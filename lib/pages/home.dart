@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:scheduler/pages/schedule/schedule.dart';
+import 'package:scheduler/pages/status/status_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,13 +15,12 @@ class _HomePageState extends State<HomePage> {
   bool isBottomNavVisible = true; // Define the variable
   final List<Widget> pages = [
     SchedulePage(),
-    const Center(child: Text('Browse')),
-    const Center(child: Text('Radio')),
-    const Center(child: Text('Library')),
+    ApplicationStatusPage(),
+    const Center(child: Text('Requests')),
+    const Center(child: Text('Profile')),
   ];
   @override
   Widget build(BuildContext context) => Scaffold(
-    
         body: NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
               if (notification.direction == ScrollDirection.reverse) {
@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
               return true;
             },
             child: Container(
+              width: double.infinity,
               margin: const EdgeInsets.only(
                   top: 50, left: 12, right: 12, bottom: 10),
               child: Stack(
@@ -62,7 +63,6 @@ class _HomePageState extends State<HomePage> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(50),
                           child: BottomNavigationBar(
-               
                             currentIndex: index,
                             onTap: (newIndex) =>
                                 setState(() => index = newIndex),
@@ -80,12 +80,12 @@ class _HomePageState extends State<HomePage> {
                                 label: 'Schedule',
                               ),
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.grid_view),
-                                label: 'Requests',
+                                icon: Icon(Icons.call_missed_outgoing),
+                                label: 'Status',
                               ),
                               BottomNavigationBarItem(
-                                icon: Icon(Icons.radio),
-                                label: 'Radio',
+                                icon: Icon(Icons.approval_rounded),
+                                label: 'Requests',
                               ),
                               BottomNavigationBarItem(
                                 icon: Icon(Icons.person),

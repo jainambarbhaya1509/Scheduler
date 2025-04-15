@@ -6,11 +6,11 @@ class ApplyModal extends StatelessWidget {
   final List<Map<String, String>> applicants;
 
   const ApplyModal({
-    Key? key,
+    super.key,
     required this.title,
     required this.time,
     required this.applicants,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

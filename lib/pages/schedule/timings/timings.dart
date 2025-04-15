@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scheduler/models/availability_model.dart';
 import 'package:scheduler/models/class_avalability_model.dart';
-import 'package:scheduler/widgets/apply_modal.dart';
+import 'package:scheduler/widgets/apply_modal_widget.dart';
 import 'package:scheduler/widgets/timings_widgets.dart';
 
 class SelectTimings extends StatelessWidget {

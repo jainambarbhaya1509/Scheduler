@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scheduler/models/availability_model.dart';
-import 'package:scheduler/widgets/department_info.dart';
+import 'package:scheduler/widgets/department_info_widget.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
