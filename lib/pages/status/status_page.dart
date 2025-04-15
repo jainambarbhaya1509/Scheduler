@@ -7,7 +7,7 @@ class ApplicationStatusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4, // Number of tabs
+      length: 4, 
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -20,7 +20,6 @@ class ApplicationStatusPage extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          // add a tab bar for all, approved, rejected, pending
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(

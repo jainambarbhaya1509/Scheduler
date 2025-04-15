@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:scheduler/pages/requests/requests_page.dart';
 import 'package:scheduler/pages/schedule/schedule.dart';
 import 'package:scheduler/pages/status/status_page.dart';
 
@@ -16,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> pages = [
     SchedulePage(),
     ApplicationStatusPage(),
-    const Center(child: Text('Requests')),
+    RequestsPage(),
     const Center(child: Text('Profile')),
   ];
   @override
