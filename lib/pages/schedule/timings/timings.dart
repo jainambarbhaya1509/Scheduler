@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scheduler/models/availability_model.dart';
 import 'package:scheduler/models/class_avalability_model.dart';
+import 'package:scheduler/widgets/apply_modal.dart';
 import 'package:scheduler/widgets/timings_widgets.dart';
 
 class SelectTimings extends StatelessWidget {
@@ -74,12 +75,41 @@ class SelectTimings extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10.0),
-                          child: DisplayTimings(
-                            classAvalabilityModel: ClassAvalabilityModel(
-                              isClassroom: true,
-                              className: "Classroom 65",
-                              startTime: "10:00 AM",
-                              endTime: "11:00 AM",
+                          child: InkWell(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            onTap: () {
+                              // Handle tap event
+                              showModalBottomSheet(
+                                  // isScrollControlled: true,
+                                  isDismissible: true,
+                                  context: context,
+                                  builder: (_) {
+                                    return ApplyModal(
+                                        title: "Classroom 65",
+                                        time: "10:00 AM - 11:00 AM",
+                                        applicants: [
+                                          {
+                                            "name": "John Doe",
+                                            "status": "Applied",
+                                          },
+                                          {
+                                            "name": "Jane Smith",
+                                            "status": "Applied",
+                                          },
+                                          {
+                                            "name": "Alice Johnson",
+                                            "status": "Applied",
+                                          },
+                                        ]);
+                                  });
+                            },
+                            child: DisplayTimings(
+                              classAvalabilityModel: ClassAvalabilityModel(
+                                isClassroom: true,
+                                className: "Classroom 65",
+                                startTime: "10:00 AM",
+                                endTime: "11:00 AM",
+                              ),
                             ),
                           ),
                         );
@@ -91,12 +121,41 @@ class SelectTimings extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10.0),
-                          child: DisplayTimings(
-                            classAvalabilityModel: ClassAvalabilityModel(
-                              isClassroom: false,
-                              className: "Lab 12",
-                              startTime: "11:00 AM",
-                              endTime: "12:00 PM",
+                          child: InkWell(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            onTap: () {
+                              // Handle tap event
+                              showModalBottomSheet(
+                                  // isScrollControlled: true,
+                                  isDismissible: true,
+                                  context: context,
+                                  builder: (_) {
+                                    return ApplyModal(
+                                        title: "Lab 1",
+                                        time: "10:00 AM - 11:00 AM",
+                                        applicants: [
+                                          {
+                                            "name": "John Doe",
+                                            "status": "Applied",
+                                          },
+                                          {
+                                            "name": "Jane Smith",
+                                            "status": "Applied",
+                                          },
+                                          {
+                                            "name": "Alice Johnson",
+                                            "status": "Applied",
+                                          },
+                                        ]);
+                                  });
+                            },
+                            child: DisplayTimings(
+                              classAvalabilityModel: ClassAvalabilityModel(
+                                isClassroom: false,
+                                className: "Lab 12",
+                                startTime: "11:00 AM",
+                                endTime: "12:00 PM",
+                              ),
                             ),
                           ),
                         );

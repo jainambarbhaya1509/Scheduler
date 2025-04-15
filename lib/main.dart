@@ -21,6 +21,14 @@ class MyApp extends StatelessWidget {
       title: 'Scheduler',
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: Colors.white,
+          showDragHandle: true,
+          shape: RoundedRectangleBorder(
+            
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
       ),
       home: HomePage(),
     );
