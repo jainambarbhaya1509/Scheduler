@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "240186502381",
+    "project_id": "teacher-scheduler-book",
+    "storage_bucket": "teacher-scheduler-book.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240186502381:android:28509fe8c17ebe505bb0e4",
+        "android_client_info": {
+          "package_name": "com.example.schedule"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxi-QntB0OAm5e9MLPnAqT4vkxncFCCDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240186502381:android:2abb161a9f91c7795bb0e4",
+        "android_client_info": {
+          "package_name": "com.example.scheduler"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxi-QntB0OAm5e9MLPnAqT4vkxncFCCDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
