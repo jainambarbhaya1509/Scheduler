@@ -1,39 +1,48 @@
-class ClassAvalabilityModel {
-  dynamic id;
-  bool isClassroom;
-  String className;
-  String timings;
-  List<UsersAppliedModel> appliedUsers;
+class ClassAvailabilityModel {
+  final String id; // Firestore doc ID or unique identifier
+  final bool isClassroom;
+  final String className;
+  final String timings; // e.g. "01:00-01:30"
+  final List<UsersAppliedModel> appliedUsers;
 
-  ClassAvalabilityModel({
+  ClassAvailabilityModel({
     required this.id,
     required this.isClassroom,
     required this.className,
     required this.timings,
     required this.appliedUsers,
-
   });
-  ClassAvalabilityModel.fromJson(Map<String, dynamic> json)
-      :  id = json['id'],
-      isClassroom = json['isClassroom'] == 1,
-        className = json['class_name'],
-        timings = json['timings'],
-        appliedUsers = json['applied_users'];
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['is_classroom'] = isClassroom ? 1 : 0;
-    data['class_name'] = className;
-    data['timings'] = timings;
-    data['applied_users'] = appliedUsers;
-    return data;
+
+  /// Create object from Firestore document data
+  factory ClassAvailabilityModel.fromMap(Map<String, dynamic> map, String docId) {
+    return ClassAvailabilityModel(
+      id: docId,
+      isClassroom: map['is_classroom'] == true || map['is_classroom'] == 1,
+      className: map['class_name'] ?? '',
+      timings: map['timings'] ?? '',
+      appliedUsers: (map['applications'] as List<dynamic>? ?? [])
+          .map((e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  /// Convert object to JSON for saving to Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'is_classroom': isClassroom,
+      'class_name': className,
+      'timings': timings,
+      'applications': appliedUsers.map((user) => user.toMap()).toList(),
+    };
   }
 }
+
+
 class UsersAppliedModel {
-  dynamic userId;
-  String name;
-  String status;
-  String description;
+  final int userId;
+  final String name;
+  final String status;
+  final String description;
 
   UsersAppliedModel({
     required this.userId,
@@ -41,18 +50,20 @@ class UsersAppliedModel {
     required this.status,
     required this.description,
   });
-  UsersAppliedModel.fromJson(Map<String, dynamic> json)
-      : userId = json['user_id'],
-        name = json['name'],
-        status = json['status'],
-        description = json['description'];
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['user_id'] = userId;
-    data['name'] = name;
-    data['status'] = status;
-    data['description'] = description;
-    return data;
+  factory UsersAppliedModel.fromMap(Map<String, dynamic> map) {
+    return UsersAppliedModel(
+      userId: map['userId'] ?? 0,
+      name: map['user'] ?? '',
+      status: map['status'] ?? 'Pending',
+      description: map['reason'] ?? '',
+    );
   }
+
+  Map<String, dynamic> toMap() => {
+        'userId': userId,
+        'user': name,
+        'status': status,
+        'reason': description,
+      };
 }

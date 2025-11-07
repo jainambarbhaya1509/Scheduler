@@ -7,9 +7,11 @@ class ScheduleController extends GetxController {
   RxList<DepartmentAvailabilityModel> departmentAvailabilityList =
       <DepartmentAvailabilityModel>[].obs;
 
+  RxString selectedDay = "".obs;
+
   /// Fetch availability for a given day
   Future<void> fetchAvailabilityForDay(String day) async {
-    print("🔍 Fetching availability for day: $day");
+    selectedDay.value = day;
 
     try {
       departmentAvailabilityList.clear();

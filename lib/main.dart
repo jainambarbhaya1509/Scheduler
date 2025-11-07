@@ -22,17 +22,17 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // const String jsonPath = 'assets/empty_slots.json';
+  const String jsonPath = 'assets/empty_slots.json';
 
-  // try {
-  //   final jsonData = await loadJsonFromAssets(jsonPath);
-  //   print("✅ JSON loaded successfully → ${jsonData.keys}");
+  try {
+    final jsonData = await loadJsonFromAssets(jsonPath);
+    print("✅ JSON loaded successfully → ${jsonData.keys}");
 
-  //   final uploader = FirestoreSlotUploader();
-  //   await uploader.uploadSlotsFromFile(jsonPath);
-  // } catch (e) {
-  //   print("❌ Failed to load JSON → $e");
-  // }
+    final uploader = FirestoreSlotUploader();
+    await uploader.uploadSlotsFromFile(jsonPath);
+  } catch (e) {
+    print("❌ Failed to load JSON → $e");
+  }
 
 
   runApp(DevicePreview(enabled: !kReleaseMode, builder: (context) => MyApp()));
