@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:schedule/controller/requests_controller.dart';
 import 'package:schedule/widgets/request_card_widget.dart';
 
-
-class RequestsPage extends StatefulWidget {
+class RequestsPage extends StatelessWidget {
   const RequestsPage({super.key});
 
   @override
-  State<RequestsPage> createState() => _RequestsPageState();
-}
-
-class _RequestsPageState extends State<RequestsPage> {
-  @override
   Widget build(BuildContext context) {
+    // Inject controller
+    final RequestsController controller = Get.put(RequestsController());
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -25,6 +23,9 @@ class _RequestsPageState extends State<RequestsPage> {
         ),
         const SizedBox(height: 20),
         TextField(
+          onChanged: (value) {
+            controller.searchQuery.value = value;
+          },
           style: Theme.of(context)
               .textTheme
               .bodyLarge
@@ -48,24 +49,42 @@ class _RequestsPageState extends State<RequestsPage> {
         ),
         const SizedBox(height: 20),
         Expanded(
-            child: ListView.builder(
-          itemCount: 10,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: RequestCard(
-                title: "Class ${index + 1}",
-                time: "10:00 AM - 11:00 AM",
-                professor: "Professor ${index + 1}",
-                description:
-                    "This is a description of the class. It contains all the details about the class.",
-              ),
+          child: Obx(() {
+            // Filter requests if searchQuery is not empty
+            final filteredRequests = controller.allRequests.where((req) {
+              final query = controller.searchQuery.value.toLowerCase();
+              return req['department']
+                      .toString()
+                      .toLowerCase()
+                      .contains(query) ||
+                  req['username'].toString().toLowerCase().contains(query) ||
+                  req['reason'].toString().toLowerCase().contains(query);
+            }).toList();
+
+            if (controller.allRequests.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return ListView.builder(
+              itemCount: filteredRequests.length,
+              itemBuilder: (context, index) {
+                final request = filteredRequests[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: RequestCard(
+                    dept: request["department"],
+                    email: request["email"],
+                    title: request['roomId'] ?? 'N/A',
+                    time: request['timeSlot'] ?? 'N/A',
+                    professor: request['username'] ?? 'N/A',
+                    description: request['reason'] ?? '',
+                  ),
+                );
+              },
             );
-          },
-        )),
+          }),
+        ),
       ],
     );
   }
 }
-
-

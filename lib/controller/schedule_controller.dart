@@ -8,6 +8,7 @@ class ScheduleController extends GetxController {
       <DepartmentAvailabilityModel>[].obs;
 
   RxString selectedDay = "".obs;
+  RxString selectedDept = "".obs;
 
   /// Fetch availability for a given day
   Future<void> fetchAvailabilityForDay(String day) async {
@@ -101,6 +102,8 @@ class ScheduleController extends GetxController {
         "Classrooms": [],
         "Labs": [],
       };
+
+      selectedDept.value = department;
 
       final sections = ["Classrooms", "Labs"];
 

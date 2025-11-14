@@ -4,7 +4,6 @@ import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/models/class_avalability_model.dart';
 import 'package:schedule/widgets/apply_modal_widget.dart';
-import 'package:schedule/widgets/timings_widgets.dart';
 
 class SelectTimings extends StatelessWidget {
   const SelectTimings({super.key, required this.deptAvailabilityModel});
@@ -15,7 +14,6 @@ class SelectTimings extends StatelessWidget {
   Widget build(BuildContext context) {
     final TimingsController controller = Get.put(TimingsController());
 
-    // Fetch once when widget builds
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchTimings(deptAvailabilityModel);
     });
@@ -30,10 +28,9 @@ class SelectTimings extends StatelessWidget {
             children: [
               Text(
                 "Select Timings",
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               _buildTabBar(),
@@ -43,6 +40,7 @@ class SelectTimings extends StatelessWidget {
                   if (controller.isLoading.value) {
                     return const Center(child: CircularProgressIndicator());
                   }
+
                   return TabBarView(
                     children: [
                       _buildListView(context, controller.classroomList),
@@ -64,22 +62,13 @@ class SelectTimings extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-       
       ),
-      child: TabBar(
-        labelStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-        ),
-        labelPadding: const EdgeInsets.symmetric(horizontal: 20),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.black87,
-        indicator: BoxDecoration(
-          color: const Color.fromARGB(255, 80, 80, 80),
-          borderRadius: BorderRadius.circular(4),
-        ),
+      child: const TabBar(
+        labelStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        labelColor: Colors.black87,
+        unselectedLabelColor: Colors.black54,
         dividerColor: Colors.transparent,
-        tabs: const [
+        tabs: [
           Tab(text: "Classroom"),
           Tab(text: "Lab"),
         ],
@@ -88,7 +77,9 @@ class SelectTimings extends StatelessWidget {
   }
 
   Widget _buildListView(
-      BuildContext context, List<ClassAvailabilityModel> dataList) {
+    BuildContext context,
+    List<ClassAvailabilityModel> dataList,
+  ) {
     if (dataList.isEmpty) {
       return const Center(child: Text("No timings available"));
     }
@@ -96,24 +87,103 @@ class SelectTimings extends StatelessWidget {
     return ListView.builder(
       itemCount: dataList.length,
       itemBuilder: (context, index) {
-        final model = dataList[index];
+        final classModel = dataList[index];
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 10.0),
-          child: InkWell(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            onTap: () {
-              showModalBottomSheet(
-                isDismissible: true,
-                context: context,
-                builder: (_) => ApplyModal(
-                  title: model.className,
-                  time: model.timings,
-                  applicants: model.appliedUsers,
+          padding: const EdgeInsets.only(bottom: 15.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12.withOpacity(0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
                 ),
-              );
-            },
-            child: DisplayTimings(classAvailabilityModel: model),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    classModel.className,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: classModel.timingsList.length,
+                  itemBuilder: (context, tIndex) {
+                    final timing = classModel.timingsList[tIndex];
+
+                    return InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.white,
+                          builder: (_) {
+                            return ApplyModal(
+                              title: classModel.className,
+                              time: timing.timing,
+                              classModel: classModel, // ✅ Pass classModel here
+                              applicants: timing.appliedUsers,
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 16,
+                        ),
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.black12,
+                              width: 0.4,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              timing.timing,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 18,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },

@@ -8,8 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:schedule/controller/schedule_controller.dart';
+import 'package:schedule/controller/user_controller.dart';
 import 'package:schedule/logic/upload_data.dart';
 import 'package:schedule/pages/home.dart';
+import 'package:schedule/pages/login/login_page.dart';
+import 'package:schedule/pages/profile/profile_page.dart';
 import 'firebase_options.dart';
 
 Future<Map<String, dynamic>> loadJsonFromAssets(String path) async {
@@ -21,18 +24,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // const String jsonPath = 'assets/empty_slots.json';
 
-  const String jsonPath = 'assets/empty_slots.json';
+  // try {
+  //   final jsonData = await loadJsonFromAssets(jsonPath);
+  //   print("✅ JSON loaded successfully → ${jsonData.keys}");
 
-  try {
-    final jsonData = await loadJsonFromAssets(jsonPath);
-    print("✅ JSON loaded successfully → ${jsonData.keys}");
-
-    final uploader = FirestoreSlotUploader();
-    await uploader.uploadSlotsFromFile(jsonPath);
-  } catch (e) {
-    print("❌ Failed to load JSON → $e");
-  }
+  //   final uploader = FirestoreSlotUploader();
+  //   await uploader.uploadSlotsFromFile(jsonPath);
+  // } catch (e) {
+  //   print("❌ Failed to load JSON → $e");
+  // }
+  Get.put(UserController(), permanent: true);
 
 
   runApp(DevicePreview(enabled: !kReleaseMode, builder: (context) => MyApp()));
@@ -56,7 +60,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: HomePage(),
+      home: LoginPage(),
     );
   }
 }

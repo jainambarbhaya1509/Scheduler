@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:schedule/controller/requests_controller.dart';
 
 class RequestCard extends StatefulWidget {
   final String title;
   final String time;
   final String professor;
   final String description;
+  final String email;
+  final String dept;
 
   const RequestCard({
     super.key,
@@ -12,6 +16,8 @@ class RequestCard extends StatefulWidget {
     required this.time,
     required this.professor,
     required this.description,
+    required this.email,
+    required this.dept,
   });
 
   @override
@@ -19,7 +25,27 @@ class RequestCard extends StatefulWidget {
 }
 
 class _RequestCardState extends State<RequestCard> {
+  final RequestsController controller = Get.find<RequestsController>();
   bool showAcceptRejectButtons = false;
+  bool isUpdating = false;
+
+  void updateStatus(String newStatus) async {
+    setState(() {
+      isUpdating = true;
+    });
+
+    await controller.updateReservationStatus(
+      email: widget.email,
+      dept: widget.dept,
+      timeSlot: widget.time,
+      newStatus: newStatus,
+    );
+
+    setState(() {
+      showAcceptRejectButtons = false;
+      isUpdating = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,34 +104,51 @@ class _RequestCardState extends State<RequestCard> {
                 color: const Color.fromARGB(34, 193, 193, 193),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(widget.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: const Color.fromARGB(95, 28, 28, 28),
-                      )),
+              child: Text(
+                widget.description,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: const Color.fromARGB(95, 28, 28, 28),
+                    ),
+              ),
             ),
             const SizedBox(height: 10),
             if (showAcceptRejectButtons)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton.icon(
-                    onPressed: () {},
-                    label: Text("Accept",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold, color: Colors.green)),
-                    icon: const Icon(Icons.check, color: Colors.green),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {},
-                    label: Text("Reject",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.redAccent)),
-                    icon: const Icon(Icons.close, color: Colors.redAccent),
-                  ),
-                ],
-              )
+              isUpdating
+                  ? const CircularProgressIndicator()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () => updateStatus('Accepted'),
+                          icon: const Icon(Icons.check, color: Colors.green),
+                          label: Text(
+                            "Accept",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => updateStatus('Rejected'),
+                          icon: const Icon(Icons.close, color: Colors.redAccent),
+                          label: Text(
+                            "Reject",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.redAccent,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
           ],
         ),
       ),

@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:schedule/controller/requests_controller.dart';
 import 'package:schedule/widgets/status_widget.dart';
-
 
 class ApplicationStatusPage extends StatelessWidget {
   const ApplicationStatusPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final RequestsController controller = Get.put(RequestsController());
+
     return DefaultTabController(
-      length: 4, 
+      length: 4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Your Requests",
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           Container(
@@ -29,9 +31,10 @@ class ApplicationStatusPage extends StatelessWidget {
             ),
             child: TabBar(
               labelStyle: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
               padding: EdgeInsets.all(5),
               dividerColor: Colors.transparent,
               indicatorSize: TabBarIndicatorSize.tab,
@@ -55,58 +58,86 @@ class ApplicationStatusPage extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
-                // all
-                ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return StatusWidget(
-                      title: "Classroom 65",
-                      time: "10:00 AM - 11:00 AM",
-                      status: "Accepted",
-                      description:
-                          "Extra Class for student of information technology",
-                    );
-                  },
-                ),
-                // approved
-                ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return StatusWidget(
-                      title: "Classroom 65",
-                      time: "10:00 AM - 11:00 AM",
-                      status: "Accepted",
-                      description:
-                          "Extra Class for student of information technology",
-                    );
-                  },
-                ),
-                // rejected
-                ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return StatusWidget(
-                      title: "Classroom 65",
-                      time: "10:00 AM - 11:00 AM",
-                      status: "Rejected",
-                      description:
-                          "Extra Class for student of information technology",
-                    );
-                  },
-                ),
-                // pending
-                ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return StatusWidget(
-                      title: "Classroom 65",
-                      time: "10:00 AM - 11:00 AM",
-                      status: "Pending",
-                      description:
-                          "Extra Class for student of information technology",
-                    );
-                  },
-                ),
+                // All
+                Obx(() {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchUserRequests();
+                    },
+                    child: ListView.builder(
+                      itemCount: controller.allRequests.length,
+                      itemBuilder: (context, index) {
+                        var request = controller.allRequests[index];
+                        return StatusWidget(
+                          title: request['username'] ?? '',
+                          time: request['timeSlot'] ?? '',
+                          status: request['status'] ?? '',
+                          description: request['reason'] ?? '',
+                        );
+                      },
+                    ),
+                  );
+                }),
+                // Accepted
+                Obx(() {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchUserRequests();
+                    },
+                    child: ListView.builder(
+                      itemCount: controller.acceptedRequests.length,
+                      itemBuilder: (context, index) {
+                        var request = controller.acceptedRequests[index];
+                        return StatusWidget(
+                          title: request['username'] ?? '',
+                          time: request['timeSlot'] ?? '',
+                          status: request['status'] ?? '',
+                          description: request['reason'] ?? '',
+                        );
+                      },
+                    ),
+                  );
+                }),
+                // Rejected
+                Obx(() {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchUserRequests();
+                    },
+                    child: ListView.builder(
+                      itemCount: controller.rejectedRequests.length,
+                      itemBuilder: (context, index) {
+                        var request = controller.rejectedRequests[index];
+                        return StatusWidget(
+                          title: request['username'] ?? '',
+                          time: request['timeSlot'] ?? '',
+                          status: request['status'] ?? '',
+                          description: request['reason'] ?? '',
+                        );
+                      },
+                    ),
+                  );
+                }),
+                // Pending
+                Obx(() {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchUserRequests();
+                    },
+                    child: ListView.builder(
+                      itemCount: controller.pendingRequests.length,
+                      itemBuilder: (context, index) {
+                        var request = controller.pendingRequests[index];
+                        return StatusWidget(
+                          title: request['username'] ?? '',
+                          time: request['timeSlot'] ?? '',
+                          status: request['status'] ?? '',
+                          description: request['reason'] ?? '',
+                        );
+                      },
+                    ),
+                  );
+                }),
               ],
             ),
           ),
