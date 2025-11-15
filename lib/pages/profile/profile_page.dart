@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/login_controller.dart';
 import 'package:schedule/controller/profile_controller.dart';
+import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/pages/login/login_page.dart';
 
 class ProfilePage extends StatelessWidget {
-  final String loggedEmail; // passed from login
+  final String loggedEmail;
 
   const ProfilePage({super.key, required this.loggedEmail});
 
@@ -29,38 +30,12 @@ class ProfilePage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 30),
-
-              _infoTile("Name", controller.username.value),
-              _infoTile("Email", controller.email.value),
-              _infoTile("Role", controller.isHOD.value ? "HOD" : "Faculty"),
-
+              _buildInfoTile("Name", controller.username.value),
+              _buildInfoTile("Email", controller.email.value),
+              _buildInfoTile("Role", controller.isHOD.value ? "HOD" : "Faculty"),
               const Spacer(),
-
-              Center(
-                child: SizedBox(
-                  width: double.infinity, // 🔥 FULL WIDTH BUTTON
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white, // 🔥 WHITE TEXT
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold, // 🔥 BOLD TEXT
-                      ),
-                    ),
-                    onPressed: () {
-                      Get.offAllNamed("/login");
-                    },
-                    child: const Text("Logout"),
-                  ),
-                ),
-              ),
+              _buildLogoutButton(),
             ],
           ),
         );
@@ -68,7 +43,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _infoTile(String title, String value) {
+  Widget _buildInfoTile(String title, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(15),
@@ -85,4 +60,33 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+
+Widget _buildLogoutButton() {
+  return SizedBox(
+    width: double.infinity,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.redAccent,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
+      onPressed: () {
+        // Clear user state
+        if (Get.isRegistered<UserController>()) {
+          final userController = Get.find<UserController>();
+          userController.clearUser();
+        }
+
+        // Navigate to login page and remove all previous routes
+        Get.offAll(() => const LoginPage());
+      },
+      child: const Text("Logout"),
+    ),
+  );
+}
+
 }

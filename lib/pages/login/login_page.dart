@@ -13,102 +13,107 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Scheduler",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 30),
-
-            // LOGIN CARD
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 25),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(34, 193, 193, 193),
-                borderRadius: BorderRadius.circular(12),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Image.asset(
+                  "assets/icon.png",
+                  height: MediaQuery.sizeOf(context).height / 4,
+                  width: MediaQuery.sizeOf(context).width / 4,
+                ),
               ),
-              child: Column(
-                children: [
-                  const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
 
-                  const SizedBox(height: 20),
-
-                  // EMAIL
-                  TextFormField(
-                    controller: controller.emailController,
-                    decoration: _inputDecoration("Email"),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // PASSWORD
-                  TextFormField(
-                    controller: controller.passwordController,
-                    decoration: _inputDecoration("Password"),
-                    obscureText: true,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // LOGIN BUTTON
-                  Obx(() {
-                    return TextButton.icon(
-                      iconAlignment: IconAlignment.end,
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : () async {
-                              final user = await controller.login();
-
-                              if (user != null) {
-                                // extract data
-                                final email = controller.emailController.text
-                                    .trim();
-                                final isHOD = user["isHOD"] ?? false;
-
-                                Get.off(
-                                  () => HomePage(
-                                    loggedEmail: email,
-                                    isHOD: isHOD,
-                                  ),
-                                );
-                              }
-                            },
-                      label: controller.isLoading.value
-                          ? const Text("Loading…")
-                          : const Text(
-                              "Login",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                      icon: const Icon(Icons.arrow_right_alt_rounded),
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey[900],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 25,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
+              const Text(
+                "Scheduler Login",
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              const SizedBox(height: 30),
+              _buildLoginCard(context, controller),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  /// Extracted login card widget
+  Widget _buildLoginCard(BuildContext context, LoginController controller) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        // color: const Color.fromARGB(34, 193, 193, 193),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          // const SizedBox(height: 20),
+          TextFormField(
+            controller: controller.emailController,
+            decoration: _buildInputDecoration("Email"),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: controller.passwordController,
+            decoration: _buildInputDecoration("Password"),
+            obscureText: true,
+          ),
+          const SizedBox(height: 20),
+          _buildLoginButton(controller),
+        ],
+      ),
+    );
+  }
+
+  /// Extracted login button widget
+  Widget _buildLoginButton(LoginController controller) {
+    return Obx(() {
+      return SizedBox(
+        width: double.infinity,
+        child: TextButton.icon(
+          iconAlignment: IconAlignment.end,
+          onPressed: controller.isLoading.value
+              ? null
+              : () async {
+                  final user = await controller.login();
+
+                  if (user != null) {
+                    final email = controller.emailController.text.trim();
+                    final isHOD = user["isHOD"] ?? false;
+
+                    Get.off(() => HomePage(loggedEmail: email, isHOD: isHOD));
+                  }
+                },
+          label: controller.isLoading.value
+              ? const Text(
+                  "Loading…",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                )
+              : const Text(
+                  "Login",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+          icon: const Icon(Icons.arrow_right_alt_rounded),
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.grey[900],
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  /// Extracted input decoration helper
+  InputDecoration _buildInputDecoration(String hint) {
     return InputDecoration(
       filled: true,
       fillColor: Colors.grey[200],

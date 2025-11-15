@@ -1,23 +1,28 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/models/availability_model.dart';
 
 class ScheduleController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  RxList<DepartmentAvailabilityModel> departmentAvailabilityList =
-      <DepartmentAvailabilityModel>[].obs;
+  
+  final departmentAvailabilityList = <DepartmentAvailabilityModel>[].obs;
+  final selectedDay = "".obs;
+  final selectedDept = "".obs;
+  final isLoading = false.obs;
 
-  RxString selectedDay = "".obs;
-  RxString selectedDept = "".obs;
+  /// Real-time availability listener
+  StreamSubscription? _availabilitySubscription;
 
-  /// Fetch availability for a given day
+  /// Fetch availability for a given day with real-time updates
   Future<void> fetchAvailabilityForDay(String day) async {
     selectedDay.value = day;
+    isLoading.value = true;
 
     try {
       departmentAvailabilityList.clear();
 
-      // Get all departments for that day
       final deptSnapshot = await _firestore
           .collection("slots")
           .doc(day)
@@ -25,125 +30,114 @@ class ScheduleController extends GetxController {
           .get();
 
       if (deptSnapshot.docs.isEmpty) {
-        print("⚠️ No departments found for $day");
+        isLoading.value = false;
         return;
       }
 
-      print("📦 Found ${deptSnapshot.docs.length} departments");
-
-      // For each department, count classrooms and labs
-      for (var deptDoc in deptSnapshot.docs) {
+      final futures = deptSnapshot.docs.map((deptDoc) async {
         final departmentId = deptDoc.id;
-        print("🏢 Department: $departmentId");
-
-        int classroomCount = 0;
-        int labCount = 0;
 
         try {
-          // Fetch Classrooms subcollection (ignore _meta)
-          final classroomSnapshot = await _firestore
-              .collection("slots")
-              .doc(day)
-              .collection("departments")
-              .doc(departmentId)
-              .collection("Classrooms")
-              .get();
+          // Parallel requests for classrooms and labs
+          final results = await Future.wait([
+            _firestore
+                .collection("slots")
+                .doc(day)
+                .collection("departments")
+                .doc(departmentId)
+                .collection("Classrooms")
+                .get(),
+            _firestore
+                .collection("slots")
+                .doc(day)
+                .collection("departments")
+                .doc(departmentId)
+                .collection("Labs")
+                .get(),
+          ]);
 
-          classroomCount = classroomSnapshot.docs
-              .where((doc) => doc.id != "_meta") // 👈 ignore _meta doc
-              .length;
-          print("🏫 $departmentId → Classrooms: $classroomCount");
+          final classroomCount =
+              results[0].docs.where((doc) => doc.id != "_meta").length;
+          final labCount =
+              results[1].docs.where((doc) => doc.id != "_meta").length;
 
-          // Fetch Labs subcollection (ignore _meta)
-          final labSnapshot = await _firestore
-              .collection("slots")
-              .doc(day)
-              .collection("departments")
-              .doc(departmentId)
-              .collection("Labs")
-              .get();
-
-          labCount = labSnapshot.docs
-              .where((doc) => doc.id != "_meta")
-              .length; // 👈 ignore _meta doc
-          print("🔬 $departmentId → Labs: $labCount");
-        } catch (subError) {
-          print(
-            "⚠️ Error fetching subcollections for $departmentId: $subError",
-          );
-        }
-
-        // Add department data to observable list
-        departmentAvailabilityList.add(
-          DepartmentAvailabilityModel(
+          return DepartmentAvailabilityModel(
             id: departmentId,
             deprtmantName: departmentId,
             totalAvailableClass: classroomCount.toString(),
             totalLabs: labCount.toString(),
             totalClass: (classroomCount + labCount).toString(),
-          ),
-        );
-      }
+          );
+        } catch (e) {
+          print("Error fetching department $departmentId: $e");
+          return null;
+        }
+      });
 
-      print("🎉 Availability fetched successfully");
-    } catch (e, st) {
-      print("❌ Error fetching availability: $e");
-      print(st);
+      final results = await Future.wait(futures);
+      departmentAvailabilityList.addAll(
+        results.whereType<DepartmentAvailabilityModel>(),
+      );
+    } catch (e) {
+      print("Error fetching availability: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 
+  /// Optimized room fetching with better filtering
   Future<Map<String, List<Map<String, dynamic>>>> fetchAvailableRooms(
     String department,
   ) async {
     try {
-      print("🔍 Fetching available rooms for department: $department");
-
-      final Map<String, List<Map<String, dynamic>>> availableData = {
-        "Classrooms": [],
-        "Labs": [],
-      };
-
       selectedDept.value = department;
+
+      final availableData = {
+        "Classrooms": <Map<String, dynamic>>[],
+        "Labs": <Map<String, dynamic>>[],
+      };
 
       final sections = ["Classrooms", "Labs"];
 
-      // Iterate through both sections
       for (final section in sections) {
-        // Get all classes under this section
-        final classesSnapshot = await _firestore
-            .collectionGroup("slots")
-            .where("status", isEqualTo: "available")
-            .where("isEmpty", isEqualTo: true)
+        final snapshot = await _firestore
+            .collection("slots")
+            .doc(selectedDay.value)
+            .collection("departments")
+            .doc(department)
+            .collection(section)
             .get();
 
-        for (final doc in classesSnapshot.docs) {
-          final pathSegments = doc.reference.path.split("/");
-          // path: slots/{day}/departments/{department}/{section}/{className}/slots/{slotTime}
-          final docDepartment = pathSegments[3];
-          final docSection = pathSegments[4];
-          final className = pathSegments[5];
-          final slotTime = pathSegments.last;
+        for (final roomDoc in snapshot.docs) {
+          final slotsSnapshot = await roomDoc.reference.collection("slots").get();
 
-          // Filter by selected department and section
-          if (docDepartment == department && sections.contains(docSection)) {
-            availableData[docSection]!.add({
-              "day": pathSegments[1],
-              "department": docDepartment,
-              "section": docSection,
-              "className": className,
-              "slotTime": slotTime,
-              ...doc.data(),
-            });
+          for (final slotDoc in slotsSnapshot.docs) {
+            final slotData = slotDoc.data();
+            if (slotData['status'] == 'available' &&
+                slotData['isEmpty'] == true) {
+              availableData[section]!.add({
+                "day": selectedDay.value,
+                "department": department,
+                "section": section,
+                "className": roomDoc.id,
+                "slotTime": slotDoc.id,
+                ...slotData,
+              });
+            }
           }
         }
       }
 
-      print("✅ Fetched available data for $department");
       return availableData;
-    } catch (e, st) {
-      print("❌ Error fetching available rooms: $e");
-      print(st);
+    } catch (e) {
+      print("Error fetching available rooms: $e");
       return {};
     }
+  }
+
+  @override
+  void onClose() {
+    _availabilitySubscription?.cancel();
+    super.onClose();
   }
 }

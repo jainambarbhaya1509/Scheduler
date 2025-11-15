@@ -9,94 +9,30 @@ import 'package:schedule/models/class_timing_model.dart';
 class TimingsController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  RxBool isLoading = false.obs;
-  RxList<ClassAvailabilityModel> classroomList = <ClassAvailabilityModel>[].obs;
-  RxList<ClassAvailabilityModel> labList = <ClassAvailabilityModel>[].obs;
+  final isLoading = false.obs;
+  final classroomList = <ClassAvailabilityModel>[].obs;
+  final labList = <ClassAvailabilityModel>[].obs;
 
-  final ScheduleController _scheduleController = Get.put(
-    ScheduleController(),
-    permanent: true,
-  );
+  final ScheduleController _scheduleController = Get.put(ScheduleController(), permanent: true);
+  late final UserController _userController = Get.find<UserController>();
 
+  /// Optimized to fetch both classrooms and labs in parallel
   Future<void> fetchTimings(DepartmentAvailabilityModel deptModel) async {
     isLoading.value = true;
     classroomList.clear();
     labList.clear();
 
     try {
-      final classRef = _firestore
-          .collection('slots')
-          .doc(_scheduleController.selectedDay.value)
-          .collection('departments')
-          .doc(deptModel.deprtmantName)
-          .collection('Classrooms');
+      final day = _scheduleController.selectedDay.value;
+      final deptName = deptModel.deprtmantName!;
 
-      final labRef = _firestore
-          .collection('slot_test')
-          .doc(_scheduleController.selectedDay.value)
-          .collection('departments')
-          .doc(deptModel.deprtmantName)
-          .collection('Labs');
+      final results = await Future.wait([
+        _fetchSection(day, deptName, "Classrooms", true),
+        _fetchSection(day, deptName, "Labs", false),
+      ]);
 
-      // Fetch classrooms
-      final classSnapshot = await classRef.get();
-      for (var doc in classSnapshot.docs) {
-        List<ClassTiming> timingList = [];
-
-        final slotsSnapshot = await classRef
-            .doc(doc.id)
-            .collection('slots')
-            .get();
-        for (var slot in slotsSnapshot.docs) {
-          timingList.add(
-            ClassTiming(
-              timing: "${slot['start_time']}-${slot['end_time']}",
-              appliedUsers: (slot['applications'] as List<dynamic>? ?? [])
-                  .map((e) => UsersAppliedModel.fromMap(e))
-                  .toList(),
-            ),
-          );
-        }
-
-        classroomList.add(
-          ClassAvailabilityModel(
-            id: doc.id,
-            className: doc.id,
-            isClassroom: true,
-            timingsList: timingList,
-          ),
-        );
-      }
-
-      // Fetch labs
-      final labSnapshot = await labRef.get();
-      for (var doc in labSnapshot.docs) {
-        List<ClassTiming> timingList = [];
-
-        final slotsSnapshot = await labRef
-            .doc(doc.id)
-            .collection('slots')
-            .get();
-        for (var slot in slotsSnapshot.docs) {
-          timingList.add(
-            ClassTiming(
-              timing: "${slot['start_time']}-${slot['end_time']}",
-              appliedUsers: (slot['applications'] as List<dynamic>? ?? [])
-                  .map((e) => UsersAppliedModel.fromMap(e))
-                  .toList(),
-            ),
-          );
-        }
-
-        labList.add(
-          ClassAvailabilityModel(
-            id: doc.id,
-            className: doc.id,
-            isClassroom: false,
-            timingsList: timingList,
-          ),
-        );
-      }
+      classroomList.addAll(results[0]);
+      labList.addAll(results[1]);
     } catch (e) {
       print("Error fetching timings: $e");
     } finally {
@@ -104,65 +40,113 @@ class TimingsController extends GetxController {
     }
   }
 
+  /// Helper method to reduce code duplication
+  Future<List<ClassAvailabilityModel>> _fetchSection(
+    String day,
+    String deptName,
+    String section,
+    bool isClassroom,
+  ) async {
+    final list = <ClassAvailabilityModel>[];
+
+    try {
+      final snapshot = await _firestore
+          .collection('slots')
+          .doc(day)
+          .collection('departments')
+          .doc(deptName)
+          .collection(section)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        if (doc.id == "_meta") continue; // Skip metadata
+
+        final slotsSnapshot = await doc.reference.collection('slots').get();
+
+        final timingList = slotsSnapshot.docs.map((slot) {
+          return ClassTiming(
+            timing: "${slot['start_time'] ?? ''}-${slot['end_time'] ?? ''}",
+            appliedUsers: (slot['applications'] as List<dynamic>? ?? [])
+                .map((e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>))
+                .toList(),
+          );
+        }).toList();
+
+        list.add(ClassAvailabilityModel(
+          id: doc.id,
+          className: doc.id,
+          isClassroom: isClassroom,
+          timingsList: timingList,
+        ));
+      }
+    } catch (e) {
+      print("Error fetching $section: $e");
+    }
+
+    return list;
+  }
+
+  /// Optimized apply with better error handling
   Future<void> apply({
     required ClassAvailabilityModel classModel,
     required String timeslot,
     required String reason,
   }) async {
-    final db = FirebaseFirestore.instance;
-    final day = _scheduleController.selectedDay.value;
-
-    final String section = classModel.isClassroom ? "Classrooms" : "Labs";
-    final UserController userController = Get.find<UserController>();
-
-    print(
-      "===================================================================================================",
-    );
-
-    final slotRef = db
-        .collection("slots")
-        .doc(day)
-        .collection("departments")
-        .doc(_scheduleController.selectedDept.value)
-        .collection(section)
-        .doc(classModel.className)
-        .collection("slots")
-        .doc(timeslot);
-
     try {
-      // 1️⃣ Add central request
-      final data = {
-        "username": userController.username.toString(),
-        "email": userController.email.toString(),
+      final day = _scheduleController.selectedDay.value;
+      final dept = _scheduleController.selectedDept.value;
+      final section = classModel.isClassroom ? "Classrooms" : "Labs";
 
-        "department": _scheduleController.selectedDept.value,
+      final application = {
+        "username": _userController.username.value,
+        "email": _userController.email.value,
+        "reason": reason,
+        "status": "Pending",
+      };
+
+      final requestData = {
+        "username": _userController.username.value,
+        "email": _userController.email.value,
+        "department": dept,
         "roomId": classModel.className,
         "reason": reason,
         "timeSlot": timeslot,
         "status": "Pending",
         "day": day,
+        "createdAt": FieldValue.serverTimestamp(),
       };
 
-      await db
+      final batch = _firestore.batch();
+
+      // Add to requests
+      final requestRef = _firestore
           .collection("requests")
-          .doc(_scheduleController.selectedDept.value)
+          .doc(dept)
           .collection("requests_list")
-          .add(data);
+          .doc();
 
-      // 2️⃣ Add inside slot applications
-      final application = {
-        "username": userController.username.toString(),
-        "email": userController.email.toString(),
-        "reason": reason,
-        "status": "Pending",
-      };
+      batch.set(requestRef, requestData);
 
-      await slotRef.set({
+      // Add to slot applications
+      final slotRef = _firestore
+          .collection("slots")
+          .doc(day)
+          .collection("departments")
+          .doc(dept)
+          .collection(section)
+          .doc(classModel.className)
+          .collection("slots")
+          .doc(timeslot);
+
+      batch.update(slotRef, {
         "applications": FieldValue.arrayUnion([application]),
-      }, SetOptions(merge: true));
+      });
 
-      print("Application submitted!");
+      await batch.commit();
+
+      Get.snackbar("Success", "Application submitted");
     } catch (e) {
+      Get.snackbar("Error", "Failed to submit: $e");
       print("ERROR: $e");
     }
   }

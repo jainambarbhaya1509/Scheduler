@@ -12,6 +12,7 @@ class DepartmentAvailabilityModel {
     this.totalClass,
     this.totalLabs,
   });
+
   DepartmentAvailabilityModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     deprtmantName = json['deprtmant_name'];
@@ -19,8 +20,9 @@ class DepartmentAvailabilityModel {
     totalClass = json['total_class'];
     totalLabs = json['total_labs'];
   }
+
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final data = <String, dynamic>{};
     data['id'] = id;
     data['deprtmant_name'] = deprtmantName;
     data['total_available_class'] = totalAvailableClass;

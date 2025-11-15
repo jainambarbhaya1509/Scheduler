@@ -1,4 +1,4 @@
-import 'package:schedule/models/class_timing_model.dart';
+import 'class_timing_model.dart';
 
 class ClassAvailabilityModel {
   final String id;
@@ -13,7 +13,6 @@ class ClassAvailabilityModel {
     required this.timingsList,
   });
 }
-
 
 class UsersAppliedModel {
   final String name;
@@ -35,8 +34,8 @@ class UsersAppliedModel {
   }
 
   Map<String, dynamic> toMap() => {
-        'username': name,
-        'status': status,
-        'reason': description,
-      };
+    'username': name,
+    'status': status,
+    'reason': description,
+  };
 }

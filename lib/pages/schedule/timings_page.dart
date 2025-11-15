@@ -35,20 +35,7 @@ class SelectTimings extends StatelessWidget {
               const SizedBox(height: 20),
               _buildTabBar(),
               const SizedBox(height: 10),
-              Expanded(
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  return TabBarView(
-                    children: [
-                      _buildListView(context, controller.classroomList),
-                      _buildListView(context, controller.labList),
-                    ],
-                  );
-                }),
-              ),
+              Expanded(child: _buildTabView(context, controller)),
             ],
           ),
         ),
@@ -56,6 +43,7 @@ class SelectTimings extends StatelessWidget {
     );
   }
 
+  /// Extracted tab bar widget
   Widget _buildTabBar() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
@@ -68,125 +56,123 @@ class SelectTimings extends StatelessWidget {
         labelColor: Colors.black87,
         unselectedLabelColor: Colors.black54,
         dividerColor: Colors.transparent,
-        tabs: [
-          Tab(text: "Classroom"),
-          Tab(text: "Lab"),
-        ],
+        tabs: [Tab(text: "Classroom"), Tab(text: "Lab")],
       ),
     );
   }
 
-  Widget _buildListView(
-    BuildContext context,
-    List<ClassAvailabilityModel> dataList,
-  ) {
+  /// Extracted tab view widget
+  Widget _buildTabView(BuildContext context, TimingsController controller) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return TabBarView(
+        children: [
+          _buildListView(context, controller.classroomList),
+          _buildListView(context, controller.labList),
+        ],
+      );
+    });
+  }
+
+  /// Extracted list view widget
+  Widget _buildListView(BuildContext context, List<ClassAvailabilityModel> dataList) {
     if (dataList.isEmpty) {
       return const Center(child: Text("No timings available"));
     }
 
     return ListView.builder(
       itemCount: dataList.length,
-      itemBuilder: (context, index) {
-        final classModel = dataList[index];
+      itemBuilder: (context, index) => _buildClassCard(context, dataList[index]),
+    );
+  }
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15.0),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12.withOpacity(0.08),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+  /// Extracted class card widget
+  Widget _buildClassCard(BuildContext context, ClassAvailabilityModel classModel) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    classModel.className,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: classModel.timingsList.length,
-                  itemBuilder: (context, tIndex) {
-                    final timing = classModel.timingsList[tIndex];
-
-                    return InkWell(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.white,
-                          builder: (_) {
-                            return ApplyModal(
-                              title: classModel.className,
-                              time: timing.timing,
-                              classModel: classModel, // ✅ Pass classModel here
-                              applicants: timing.appliedUsers,
-                            );
-                          },
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                          horizontal: 16,
-                        ),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.black12,
-                              width: 0.4,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              timing.timing,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              ),
+              child: Text(
+                classModel.className,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: classModel.timingsList.length,
+              itemBuilder: (context, tIndex) => _buildTimingTile(
+                context,
+                classModel,
+                classModel.timingsList[tIndex],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Extracted timing tile widget
+  Widget _buildTimingTile(
+    BuildContext context,
+    ClassAvailabilityModel classModel,
+    dynamic timing,
+  ) {
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.white,
+          builder: (_) => ApplyModal(
+            title: classModel.className,
+            time: timing.timing,
+            classModel: classModel,
+            applicants: timing.appliedUsers,
           ),
         );
       },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.black12, width: 0.4),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              timing.timing,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+          ],
+        ),
+      ),
     );
   }
 }

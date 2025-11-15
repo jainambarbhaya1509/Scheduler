@@ -4,20 +4,14 @@ import 'package:get/get.dart';
 import 'user_controller.dart';
 
 class LoginController extends GetxController {
-  // TEXT CONTROLLERS
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  // LOADING STATE
   final isLoading = false.obs;
 
-  // FIRESTORE INSTANCE
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late final UserController _userController = Get.find<UserController>();
 
-  // GLOBAL USER CONTROLLER
-  final UserController userController = Get.find<UserController>();
-
-  /// LOGIN FUNCTION
+  /// Optimized login with validation
   Future<Map<String, dynamic>?> login() async {
     try {
       isLoading.value = true;
@@ -30,7 +24,6 @@ class LoginController extends GetxController {
         return null;
       }
 
-      // Check user in Firestore
       final query = await _db
           .collection("faculty")
           .where("email", isEqualTo: email)
@@ -45,19 +38,20 @@ class LoginController extends GetxController {
       final doc = query.docs.first;
       final user = doc.data();
 
-      // PASSWORD MATCH
       if (user["password"] != password) {
         Get.snackbar("Login Failed", "Incorrect password");
         return null;
       }
 
-      // SAVE USER ID + DATA
-      final userCtrl = Get.find<UserController>();
-      userCtrl.setUser(doc.id, user["username"], user["email"], user["department"]);
+      _userController.setUser(
+        doc.id,
+        user["username"] ?? "",
+        user["email"] ?? "",
+        user["department"] ?? "",
+        hod: user["isHOD"] ?? false,
+      );
 
-      // SUCCESS
       Get.snackbar("Success", "Welcome ${user['username']}");
-
       return user;
     } catch (e) {
       Get.snackbar("Error", e.toString());

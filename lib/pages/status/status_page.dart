@@ -18,131 +18,85 @@ class ApplicationStatusPage extends StatelessWidget {
         children: [
           Text(
             "Your Requests",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: TabBar(
-              labelStyle: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              padding: EdgeInsets.all(5),
-              dividerColor: Colors.transparent,
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicator: BoxDecoration(
-                color: const Color.fromARGB(255, 80, 80, 80),
-                borderRadius: BorderRadius.circular(4),
-                shape: BoxShape.rectangle,
-              ),
-              tabs: const [
-                Tab(text: "All"),
-                Tab(text: "Accepted"),
-                Tab(text: "Rejected"),
-                Tab(text: "Pending"),
-              ],
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.grey,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 20),
-          // tabs
-          Expanded(
-            child: TabBarView(
-              children: [
-                // All
-                Obx(() {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.fetchUserRequests();
-                    },
-                    child: ListView.builder(
-                      itemCount: controller.allRequests.length,
-                      itemBuilder: (context, index) {
-                        var request = controller.allRequests[index];
-                        return StatusWidget(
-                          title: request['username'] ?? '',
-                          time: request['timeSlot'] ?? '',
-                          status: request['status'] ?? '',
-                          description: request['reason'] ?? '',
-                        );
-                      },
-                    ),
-                  );
-                }),
-                // Accepted
-                Obx(() {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.fetchUserRequests();
-                    },
-                    child: ListView.builder(
-                      itemCount: controller.acceptedRequests.length,
-                      itemBuilder: (context, index) {
-                        var request = controller.acceptedRequests[index];
-                        return StatusWidget(
-                          title: request['username'] ?? '',
-                          time: request['timeSlot'] ?? '',
-                          status: request['status'] ?? '',
-                          description: request['reason'] ?? '',
-                        );
-                      },
-                    ),
-                  );
-                }),
-                // Rejected
-                Obx(() {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.fetchUserRequests();
-                    },
-                    child: ListView.builder(
-                      itemCount: controller.rejectedRequests.length,
-                      itemBuilder: (context, index) {
-                        var request = controller.rejectedRequests[index];
-                        return StatusWidget(
-                          title: request['username'] ?? '',
-                          time: request['timeSlot'] ?? '',
-                          status: request['status'] ?? '',
-                          description: request['reason'] ?? '',
-                        );
-                      },
-                    ),
-                  );
-                }),
-                // Pending
-                Obx(() {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.fetchUserRequests();
-                    },
-                    child: ListView.builder(
-                      itemCount: controller.pendingRequests.length,
-                      itemBuilder: (context, index) {
-                        var request = controller.pendingRequests[index];
-                        return StatusWidget(
-                          title: request['username'] ?? '',
-                          time: request['timeSlot'] ?? '',
-                          status: request['status'] ?? '',
-                          description: request['reason'] ?? '',
-                        );
-                      },
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
+          _buildTabBar(),
+          const SizedBox(height: 20),
+          Expanded(child: _buildTabView(controller)),
         ],
       ),
     );
   }
+
+  /// Extracted tab bar widget
+  Widget _buildTabBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const TabBar(
+        labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        padding: EdgeInsets.all(5),
+        dividerColor: Colors.transparent,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          color: Color.fromARGB(255, 80, 80, 80),
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+          shape: BoxShape.rectangle,
+        ),
+        tabs: [
+          Tab(text: "All"),
+          Tab(text: "Accepted"),
+          Tab(text: "Rejected"),
+          Tab(text: "Pending"),
+        ],
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.grey,
+      ),
+    );
+  }
+
+  /// Consolidated tab views with helper method
+  Widget _buildTabView(RequestsController controller) {
+    return TabBarView(
+      children: [
+        _buildRefreshableList(controller, controller.allRequests),
+        _buildRefreshableList(controller, controller.acceptedRequests),
+        _buildRefreshableList(controller, controller.rejectedRequests),
+        _buildRefreshableList(controller, controller.pendingRequests),
+      ],
+    );
+  }
+
+  /// Extracted reusable refreshable list widget
+  Widget _buildRefreshableList(
+    RequestsController controller,
+    RxList<Map<String, dynamic>> requestList,
+  ) {
+    return Obx(() {
+      return RefreshIndicator(
+        onRefresh: () async => {},
+        child: requestList.isEmpty
+            ? const Center(child: Text("No requests"))
+            : ListView.builder(
+                itemCount: requestList.length,
+                itemBuilder: (context, index) {
+                  var request = requestList[index];
+                  return StatusWidget(
+                    title: request['username'] ?? '',
+                    time: request['timeSlot'] ?? '',
+                    status: request['status'] ?? '',
+                    description: request['reason'] ?? '',
+                  );
+                },
+              ),
+      );
+    });
+  }
+
 }
