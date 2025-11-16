@@ -85,7 +85,7 @@ class _RequestCardState extends State<RequestCard> {
 
                 /// USER EMAIL
                 Text(
-                  req["email"] ?? "",
+                  req["username"] ?? "",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: Colors.grey[600],
