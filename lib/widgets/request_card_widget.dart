@@ -3,22 +3,9 @@ import 'package:get/get.dart';
 import 'package:schedule/controller/requests_controller.dart';
 
 class RequestCard extends StatefulWidget {
-  final String title;
-  final String time;
-  final String professor;
-  final String description;
-  final String email;
-  final String dept;
+  final Map<String, dynamic> request;
 
-  const RequestCard({
-    super.key,
-    required this.title,
-    required this.time,
-    required this.professor,
-    required this.description,
-    required this.email,
-    required this.dept,
-  });
+  const RequestCard({super.key, required this.request});
 
   @override
   State<RequestCard> createState() => _RequestCardState();
@@ -35,10 +22,13 @@ class _RequestCardState extends State<RequestCard> {
     });
 
     await controller.updateReservationStatus(
-      email: widget.email,
-      dept: widget.dept,
-      timeSlot: widget.time,
+      bookingId: widget.request["bookingId"],
+      dept: widget.request["department"],
       newStatus: newStatus,
+      day: widget.request["day"],
+      roomId: widget.request["roomId"],
+      timeSlot: widget.request["timeSlot"],
+      isClassroom: widget.request["isClassroom"] ?? true,
     );
 
     setState(() {
@@ -49,6 +39,8 @@ class _RequestCardState extends State<RequestCard> {
 
   @override
   Widget build(BuildContext context) {
+    final req = widget.request;
+
     return InkWell(
       onTap: () {
         setState(() {
@@ -68,16 +60,19 @@ class _RequestCardState extends State<RequestCard> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    /// ROOM / LAB NAME
                     Text(
-                      widget.title,
+                      req["roomId"] ?? "",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.black,
                       ),
                     ),
+
+                    /// TIMESLOT
                     Text(
-                      widget.time,
+                      req["timeSlot"] ?? "",
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -87,8 +82,10 @@ class _RequestCardState extends State<RequestCard> {
                   ],
                 ),
                 const Spacer(),
+
+                /// USER EMAIL
                 Text(
-                  widget.professor,
+                  req["email"] ?? "",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: Colors.grey[600],
@@ -96,7 +93,10 @@ class _RequestCardState extends State<RequestCard> {
                 ),
               ],
             ),
+
             const SizedBox(height: 10),
+
+            /// REASON BOX
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
@@ -105,14 +105,17 @@ class _RequestCardState extends State<RequestCard> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                widget.description,
+                req["reason"] ?? "",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                       color: const Color.fromARGB(95, 28, 28, 28),
                     ),
               ),
             ),
+
             const SizedBox(height: 10),
+
+            /// ACCEPT / REJECT BUTTONS
             if (showAcceptRejectButtons)
               isUpdating
                   ? const CircularProgressIndicator()
@@ -124,9 +127,7 @@ class _RequestCardState extends State<RequestCard> {
                           icon: const Icon(Icons.check, color: Colors.green),
                           label: Text(
                             "Accept",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.green,
@@ -138,9 +139,7 @@ class _RequestCardState extends State<RequestCard> {
                           icon: const Icon(Icons.close, color: Colors.redAccent),
                           label: Text(
                             "Reject",
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.redAccent,

@@ -4,7 +4,15 @@ import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
 String _getDayFromDate(DateTime date) {
-  const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+  const days = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
   return days[date.weekday - 1];
 }
 
@@ -33,16 +41,14 @@ class _SchedulePageState extends State<SchedulePage> {
       children: [
         Text(
           "Schedule Class",
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
         _buildDateSelector(context),
         const SizedBox(height: 20),
-        Text(
-          "Available Classes",
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 5),
+
         _buildAvailableClasses(),
       ],
     );
@@ -82,7 +88,9 @@ class _SchedulePageState extends State<SchedulePage> {
               _dateController.text =
                   "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
             });
-            _scheduleController.fetchAvailabilityForDay(_getDayFromDate(selectedDate));
+            _scheduleController.fetchAvailabilityForDay(
+              _getDayFromDate(selectedDate),
+            );
           }
         },
       ),
@@ -95,7 +103,7 @@ class _SchedulePageState extends State<SchedulePage> {
       child: hasSelectedDate == false
           ? const Center(
               child: Text(
-                "Select date to get details",
+                "Select date to get available classes",
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             )
@@ -119,9 +127,26 @@ class _SchedulePageState extends State<SchedulePage> {
                 );
               }
 
-              return ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (context, index) => _buildDepartmentCard(context, list[index]),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Available Classes",
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+
+                  /// FIX: ListView must be in Expanded
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: list.length,
+                      itemBuilder: (context, index) =>
+                          _buildDepartmentCard(context, list[index]),
+                    ),
+                  ),
+                ],
               );
             }),
     );
@@ -151,7 +176,10 @@ class _SchedulePageState extends State<SchedulePage> {
               children: [
                 Text(
                   dept.deprtmantName!,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 3),
                 Text(

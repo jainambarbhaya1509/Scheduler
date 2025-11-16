@@ -13,7 +13,10 @@ class TimingsController extends GetxController {
   final classroomList = <ClassAvailabilityModel>[].obs;
   final labList = <ClassAvailabilityModel>[].obs;
 
-  final ScheduleController _scheduleController = Get.put(ScheduleController(), permanent: true);
+  final ScheduleController _scheduleController = Get.put(
+    ScheduleController(),
+    permanent: true,
+  );
   late final UserController _userController = Get.find<UserController>();
 
   /// Optimized to fetch both classrooms and labs in parallel
@@ -67,17 +70,21 @@ class TimingsController extends GetxController {
           return ClassTiming(
             timing: "${slot['start_time'] ?? ''}-${slot['end_time'] ?? ''}",
             appliedUsers: (slot['applications'] as List<dynamic>? ?? [])
-                .map((e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>))
+                .map(
+                  (e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>),
+                )
                 .toList(),
           );
         }).toList();
 
-        list.add(ClassAvailabilityModel(
-          id: doc.id,
-          className: doc.id,
-          isClassroom: isClassroom,
-          timingsList: timingList,
-        ));
+        list.add(
+          ClassAvailabilityModel(
+            id: doc.id,
+            className: doc.id,
+            isClassroom: isClassroom,
+            timingsList: timingList,
+          ),
+        );
       }
     } catch (e) {
       print("Error fetching $section: $e");
@@ -97,14 +104,21 @@ class TimingsController extends GetxController {
       final dept = _scheduleController.selectedDept.value;
       final section = classModel.isClassroom ? "Classrooms" : "Labs";
 
-      final application = {
-        "username": _userController.username.value,
-        "email": _userController.email.value,
-        "reason": reason,
-        "status": "Pending",
-      };
+      final batch = _firestore.batch();
+
+      // Add to requests
+      // Generate bookingId
+      final bookingId = _firestore.collection("requests").doc().id;
+
+      // Add to requests
+      final requestRef = _firestore
+          .collection("requests")
+          .doc(dept)
+          .collection("requests_list")
+          .doc(bookingId);
 
       final requestData = {
+        "bookingId": bookingId,
         "username": _userController.username.value,
         "email": _userController.email.value,
         "department": dept,
@@ -116,18 +130,16 @@ class TimingsController extends GetxController {
         "createdAt": FieldValue.serverTimestamp(),
       };
 
-      final batch = _firestore.batch();
-
-      // Add to requests
-      final requestRef = _firestore
-          .collection("requests")
-          .doc(dept)
-          .collection("requests_list")
-          .doc();
-
       batch.set(requestRef, requestData);
 
-      // Add to slot applications
+      final application = {
+        "bookingId": bookingId,
+        "username": _userController.username.value,
+        "email": _userController.email.value,
+        "reason": reason,
+        "status": "Pending",
+      };
+
       final slotRef = _firestore
           .collection("slots")
           .doc(day)

@@ -16,7 +16,9 @@ class RequestsPage extends StatelessWidget {
       children: [
         Text(
           "Requests",
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
         _buildSearchBar(context, searchQuery),
@@ -37,7 +39,10 @@ class RequestsPage extends StatelessWidget {
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.grey.shade200,
-        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 20,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
@@ -79,17 +84,9 @@ class RequestsPage extends StatelessWidget {
         return ListView.builder(
           itemCount: filteredRequests.length,
           itemBuilder: (context, index) {
-            final request = filteredRequests[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: RequestCard(
-                dept: request["department"] ?? 'N/A',
-                email: request["email"] ?? 'N/A',
-                title: request['roomId'] ?? 'N/A',
-                time: request['timeSlot'] ?? 'N/A',
-                professor: request['username'] ?? 'N/A',
-                description: request['reason'] ?? '',
-              ),
+              child: RequestCard(request: controller.appliedRequests[index]),
             );
           },
         );

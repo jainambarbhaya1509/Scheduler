@@ -82,34 +82,75 @@ class RequestsController extends GetxController {
   /// Simplified update with batch operation
   /// TODO: [UPDATE THE LIST IN THE APPLICATION's LIST]
   Future<void> updateReservationStatus({
-    required String email,
+    required String bookingId,
     required String dept,
+    required String newStatus,
+    required String day,
+    required String roomId,
     required String timeSlot,
+    required bool isClassroom,
+  }) async {
+    try {
+      final ref = _firestore
+          .collection("requests")
+          .doc(dept)
+          .collection("requests_list")
+          .doc(bookingId);
+
+      await ref.update({"status": newStatus});
+
+      // ───────────────────────────────────────
+      // UPDATE slot applications also
+      // ───────────────────────────────────────
+      await _updateSlotApplicationStatus(
+        day: day,
+        dept: dept,
+        roomId: roomId,
+        timeSlot: timeSlot,
+        bookingId: bookingId,
+        newStatus: newStatus,
+      );
+
+      Get.snackbar("Success", "Application updated");
+    } catch (e) {
+      Get.snackbar("Error", "Failed: $e");
+    }
+  }
+
+  Future<void> _updateSlotApplicationStatus({
+    required String day,
+    required String dept,
+    required String roomId,
+    required String timeSlot,
+    required String bookingId,
     required String newStatus,
   }) async {
     try {
-      final query = await _firestore
-          .collection('requests')
+      final slotRef = _firestore
+          .collection("slots")
+          .doc(day)
+          .collection("departments")
           .doc(dept)
-          .collection('requests_list')
-          .where('email', isEqualTo: email)
-          .where('timeSlot', isEqualTo: timeSlot)
-          .get();
+          .collection("Classrooms") // OR Labs (will handle below)
+          .doc(roomId)
+          .collection("slots")
+          .doc(timeSlot);
 
-      if (query.docs.isEmpty) {
-        Get.snackbar("Error", "Request not found");
-        return;
-      }
+      final snapshot = await slotRef.get();
+      if (!snapshot.exists) return;
 
-      final batch = _firestore.batch();
-      for (var doc in query.docs) {
-        batch.update(doc.reference, {'status': newStatus});
-      }
-      await batch.commit();
+      List apps = snapshot.data()?['applications'] ?? [];
 
-      Get.snackbar("Success", "Status updated");
+      final updated = apps.map((app) {
+        if (app['bookingId'] == bookingId) {
+          return {...app, "status": newStatus};
+        }
+        return app;
+      }).toList();
+
+      await slotRef.update({"applications": updated});
     } catch (e) {
-      Get.snackbar("Error", "Failed to update: $e");
+      print("ERROR updating slot app status: $e");
     }
   }
 
