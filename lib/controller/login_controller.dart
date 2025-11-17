@@ -49,6 +49,8 @@ class LoginController extends GetxController {
         user["email"] ?? "",
         user["department"] ?? "",
         hod: user["isHOD"] ?? false,
+        admin: user["isAdmin"] ?? false,
+
       );
 
       Get.snackbar("Success", "Welcome ${user['username']}");

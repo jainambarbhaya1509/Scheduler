@@ -9,6 +9,7 @@ class ProfileController extends GetxController {
   final username = "".obs;
   final email = "".obs;
   final isHOD = false.obs;
+  final isAdmin = false.obs;
   final loading = true.obs;
 
   final String userEmail;
@@ -36,6 +37,8 @@ class ProfileController extends GetxController {
         username.value = data["username"] ?? "";
         email.value = data["email"] ?? "";
         isHOD.value = data["isHOD"] ?? false;
+        isAdmin.value = data["isAdmin"] ?? false;
+
       }
     }, onError: (e) {
       loading.value = false;

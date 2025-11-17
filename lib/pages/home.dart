@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:schedule/pages/manage_timetable/add_timetable.dart';
+import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import 'package:schedule/pages/profile/profile_page.dart';
 import 'package:schedule/pages/requests/requests_page.dart';
 import 'package:schedule/pages/schedule/schedule_page.dart';
@@ -7,9 +8,14 @@ import 'package:schedule/pages/status/status_page.dart';
 
 class HomePage extends StatefulWidget {
   final String loggedEmail;
-  final bool isHOD;
+  final bool isHOD, isAdmin;
 
-  const HomePage({super.key, required this.loggedEmail, required this.isHOD});
+  const HomePage({
+    super.key,
+    required this.loggedEmail,
+    required this.isHOD,
+    required this.isAdmin,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -25,9 +31,18 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     // Build pages dynamically
-    pages = [const SchedulePage(), const ApplicationStatusPage()];
+    pages = [];
 
-    // Add Requests ONLY if HOD
+    if (widget.isAdmin) {
+      pages.add(AddTimeTable());
+      pages.add(ViewReservations());
+
+    }
+
+    if (!widget.isAdmin) {
+      pages.add(const SchedulePage());
+      pages.add(const ApplicationStatusPage());
+    }
     if (widget.isHOD) {
       pages.add(const RequestsPage());
     }
@@ -37,17 +52,36 @@ class _HomePageState extends State<HomePage> {
 
   /// Build bottom navigation items dynamically based on isHOD
   List<BottomNavigationBarItem> buildNavItems() {
-    final items = <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: "Schedule",
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.call_missed_outgoing),
-        label: "Status",
-      ),
-    ];
+    final items = <BottomNavigationBarItem>[];
 
+    if (widget.isAdmin) {
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.add),
+          label: "Add Time Table",
+        ),
+      );
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.view_agenda),
+          label: "View Reservations",
+        ),
+      );
+    }
+    if (!widget.isAdmin) {
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: "Schedule",
+        ),
+      );
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.call_missed_outgoing),
+          label: "Status",
+        ),
+      );
+    }
     if (widget.isHOD) {
       items.add(
         const BottomNavigationBarItem(
@@ -69,11 +103,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        padding: const EdgeInsets.only(
-          top: 50,
-          left: 12,
-          right: 12,
-        ),
+        padding: const EdgeInsets.only(top: 50, left: 12, right: 12),
         child: pages[index],
       ),
       bottomNavigationBar: ClipRRect(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/timings_controller.dart';
-import 'package:schedule/controller/user_controller.dart';
 import 'package:schedule/models/class_avalability_model.dart';
 
 class ApplyModal extends StatelessWidget {
@@ -23,9 +22,7 @@ class ApplyModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timingController = Get.find<TimingsController>();
-    final userController = Get.find<UserController>();
 
-    print(userController.username);
     return Container(
       padding: const EdgeInsets.all(10),
       width: double.infinity,
@@ -92,7 +89,6 @@ class ApplyModal extends StatelessWidget {
 
                               ElevatedButton(
                                 onPressed: () {
-                                  print(userController.email);
                                   final reason = reasonController.text.trim();
                                   if (reason.isEmpty) return;
 
@@ -145,55 +141,72 @@ class ApplyModal extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          Container(
+          SizedBox(
             height: 250,
-            child: ListView.builder(
-              itemCount: applicants.length,
-              itemBuilder: (context, index) {
-                final applicant = applicants[index];
-                
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 15),
-                  child: Row(
-                    children: [
-                      const CircleAvatar(radius: 20),
-                      const SizedBox(width: 10),
-
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "${applicant.name}\n",
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              TextSpan(
-                                text: applicant.description,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.black54),
-                              ),
-                            ],
-                          ),
-                        ),
+            child: applicants.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Be the first to apply",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: applicants.length,
+                    itemBuilder: (context, index) {
+                      final applicant = applicants[index];
 
-                      Text(
-                        applicant.status,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: applicant.status == "Accepted"
-                              ? Colors.green
-                              : applicant.status == "Rejected"
-                              ? Colors.red
-                              : const Color(0xFFB8A606),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 15),
+                        child: Row(
+                          children: [
+                            const CircleAvatar(radius: 20),
+                            const SizedBox(width: 10),
+
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "${applicant.name}\n",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                    TextSpan(
+                                      text: applicant.description,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.black54),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            Text(
+                              applicant.status,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: applicant.status == "Accepted"
+                                    ? Colors.green
+                                    : applicant.status == "Rejected"
+                                    ? Colors.red
+                                    : const Color(0xFFB8A606),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

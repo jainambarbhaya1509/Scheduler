@@ -33,7 +33,7 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 30),
               _buildInfoTile("Name", controller.username.value),
               _buildInfoTile("Email", controller.email.value),
-              _buildInfoTile("Role", controller.isHOD.value ? "HOD" : "Faculty"),
+              _buildInfoTile("Role", controller.isHOD.value ? "Head of Department" : controller.isAdmin.value ? "Time Table Coordinator" : "Faculty"),
               const Spacer(),
               _buildLogoutButton(),
             ],
