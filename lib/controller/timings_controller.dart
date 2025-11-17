@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
 import 'package:schedule/models/class_avalability_model.dart';
@@ -12,6 +13,7 @@ class TimingsController extends GetxController {
   final isLoading = false.obs;
   final classroomList = <ClassAvailabilityModel>[].obs;
   final labList = <ClassAvailabilityModel>[].obs;
+  final date = "".obs;
 
   final ScheduleController _scheduleController = Get.put(
     ScheduleController(),
@@ -51,7 +53,8 @@ class TimingsController extends GetxController {
     bool isClassroom,
   ) async {
     final list = <ClassAvailabilityModel>[];
-
+    final dt = DateTime.parse(date.value);
+    final formatted = DateFormat("dd-MM-yyyy").format(dt);
     try {
       final snapshot = await _firestore
           .collection('slots')
@@ -67,13 +70,29 @@ class TimingsController extends GetxController {
         final slotsSnapshot = await doc.reference.collection('slots').get();
 
         final timingList = slotsSnapshot.docs.map((slot) {
+          final rawApplications = slot['applications'];
+
+          List<UsersAppliedModel> appliedUsers = [];
+
+          // Filter only selected date
+          if (rawApplications is Map<String, dynamic>) {
+            if (rawApplications.containsKey(formatted)) {
+              final appList = rawApplications[formatted];
+
+              if (appList is List) {
+                appliedUsers = appList
+                    .map(
+                      (e) =>
+                          UsersAppliedModel.fromMap(e as Map<String, dynamic>),
+                    )
+                    .toList();
+              }
+            }
+          }
+
           return ClassTiming(
             timing: "${slot['start_time'] ?? ''}-${slot['end_time'] ?? ''}",
-            appliedUsers: (slot['applications'] as List<dynamic>? ?? [])
-                .map(
-                  (e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>),
-                )
-                .toList(),
+            appliedUsers: appliedUsers,
           );
         }).toList();
 
@@ -127,7 +146,7 @@ class TimingsController extends GetxController {
         "timeSlot": timeslot,
         "status": "Pending",
         "day": day,
-        "createdAt": FieldValue.serverTimestamp(),
+        "createdAt": Timestamp.now(),
       };
 
       batch.set(requestRef, requestData);
@@ -137,8 +156,12 @@ class TimingsController extends GetxController {
         "username": _userController.username.value,
         "email": _userController.email.value,
         "reason": reason,
+        "createdAt": Timestamp.now(),
         "status": "Pending",
       };
+
+      final dt = DateTime.parse(date.value);
+      final formatted = DateFormat("dd-MM-yyyy").format(dt);
 
       final slotRef = _firestore
           .collection("slots")
@@ -151,7 +174,7 @@ class TimingsController extends GetxController {
           .doc(timeslot);
 
       batch.update(slotRef, {
-        "applications": FieldValue.arrayUnion([application]),
+        "applications.$formatted": FieldValue.arrayUnion([application]),
       });
 
       await batch.commit();

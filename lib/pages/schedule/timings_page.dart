@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/models/class_avalability_model.dart';
+import 'package:schedule/models/class_timing_model.dart';
 import 'package:schedule/widgets/apply_modal_widget.dart';
 
 class SelectTimings extends StatelessWidget {
@@ -56,7 +57,10 @@ class SelectTimings extends StatelessWidget {
         labelColor: Colors.black87,
         unselectedLabelColor: Colors.black54,
         dividerColor: Colors.transparent,
-        tabs: [Tab(text: "Classroom"), Tab(text: "Lab")],
+        tabs: [
+          Tab(text: "Classroom"),
+          Tab(text: "Lab"),
+        ],
       ),
     );
   }
@@ -78,19 +82,26 @@ class SelectTimings extends StatelessWidget {
   }
 
   /// Extracted list view widget
-  Widget _buildListView(BuildContext context, List<ClassAvailabilityModel> dataList) {
+  Widget _buildListView(
+    BuildContext context,
+    List<ClassAvailabilityModel> dataList,
+  ) {
     if (dataList.isEmpty) {
       return const Center(child: Text("No timings available"));
     }
 
     return ListView.builder(
       itemCount: dataList.length,
-      itemBuilder: (context, index) => _buildClassCard(context, dataList[index]),
+      itemBuilder: (context, index) =>
+          _buildClassCard(context, dataList[index]),
     );
   }
 
   /// Extracted class card widget
-  Widget _buildClassCard(BuildContext context, ClassAvailabilityModel classModel) {
+  Widget _buildClassCard(
+    BuildContext context,
+    ClassAvailabilityModel classModel,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Container(
@@ -112,11 +123,16 @@ class SelectTimings extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
               ),
               child: Text(
                 classModel.className,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ListView.builder(
@@ -139,7 +155,7 @@ class SelectTimings extends StatelessWidget {
   Widget _buildTimingTile(
     BuildContext context,
     ClassAvailabilityModel classModel,
-    dynamic timing,
+    ClassTiming timing,
   ) {
     return InkWell(
       onTap: () {
@@ -158,9 +174,7 @@ class SelectTimings extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.black12, width: 0.4),
-          ),
+          border: Border(bottom: BorderSide(color: Colors.black12, width: 0.4)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -13,88 +13,98 @@ class RequestCard extends StatefulWidget {
 
 class _RequestCardState extends State<RequestCard> {
   final RequestsController controller = Get.find<RequestsController>();
-  bool showAcceptRejectButtons = false;
+
+  bool showActions = false;
   bool isUpdating = false;
 
-  void updateStatus(String newStatus) async {
-    setState(() {
-      isUpdating = true;
-    });
+  Future<void> updateStatus(String newStatus) async {
+    setState(() => isUpdating = true);
+
+    final req = widget.request;
 
     await controller.updateReservationStatus(
-      bookingId: widget.request["bookingId"],
-      dept: widget.request["department"],
+      bookingId: req["bookingId"] ?? "",
+      dept: req["department"] ?? "",
       newStatus: newStatus,
-      day: widget.request["day"],
-      roomId: widget.request["roomId"],
-      timeSlot: widget.request["timeSlot"],
-      isClassroom: widget.request["isClassroom"] ?? true,
+      day: req["day"] ?? "",
+      roomId: req["roomId"] ?? "",
+      timeSlot: req["timeSlot"] ?? "",
+      isClassroom: req["isClassroom"] ?? true,
     );
 
-    setState(() {
-      showAcceptRejectButtons = false;
-      isUpdating = false;
-    });
+    if (mounted) {
+      setState(() {
+        showActions = false;
+        isUpdating = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final req = widget.request;
 
+    final room = req["roomId"] ?? "Unknown Room";
+    final time = req["timeSlot"] ?? "Unknown Time";
+    final user = req["username"] ?? "No Username";
+    final reason = req["reason"] ?? "No reason provided";
+
     return InkWell(
-      onTap: () {
-        setState(() {
-          showAcceptRejectButtons = !showAcceptRejectButtons;
-        });
-      },
+      onTap: () => setState(() => showActions = !showActions),
       child: Container(
         padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 245, 245, 245),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// FIRST ROW — ROOM + TIMESLOT + USER
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// ROOM / LAB NAME
-                    Text(
-                      req["roomId"] ?? "",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        room,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-
-                    /// TIMESLOT
-                    Text(
-                      req["timeSlot"] ?? "",
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                      const SizedBox(height: 4),
+                      Text(
+                        time,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const Spacer(),
+
+                const SizedBox(width: 10),
 
                 /// USER EMAIL
                 Text(
-                  req["username"] ?? "",
+                  user,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: Colors.grey[600],
                       ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
             /// REASON BOX
             Container(
@@ -105,45 +115,43 @@ class _RequestCardState extends State<RequestCard> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                req["reason"] ?? "",
+                reason,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(95, 28, 28, 28),
+                      color: const Color.fromARGB(150, 28, 28, 30),
                     ),
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
 
             /// ACCEPT / REJECT BUTTONS
-            if (showAcceptRejectButtons)
+            if (showActions)
               isUpdating
-                  ? const CircularProgressIndicator()
+                  ? const Center(child: CircularProgressIndicator())
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         TextButton.icon(
-                          onPressed: () => updateStatus('Accepted'),
+                          onPressed: () => updateStatus("Accepted"),
                           icon: const Icon(Icons.check, color: Colors.green),
-                          label: Text(
+                          label: const Text(
                             "Accept",
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
                           ),
                         ),
                         TextButton.icon(
-                          onPressed: () => updateStatus('Rejected'),
+                          onPressed: () => updateStatus("Rejected"),
                           icon: const Icon(Icons.close, color: Colors.redAccent),
-                          label: Text(
+                          label: const Text(
                             "Reject",
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.redAccent,
-                                ),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.redAccent,
+                            ),
                           ),
                         ),
                       ],

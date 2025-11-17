@@ -43,31 +43,31 @@ class FirestoreSlotUploader {
         // Level 1: Day document
         final dayRef = _firestore.collection("slots").doc(day);
         await dayRef.set({
-          "createdAt": FieldValue.serverTimestamp(),
-          "lastUpdated": FieldValue.serverTimestamp(),
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
         }, SetOptions(merge: true));
 
         // Level 2: Department
         final deptRef = dayRef.collection("departments").doc(department);
         await deptRef.set({
-          "createdAt": FieldValue.serverTimestamp(),
-          "lastUpdated": FieldValue.serverTimestamp(),
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
         }, SetOptions(merge: true));
 
         // Level 3: Section (_meta)
         final sectionRef = deptRef.collection(section).doc("_meta");
         await sectionRef.set({
           "sectionType": section,
-          "createdAt": FieldValue.serverTimestamp(),
-          "lastUpdated": FieldValue.serverTimestamp(),
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
         }, SetOptions(merge: true));
 
         // Level 4: Class
         final classRef = deptRef.collection(section).doc(className);
         await classRef.set({
           "className": className,
-          "createdAt": FieldValue.serverTimestamp(),
-          "lastUpdated": FieldValue.serverTimestamp(),
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
         }, SetOptions(merge: true));
 
         // Level 5: Slots — each with an empty applications list
@@ -76,9 +76,9 @@ class FirestoreSlotUploader {
           await slotRef.set({
             "start_time": slotTime.split('-').first,
             "end_time": slotTime.split('-').last,
-            "applications": [],
-            "createdAt": FieldValue.serverTimestamp(),
-            "lastUpdated": FieldValue.serverTimestamp(),
+            "applications": {},
+            "createdAt": Timestamp.now(),
+            "lastUpdated": Timestamp.now(),
           });
         }
 

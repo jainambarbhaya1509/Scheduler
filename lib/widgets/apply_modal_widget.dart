@@ -25,9 +25,7 @@ class ApplyModal extends StatelessWidget {
     final timingController = Get.find<TimingsController>();
     final userController = Get.find<UserController>();
 
-    final uid = userController.userId.value;
-    final username = userController.username.value;
-
+    print(userController.username);
     return Container(
       padding: const EdgeInsets.all(10),
       width: double.infinity,
@@ -153,7 +151,7 @@ class ApplyModal extends StatelessWidget {
               itemCount: applicants.length,
               itemBuilder: (context, index) {
                 final applicant = applicants[index];
-                print(applicant.name);
+                
                 return Container(
                   margin: const EdgeInsets.only(bottom: 15),
                   child: Row(

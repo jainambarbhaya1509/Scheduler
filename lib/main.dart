@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/logic/upload_data.dart';
 import 'package:schedule/pages/login/login_page.dart';
 import 'firebase_options.dart';
 

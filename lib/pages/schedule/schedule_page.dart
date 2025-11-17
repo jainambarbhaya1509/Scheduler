@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
+import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
 String _getDayFromDate(DateTime date) {
@@ -26,6 +27,8 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   final TextEditingController _dateController = TextEditingController();
   final ScheduleController _scheduleController = Get.put(ScheduleController());
+  final TimingsController _timingsController = Get.put(TimingsController());
+
   bool hasSelectedDate = false;
 
   @override
@@ -41,11 +44,13 @@ class _SchedulePageState extends State<SchedulePage> {
       children: [
         Text(
           "Schedule Class",
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
+
         _buildDateSelector(context),
         const SizedBox(height: 20),
 
@@ -54,7 +59,7 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  /// Extracted date selector widget
+  /// ---------------------- DATE PICKER ----------------------
   Widget _buildDateSelector(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -66,9 +71,9 @@ class _SchedulePageState extends State<SchedulePage> {
         controller: _dateController,
         readOnly: true,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Colors.black,
-          fontWeight: FontWeight.w500,
-        ),
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+            ),
         decoration: const InputDecoration(
           border: InputBorder.none,
           hintText: "Select Date",
@@ -83,11 +88,14 @@ class _SchedulePageState extends State<SchedulePage> {
           );
 
           if (selectedDate != null) {
+            _timingsController.date.value = selectedDate.toString();
+
             setState(() {
               hasSelectedDate = true;
               _dateController.text =
                   "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
             });
+
             _scheduleController.fetchAvailabilityForDay(
               _getDayFromDate(selectedDate),
             );
@@ -97,7 +105,7 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  /// Extracted available classes widget
+  /// ---------------------- CLASS LIST ----------------------
   Widget _buildAvailableClasses() {
     return Expanded(
       child: hasSelectedDate == false
@@ -133,12 +141,11 @@ class _SchedulePageState extends State<SchedulePage> {
                   Text(
                     "Available Classes",
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 5),
 
-                  /// FIX: ListView must be in Expanded
                   Expanded(
                     child: ListView.builder(
                       itemCount: list.length,
@@ -152,7 +159,7 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  /// Extracted department card widget
+  /// ---------------------- DEPARTMENT CARD ----------------------
   Widget _buildDepartmentCard(BuildContext context, dynamic dept) {
     return InkWell(
       onTap: () {

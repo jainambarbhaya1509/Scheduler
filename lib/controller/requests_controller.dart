@@ -131,7 +131,7 @@ class RequestsController extends GetxController {
           .doc(day)
           .collection("departments")
           .doc(dept)
-          .collection("Classrooms") // OR Labs (will handle below)
+          .collection("Classrooms") // TODO: handle Labs if needed
           .doc(roomId)
           .collection("slots")
           .doc(timeSlot);
@@ -139,16 +139,28 @@ class RequestsController extends GetxController {
       final snapshot = await slotRef.get();
       if (!snapshot.exists) return;
 
-      List apps = snapshot.data()?['applications'] ?? [];
+      final raw = snapshot.data()?['applications'];
 
-      final updated = apps.map((app) {
-        if (app['bookingId'] == bookingId) {
-          return {...app, "status": newStatus};
+      if (raw == null || raw is! Map<String, dynamic>) {
+        print("Applications is null or not a Map");
+        return;
+      }
+
+      final Map<String, dynamic> applications = Map.from(raw);
+
+      // Iterate date → list → update
+      applications.forEach((dateKey, list) {
+        if (list is List) {
+          for (int i = 0; i < list.length; i++) {
+            final app = list[i];
+            if (app['bookingId'] == bookingId) {
+              list[i] = {...app, "status": newStatus};
+            }
+          }
         }
-        return app;
-      }).toList();
+      });
 
-      await slotRef.update({"applications": updated});
+      await slotRef.update({"applications": applications});
     } catch (e) {
       print("ERROR updating slot app status: $e");
     }
