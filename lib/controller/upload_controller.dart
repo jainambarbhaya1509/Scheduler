@@ -20,8 +20,7 @@ class UploadTTController extends GetxController {
     'Information Technology': ['64', '65', '66', 'L1', 'L2', 'L3'],
   };
 
-  List<String> get classOptions =>
-      departmentData[department.value] ?? [];
+  List<String> get classOptions => departmentData[department.value] ?? [];
 
   void resetSelections() => classNo.value = "";
 
@@ -40,6 +39,7 @@ class UploadTTController extends GetxController {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["xlsx", "xls"],
+        withData: true,
       );
 
       if (result == null || result.files.isEmpty) {
@@ -58,6 +58,8 @@ class UploadTTController extends GetxController {
       status.value = "Converting Excel to JSON...";
 
       final Map<String, dynamic> jsonResult = await excelToJson(
+        department.value,
+        classNo.value,
         path!,
         null,
         saveHtml: false,
@@ -66,11 +68,7 @@ class UploadTTController extends GetxController {
 
       status.value = "Uploading extracted slots to Firestore...";
 
-      await _uploadSlotsFromJson(
-        jsonResult,
-        department: department.value,
-        className: classNo.value,
-      );
+      await _uploadSlotsFromJson(jsonResult);
 
       status.value = "Success: Uploaded!";
     } catch (e) {
@@ -80,54 +78,87 @@ class UploadTTController extends GetxController {
     }
   }
 
-  Future<void> _uploadSlotsFromJson(
-    Map<String, dynamic> data, {
-    required String department,
-    required String className,
-  }) async {
-    final slotDays = data["slots"] as List? ?? [];
+  Future<void> _uploadSlotsFromJson(Map<String, dynamic> data) async {
+    try {
+      // Load and decode JSON file
 
-    if (slotDays.isEmpty) {
-      throw Exception("No slots found in file");
-    }
+      final department = data["department"]?.toString();
+      final className = data["class"]?.toString();
+      final slotDays = data["slots"] as List?;
 
-    for (var dayData in slotDays) {
-      final day = dayData["day"]?.toString();
-      final emptySlots = (dayData["empty_slots"] as List?)
-          ?.map((e) => e.toString())
-          .toList();
-
-      if (day == null || emptySlots == null) continue;
-
-      final dayRef = _firestore.collection("slots").doc(day);
-
-      await dayRef.set({
-        "lastUpdated": Timestamp.now(),
-      }, SetOptions(merge: true));
-
-      final deptRef = dayRef.collection("departments").doc(department);
-      await deptRef.set({
-        "lastUpdated": Timestamp.now(),
-      }, SetOptions(merge: true));
-
-      final classRef = deptRef.collection("classes").doc(className);
-      await classRef.set({
-        "className": className,
-        "lastUpdated": Timestamp.now(),
-      }, SetOptions(merge: true));
-
-      for (var slotTime in emptySlots) {
-        final parts = slotTime.split('-').map((e) => e.trim()).toList();
-        final start = parts.isNotEmpty ? parts.first : "";
-        final end = parts.length > 1 ? parts.last : "";
-
-        await classRef.collection("slots").doc(slotTime).set({
-          "start_time": start,
-          "end_time": end,
-          "applications": {},
-          "lastUpdated": Timestamp.now(),
-        });
+      if (department == null || className == null || slotDays == null) {
+        throw Exception(
+          "❌ Invalid JSON: Missing 'department', 'class', or 'slots'",
+        );
       }
+
+      // Determine if it's a Lab or Classroom
+      final section = className.contains('L') ? "Labs" : "Classrooms";
+      print("📁 Detected section: $section for class $className");
+
+      // Iterate over all days in the JSON
+      for (var dayData in slotDays) {
+        final day = dayData["day"]?.toString();
+        final emptySlots = dayData["empty_slots"] as List?;
+
+        if (day == null || emptySlots == null) {
+          print("⚠️ Skipping invalid entry: $dayData");
+          continue;
+        }
+
+        print("📅 Uploading for Day: $day");
+
+        // Level 1: Day document
+        final dayRef = _firestore.collection("slots").doc(day);
+        await dayRef.set({
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
+        }, SetOptions(merge: true));
+
+        // Level 2: Department
+        final deptRef = dayRef.collection("departments").doc(department);
+        await deptRef.set({
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
+        }, SetOptions(merge: true));
+
+        // Level 3: Section (_meta)
+        final sectionRef = deptRef.collection(section).doc("_meta");
+        await sectionRef.set({
+          "sectionType": section,
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
+        }, SetOptions(merge: true));
+
+        // Level 4: Class
+        final classRef = deptRef.collection(section).doc(className);
+        await classRef.set({
+          "className": className,
+          "createdAt": Timestamp.now(),
+          "lastUpdated": Timestamp.now(),
+        }, SetOptions(merge: true));
+
+        // Level 5: Slots — each with an empty applications list
+        for (var slotTime in emptySlots) {
+          final slotRef = classRef.collection("slots").doc(slotTime);
+          await slotRef.set({
+            "start_time": slotTime.split('-').first,
+            "end_time": slotTime.split('-').last,
+            "applications": {},
+            "createdAt": Timestamp.now(),
+            "lastUpdated": Timestamp.now(),
+          });
+        }
+
+        print(
+          "✅ Uploaded slots for → $day / $department / $section / $className",
+        );
+      }
+
+      print("🎉 All slot documents uploaded successfully!");
+    } catch (e, st) {
+      print("❌ Error uploading slots: $e");
+      print(st);
     }
   }
 }

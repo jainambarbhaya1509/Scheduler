@@ -88,6 +88,7 @@ class ApplicationStatusPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   var request = requestList[index];
                   return StatusWidget(
+                    requestedDate: request["requestedDate"] ?? '',
                     title: request['username'] ?? '',
                     time: request['timeSlot'] ?? '',
                     status: request['status'] ?? '',

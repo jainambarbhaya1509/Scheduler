@@ -129,6 +129,9 @@ class TimingsController extends GetxController {
       // Generate bookingId
       final bookingId = _firestore.collection("requests").doc().id;
 
+      final dt = DateTime.parse(date.value);
+      final formatted = DateFormat("dd-MM-yyyy").format(dt);
+
       // Add to requests
       final requestRef = _firestore
           .collection("requests")
@@ -146,6 +149,7 @@ class TimingsController extends GetxController {
         "timeSlot": timeslot,
         "status": "Pending",
         "day": day,
+        "requestedDate": formatted,
         "createdAt": Timestamp.now(),
       };
 
@@ -156,12 +160,10 @@ class TimingsController extends GetxController {
         "username": _userController.username.value,
         "email": _userController.email.value,
         "reason": reason,
+        "requestedDate": formatted,
         "createdAt": Timestamp.now(),
         "status": "Pending",
       };
-
-      final dt = DateTime.parse(date.value);
-      final formatted = DateFormat("dd-MM-yyyy").format(dt);
 
       final slotRef = _firestore
           .collection("slots")

@@ -30,6 +30,7 @@ class _RequestCardState extends State<RequestCard> {
       roomId: req["roomId"] ?? "",
       timeSlot: req["timeSlot"] ?? "",
       isClassroom: req["isClassroom"] ?? true,
+      requestedDate: req["requestedDate"] ?? '',
     );
 
     if (mounted) {
@@ -48,6 +49,7 @@ class _RequestCardState extends State<RequestCard> {
     final time = req["timeSlot"] ?? "Unknown Time";
     final user = req["username"] ?? "No Username";
     final reason = req["reason"] ?? "No reason provided";
+    final requestedDate = req["requestedDate"] ?? '';
 
     return InkWell(
       onTap: () => setState(() => showActions = !showActions),
@@ -92,14 +94,32 @@ class _RequestCardState extends State<RequestCard> {
 
                 const SizedBox(width: 10),
 
-                /// USER EMAIL
-                Text(
-                  user,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      child: Text(
+                        user,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
                       ),
+                    ),
+                    Container(
+                      child: Text(
+                        requestedDate,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -117,9 +137,9 @@ class _RequestCardState extends State<RequestCard> {
               child: Text(
                 reason,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(150, 28, 28, 30),
-                    ),
+                  fontWeight: FontWeight.w500,
+                  color: const Color.fromARGB(150, 28, 28, 30),
+                ),
               ),
             ),
 
@@ -145,7 +165,10 @@ class _RequestCardState extends State<RequestCard> {
                         ),
                         TextButton.icon(
                           onPressed: () => updateStatus("Rejected"),
-                          icon: const Icon(Icons.close, color: Colors.redAccent),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.redAccent,
+                          ),
                           label: const Text(
                             "Reject",
                             style: TextStyle(

@@ -4,6 +4,7 @@ class StatusWidget extends StatelessWidget {
   final String title;
   final String time;
   final String status;
+  final String requestedDate;
   final String description;
 
   const StatusWidget({
@@ -12,6 +13,7 @@ class StatusWidget extends StatelessWidget {
     required this.time,
     required this.status,
     required this.description,
+    required this.requestedDate,
   });
 
   @override
@@ -49,16 +51,30 @@ class StatusWidget extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              Text(
-                status,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    status,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: status == "Accepted"
                           ? Colors.green
                           : status == "Rejected"
-                              ? Colors.red
-                              : const Color.fromARGB(255, 184, 166, 6),
+                          ? Colors.red
+                          : const Color.fromARGB(255, 184, 166, 6),
                     ),
+                  ),
+                  Text(
+                    requestedDate,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -70,12 +86,14 @@ class StatusWidget extends StatelessWidget {
               color: const Color.fromARGB(34, 193, 193, 193),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: const Color.fromARGB(95, 28, 28, 28),
-                    )),
-          )
+            child: Text(
+              description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: const Color.fromARGB(95, 28, 28, 28),
+              ),
+            ),
+          ),
         ],
       ),
     );

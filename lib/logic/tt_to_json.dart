@@ -76,7 +76,7 @@ String excelToHtml(Excel excel, String sheetName, Sheet sheet) {
   return html.toString();
 }
 
-Map<String, dynamic> extractEmptySlotsFromHtml(String html) {
+Map<String, dynamic> extractEmptySlotsFromHtml(String html, String department, String className) {
   final document = parse(html);
   final table = document.querySelector('table');
   final rows = table?.querySelectorAll('tr') ?? [];
@@ -167,8 +167,8 @@ Map<String, dynamic> extractEmptySlotsFromHtml(String html) {
   }
 
   final result = {
-    "departmrent": "Information Technology",
-    'class': '64',
+    "department": department,
+    'class': className,
     'slots': [],
   };
 
@@ -186,6 +186,8 @@ Map<String, dynamic> extractEmptySlotsFromHtml(String html) {
 }
 
 Future<Map<String, dynamic>> excelToJson(
+  String department,
+  String className,
   String filePath,
   String? sheetName, {
   bool saveHtml = false,
@@ -198,7 +200,7 @@ Future<Map<String, dynamic>> excelToJson(
   final sheet = excel.tables[sheetKey]!;
 
   final html = excelToHtml(excel, sheetKey, sheet);
-  final jsonResult = extractEmptySlotsFromHtml(html);
+  final jsonResult = extractEmptySlotsFromHtml(html, department, className);
 
   if (saveHtml) {
     File('table_output.html').writeAsStringSync(html);
@@ -212,19 +214,19 @@ Future<Map<String, dynamic>> excelToJson(
   return jsonResult;
 }
 
-void main() async {
-  stdout.write('Excel file path (e.g. test.xlsx): ');
-  final path = stdin.readLineSync()?.trim() ?? '';
-  stdout.write('Sheet name (or press Enter for default sheet): ');
-  final sheet = stdin.readLineSync()?.trim();
+// void main() async {
+//   stdout.write('Excel file path (e.g. test.xlsx): ');
+//   final path = stdin.readLineSync()?.trim() ?? '';
+//   stdout.write('Sheet name (or press Enter for default sheet): ');
+//   final sheet = stdin.readLineSync()?.trim();
 
-  final result = await excelToJson(
-    path,
-    (sheet != null && sheet.isNotEmpty) ? sheet : null,
-    saveHtml: true,
-    saveJson: true,
-  );
+//   final result = await excelToJson(
+//     path,
+//     (sheet != null && sheet.isNotEmpty) ? sheet : null,
+//     saveHtml: true,
+//     saveJson: true,
+//   );
 
-  print('\nFinal Result JSON:');
-  print(JsonEncoder.withIndent('  ').convert(result));
-}
+//   print('\nFinal Result JSON:');
+//   print(JsonEncoder.withIndent('  ').convert(result));
+// }

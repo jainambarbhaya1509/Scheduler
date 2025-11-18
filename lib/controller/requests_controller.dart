@@ -47,6 +47,8 @@ class RequestsController extends GetxController {
 
           for (var doc in snapshot.docs) {
             final data = doc.data();
+
+            print(data);
             allRequests.add(data);
 
             switch (data['status']?.toString().toLowerCase() ?? 'pending') {
@@ -80,7 +82,7 @@ class RequestsController extends GetxController {
   }
 
   /// Simplified update with batch operation
-  /// TODO: [UPDATE THE LIST IN THE APPLICATION's LIST]
+
   Future<void> updateReservationStatus({
     required String bookingId,
     required String dept,
@@ -89,6 +91,7 @@ class RequestsController extends GetxController {
     required String roomId,
     required String timeSlot,
     required bool isClassroom,
+    required String requestedDate
   }) async {
     try {
       final ref = _firestore
@@ -107,6 +110,7 @@ class RequestsController extends GetxController {
         dept: dept,
         roomId: roomId,
         timeSlot: timeSlot,
+        isClassroom: isClassroom,
         bookingId: bookingId,
         newStatus: newStatus,
       );
@@ -122,6 +126,7 @@ class RequestsController extends GetxController {
     required String dept,
     required String roomId,
     required String timeSlot,
+    required bool isClassroom,
     required String bookingId,
     required String newStatus,
   }) async {
@@ -131,7 +136,7 @@ class RequestsController extends GetxController {
           .doc(day)
           .collection("departments")
           .doc(dept)
-          .collection("Classrooms") // TODO: handle Labs if needed
+          .collection("Classrooms")
           .doc(roomId)
           .collection("slots")
           .doc(timeSlot);
