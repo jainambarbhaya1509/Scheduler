@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../controller/upload_controller.dart';
 
 class AddTimeTable extends StatelessWidget {
@@ -9,25 +8,29 @@ class AddTimeTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(UploadTTController());
+
     return Scaffold(
       body: Container(
-        margin: const EdgeInsets.only(top: 10, left: 12, right: 12, bottom: 10),
+        margin: const EdgeInsets.all(12),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Manage Time Table",
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 16),
+
+              /// ------------------ Department dropdown ------------------
               Obx(
                 () => _buildDropdownRow(
                   label: 'Select Department',
-                  value: controller.department.value,
+                  value: controller.department.value.isEmpty
+                      ? null
+                      : controller.department.value,
                   items: controller.departmentData.keys.toList(),
                   onChanged: controller.running.value
                       ? null
@@ -40,6 +43,8 @@ class AddTimeTable extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+
+              /// ------------------ Class/Lab dropdown ------------------
               Obx(
                 () => _buildDropdownRow(
                   label: 'Select Class/Lab',
@@ -56,52 +61,41 @@ class AddTimeTable extends StatelessWidget {
                         },
                 ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 30),
+
+              /// ------------------ Upload button ------------------
               Obx(
                 () => Column(
                   children: [
                     ElevatedButton.icon(
-                      onPressed:
-                          controller.running.value ||
+                      onPressed: controller.running.value ||
                               controller.classNo.value.isEmpty
                           ? null
                           : () => controller.pickFileAndProcess(),
-                      icon: const Icon(
-                        Icons.upload_file_rounded,
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.upload_file_rounded, color: Colors.white),
                       label: const Text(
                         'Pick & Upload Excel',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-
-                        minimumSize: const Size(double.infinity, 50),
                         backgroundColor: Colors.black87,
                         disabledBackgroundColor: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    if (controller.running.value)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: SizedBox(
-                          height: 20,
-                          child: LinearProgressIndicator(
-                            backgroundColor: Colors.grey[300],
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.black87,
-                            ),
-                          ),
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
+                    ),
+
+                    if (controller.running.value) ...[
+                      const SizedBox(height: 16),
+                      LinearProgressIndicator(
+                        backgroundColor: Colors.grey[300],
+                        valueColor:
+                            const AlwaysStoppedAnimation<Color>(Colors.black87),
+                      ),
+                    ]
                   ],
                 ),
               ),
@@ -121,14 +115,9 @@ class AddTimeTable extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -140,26 +129,16 @@ class AddTimeTable extends StatelessWidget {
             value: value,
             isExpanded: true,
             underline: const SizedBox(),
-            hint: Text(
-              'Select $label',
-              style: const TextStyle(color: Colors.black54),
-            ),
+            hint: Text("Select $label"),
             items: items
                 .map(
                   (item) => DropdownMenuItem(
                     value: item,
-                    child: Text(
-                      item,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                      ),
-                    ),
+                    child: Text(item),
                   ),
                 )
                 .toList(),
             onChanged: onChanged,
-            style: const TextStyle(color: Colors.black87),
           ),
         ),
       ],
