@@ -63,7 +63,7 @@ class ScheduleController extends GetxController {
             deprtmantName: departmentId,
             totalAvailableClass: classroomCount.toString(),
             totalLabs: labCount.toString(),
-            totalClass: (classroomCount + labCount).toString(),
+            totalClass: (classroomCount).toString(),
           );
         } catch (e) {
           print("Error fetching department $departmentId: $e");
