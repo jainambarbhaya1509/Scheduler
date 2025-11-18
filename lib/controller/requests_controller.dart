@@ -91,7 +91,7 @@ class RequestsController extends GetxController {
     required String roomId,
     required String timeSlot,
     required bool isClassroom,
-    required String requestedDate
+    required String requestedDate,
   }) async {
     try {
       final ref = _firestore
@@ -110,11 +110,11 @@ class RequestsController extends GetxController {
         dept: dept,
         roomId: roomId,
         timeSlot: timeSlot,
-        isClassroom: isClassroom,
         bookingId: bookingId,
         newStatus: newStatus,
+        isClassroom: isClassroom
       );
-
+      print(isClassroom);
       Get.snackbar("Success", "Application updated");
     } catch (e) {
       Get.snackbar("Error", "Failed: $e");
@@ -126,9 +126,9 @@ class RequestsController extends GetxController {
     required String dept,
     required String roomId,
     required String timeSlot,
-    required bool isClassroom,
     required String bookingId,
     required String newStatus,
+    required bool isClassroom,
   }) async {
     try {
       final slotRef = _firestore
@@ -136,7 +136,7 @@ class RequestsController extends GetxController {
           .doc(day)
           .collection("departments")
           .doc(dept)
-          .collection("Classrooms")
+          .collection(isClassroom ? "Classrooms" : "Labs")
           .doc(roomId)
           .collection("slots")
           .doc(timeSlot);
@@ -146,14 +146,11 @@ class RequestsController extends GetxController {
 
       final raw = snapshot.data()?['applications'];
 
-      if (raw == null || raw is! Map<String, dynamic>) {
-        print("Applications is null or not a Map");
-        return;
-      }
+      if (raw == null || raw is! Map<String, dynamic>) return;
 
       final Map<String, dynamic> applications = Map.from(raw);
 
-      // Iterate date → list → update
+      // Iterate through dates and update booking status
       applications.forEach((dateKey, list) {
         if (list is List) {
           for (int i = 0; i < list.length; i++) {

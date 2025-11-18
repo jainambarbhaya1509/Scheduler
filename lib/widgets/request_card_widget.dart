@@ -29,7 +29,7 @@ class _RequestCardState extends State<RequestCard> {
       day: req["day"] ?? "",
       roomId: req["roomId"] ?? "",
       timeSlot: req["timeSlot"] ?? "",
-      isClassroom: req["isClassroom"] ?? true,
+      isClassroom: !req["roomId"].toString().toUpperCase().contains('L'),
       requestedDate: req["requestedDate"] ?? '',
     );
 
