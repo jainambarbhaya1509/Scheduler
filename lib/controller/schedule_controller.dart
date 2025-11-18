@@ -1,21 +1,19 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/models/availability_model.dart';
 
 class ScheduleController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   final departmentAvailabilityList = <DepartmentAvailabilityModel>[].obs;
   final selectedDay = "".obs;
   final selectedDept = "".obs;
   final isLoading = false.obs;
 
-  /// Real-time availability listener
   StreamSubscription? _availabilitySubscription;
 
-  /// Fetch availability for a given day with real-time updates
+  /// Fetch availability for a given day
   Future<void> fetchAvailabilityForDay(String day) async {
     selectedDay.value = day;
     isLoading.value = true;
@@ -38,7 +36,6 @@ class ScheduleController extends GetxController {
         final departmentId = deptDoc.id;
 
         try {
-          // Parallel requests for classrooms and labs
           final results = await Future.wait([
             _firestore
                 .collection("slots")
@@ -57,9 +54,9 @@ class ScheduleController extends GetxController {
           ]);
 
           final classroomCount =
-              results[0].docs.where((doc) => doc.id != "_meta").length;
+              results[0].docs.where((d) => d.id != "_meta").length;
           final labCount =
-              results[1].docs.where((doc) => doc.id != "_meta").length;
+              results[1].docs.where((d) => d.id != "_meta").length;
 
           return DepartmentAvailabilityModel(
             id: departmentId,
@@ -72,7 +69,7 @@ class ScheduleController extends GetxController {
           print("Error fetching department $departmentId: $e");
           return null;
         }
-      });
+      }).toList();
 
       final results = await Future.wait(futures);
       departmentAvailabilityList.addAll(
@@ -85,10 +82,9 @@ class ScheduleController extends GetxController {
     }
   }
 
-  /// Optimized room fetching with better filtering
+  /// Fetch available rooms
   Future<Map<String, List<Map<String, dynamic>>>> fetchAvailableRooms(
-    String department,
-  ) async {
+      String department) async {
     try {
       selectedDept.value = department;
 
@@ -100,7 +96,7 @@ class ScheduleController extends GetxController {
       final sections = ["Classrooms", "Labs"];
 
       for (final section in sections) {
-        final snapshot = await _firestore
+        final roomsSnapshot = await _firestore
             .collection("slots")
             .doc(selectedDay.value)
             .collection("departments")
@@ -108,20 +104,23 @@ class ScheduleController extends GetxController {
             .collection(section)
             .get();
 
-        for (final roomDoc in snapshot.docs) {
-          final slotsSnapshot = await roomDoc.reference.collection("slots").get();
+        final roomDocs =
+            roomsSnapshot.docs.where((d) => d.id != "_meta").toList();
 
-          for (final slotDoc in slotsSnapshot.docs) {
-            final slotData = slotDoc.data();
-            if (slotData['status'] == 'available' &&
-                slotData['isEmpty'] == true) {
+        for (final roomDoc in roomDocs) {
+          final slotSnapshot =
+              await roomDoc.reference.collection("slots").get();
+
+          for (final slotDoc in slotSnapshot.docs) {
+            final data = slotDoc.data();
+            if (data['status'] == 'available' && data['isEmpty'] == true) {
               availableData[section]!.add({
                 "day": selectedDay.value,
                 "department": department,
                 "section": section,
                 "className": roomDoc.id,
                 "slotTime": slotDoc.id,
-                ...slotData,
+                ...data,
               });
             }
           }

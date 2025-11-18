@@ -44,10 +44,9 @@ class _SchedulePageState extends State<SchedulePage> {
       children: [
         Text(
           "Schedule Class",
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
 
@@ -71,9 +70,9 @@ class _SchedulePageState extends State<SchedulePage> {
         controller: _dateController,
         readOnly: true,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
+          color: Colors.black,
+          fontWeight: FontWeight.w500,
+        ),
         decoration: const InputDecoration(
           border: InputBorder.none,
           hintText: "Select Date",
@@ -88,7 +87,7 @@ class _SchedulePageState extends State<SchedulePage> {
           );
 
           if (selectedDate != null) {
-            _timingsController.date.value = selectedDate.toString();
+            final day = _getDayFromDate(selectedDate);
 
             setState(() {
               hasSelectedDate = true;
@@ -96,9 +95,11 @@ class _SchedulePageState extends State<SchedulePage> {
                   "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
             });
 
-            _scheduleController.fetchAvailabilityForDay(
-              _getDayFromDate(selectedDate),
-            );
+            // IMPORTANT: update both controllers
+            _timingsController.date.value = selectedDate.toString();
+            _scheduleController.selectedDay.value = day;
+
+            _scheduleController.fetchAvailabilityForDay(day);
           }
         },
       ),
@@ -141,8 +142,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   Text(
                     "Available Classes",
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 5),
 
@@ -164,6 +165,7 @@ class _SchedulePageState extends State<SchedulePage> {
     return InkWell(
       onTap: () {
         _scheduleController.fetchAvailableRooms(dept.deprtmantName!);
+
         Get.to(
           SelectTimings(deptAvailabilityModel: dept),
           transition: Transition.cupertino,
