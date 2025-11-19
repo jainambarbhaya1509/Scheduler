@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBxi-QntB0OAm5e9MLPnAqT4vkxncFCCDI',
-    appId: '1:240186502381:android:28509fe8c17ebe505bb0e4',
-    messagingSenderId: '240186502381',
-    projectId: 'teacher-scheduler-book',
-    storageBucket: 'teacher-scheduler-book.firebasestorage.app',
+    apiKey: 'AIzaSyD82oJq40APGfexWe21aULyJ1hjyfGGzlA',
+    appId: '1:288826539666:android:4f1ab658b21b066cd0304b',
+    messagingSenderId: '288826539666',
+    projectId: 'scheduler-1a878',
+    storageBucket: 'scheduler-1a878.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB3blCb-cMvnwpjlgjOr4cCENhp3vuZ6Fo',
-    appId: '1:240186502381:ios:5b5bc2afdb80f40a5bb0e4',
-    messagingSenderId: '240186502381',
-    projectId: 'teacher-scheduler-book',
-    storageBucket: 'teacher-scheduler-book.firebasestorage.app',
+    apiKey: 'AIzaSyCXijhdf6hsl-WAH53bIK6W9TYobPNn9Cw',
+    appId: '1:288826539666:ios:362ceb547e99f309d0304b',
+    messagingSenderId: '288826539666',
+    projectId: 'scheduler-1a878',
+    storageBucket: 'scheduler-1a878.firebasestorage.app',
     iosBundleId: 'com.example.schedule',
   );
+
 }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +8,8 @@ import 'package:schedule/controller/user_controller.dart';
 import 'package:schedule/pages/login/login_page.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   Get.put(UserController(), permanent: true);
   runApp(DevicePreview(enabled: !kReleaseMode, builder: (context) => MyApp()));
