@@ -9,6 +9,7 @@ class ProfileController extends GetxController {
   final username = "".obs;
   final email = "".obs;
   final isHOD = false.obs;
+  final isSuperAdmin = false.obs;
   final isAdmin = false.obs;
   final loading = true.obs;
 
@@ -30,20 +31,23 @@ class ProfileController extends GetxController {
         .where("email", isEqualTo: userEmail)
         .limit(1)
         .snapshots()
-        .listen((snapshot) {
-      loading.value = false;
-      if (snapshot.docs.isNotEmpty) {
-        final data = snapshot.docs.first.data();
-        username.value = data["username"] ?? "";
-        email.value = data["email"] ?? "";
-        isHOD.value = data["isHOD"] ?? false;
-        isAdmin.value = data["isAdmin"] ?? false;
-
-      }
-    }, onError: (e) {
-      loading.value = false;
-      print("Error fetching profile: $e");
-    });
+        .listen(
+          (snapshot) {
+            loading.value = false;
+            if (snapshot.docs.isNotEmpty) {
+              final data = snapshot.docs.first.data();
+              username.value = data["username"] ?? "";
+              email.value = data["email"] ?? "";
+              isHOD.value = data["isHOD"] ?? false;
+              isAdmin.value = data["isAdmin"] ?? false;
+              isSuperAdmin.value = data["isSuperAdmin"] ?? false;
+            }
+          },
+          onError: (e) {
+            loading.value = false;
+            print("Error fetching profile: $e");
+          },
+        );
   }
 
   @override

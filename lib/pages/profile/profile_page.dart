@@ -33,7 +33,16 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 30),
               _buildInfoTile("Name", controller.username.value),
               _buildInfoTile("Email", controller.email.value),
-              _buildInfoTile("Role", controller.isHOD.value ? "Head of Department" : controller.isAdmin.value ? "Time Table Coordinator" : "Faculty"),
+              _buildInfoTile(
+                "Role",
+                controller.isHOD.value
+                    ? "Head of Department"
+                    : controller.isAdmin.value
+                    ? "Time Table Coordinator"
+                    : controller.isSuperAdmin.value
+                    ? "Super Admin"
+                    : "Faculty",
+              ),
               const Spacer(),
               _buildLogoutButton(),
             ],
@@ -61,32 +70,31 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-Widget _buildLogoutButton() {
-  return SizedBox(
-    width: double.infinity,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.redAccent,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        onPressed: () {
+          // Clear user state
+          if (Get.isRegistered<UserController>()) {
+            final userController = Get.find<UserController>();
+            userController.clearUser();
+          }
+
+          // Navigate to login page and remove all previous routes
+          Get.offAll(() => const LoginPage());
+        },
+        child: const Text("Logout"),
       ),
-      onPressed: () {
-        // Clear user state
-        if (Get.isRegistered<UserController>()) {
-          final userController = Get.find<UserController>();
-          userController.clearUser();
-        }
-
-        // Navigate to login page and remove all previous routes
-        Get.offAll(() => const LoginPage());
-      },
-      child: const Text("Logout"),
-    ),
-  );
-}
-
+    );
+  }
 }

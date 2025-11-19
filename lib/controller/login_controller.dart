@@ -50,7 +50,7 @@ class LoginController extends GetxController {
         user["department"] ?? "",
         hod: user["isHOD"] ?? false,
         admin: user["isAdmin"] ?? false,
-
+        superadmin: user["isSuperAdmin"] ?? false
       );
 
       Get.snackbar("Success", "Welcome ${user['username']}");

@@ -37,3 +37,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+// TODO: [change isAdmin -> isTTC and isSuperAdmin -> isAdmin]

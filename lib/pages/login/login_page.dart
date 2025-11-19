@@ -83,7 +83,15 @@ class LoginPage extends StatelessWidget {
                     final email = controller.emailController.text.trim();
                     final isHOD = user["isHOD"] ?? false;
                     final isAdmin = user["isAdmin"] ?? false;
-                    Get.off(() => HomePage(loggedEmail: email, isHOD: isHOD, isAdmin: isAdmin,));
+                    final isSuperAdmin = user["isSuperAdmin"] ?? false;
+                    Get.off(
+                      () => HomePage(
+                        loggedEmail: email,
+                        isHOD: isHOD,
+                        isAdmin: isAdmin,
+                        isSuperAdmin: isSuperAdmin,
+                      ),
+                    );
                   }
                 },
           label: controller.isLoading.value

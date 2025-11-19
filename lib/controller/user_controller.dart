@@ -7,15 +7,18 @@ class UserController extends GetxController {
   final RxString department = "".obs;
   final RxBool isHOD = false.obs;
   final RxBool isAdmin = false.obs;
+  final RxBool isSuperAdmin = false.obs;
+
 
   /// Set the current logged-in user info
-  void setUser(String id, String name, String userEmail, String dept, {bool hod = false, bool admin = false}) {
+  void setUser(String id, String name, String userEmail, String dept, {bool hod = false, bool admin = false, bool superadmin = false}) {
     userId.value = id;
     username.value = name;
     email.value = userEmail;
     department.value = dept;
     isHOD.value = hod;
     isAdmin.value = admin;
+    isSuperAdmin.value = superadmin;
   }
 
   /// Clear user data on logout
@@ -26,5 +29,6 @@ class UserController extends GetxController {
     department.value = "";
     isHOD.value = false;
     isAdmin.value = false;
+    isSuperAdmin.value = false;
   }
 }
