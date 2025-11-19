@@ -161,4 +161,6 @@ class UploadTTController extends GetxController {
       print(st);
     }
   }
+
+
 }

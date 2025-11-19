@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controller/upload_controller.dart';
+import '../../controller/timetable_controller.dart';
 
 class AddTimeTable extends StatelessWidget {
   const AddTimeTable({super.key});
