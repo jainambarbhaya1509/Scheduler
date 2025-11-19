@@ -157,20 +157,40 @@ class SelectTimings extends StatelessWidget {
     ClassAvailabilityModel classModel,
     ClassTiming timing,
   ) {
+    final timingController = Get.find<TimingsController>();
+
+    // Block only Pending or Accepted
+    final appliedUser = timing.appliedUsers.isNotEmpty
+        ? timing.appliedUsers.first
+        : null;
+
+    final bool isPendingOrAccepted =
+        appliedUser != null &&
+        (appliedUser.status == "Pending" || appliedUser.status == "Accepted");
+
+    // Rejected should NOT block
+    final bool isRejected =
+        appliedUser != null && appliedUser.status == "Rejected";
+
     return InkWell(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.white,
-          builder: (_) => ApplyModal(
-            title: classModel.className,
-            time: timing.timing,
-            classModel: classModel,
-            applicants: timing.appliedUsers,
-          ),
-        );
-      },
+      onTap: isPendingOrAccepted
+          ? null
+          : () {
+              showDialog(
+                context: context,
+                builder: (BuildContext builder) {
+                  return ApplyReasonDialog(
+                    onSubmit: (reason) {
+                      timingController.apply(
+                        classModel: classModel,
+                        timeslot: timing.timing,
+                        reason: reason,
+                      );
+                    },
+                  );
+                },
+              );
+            },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: const BoxDecoration(
@@ -179,11 +199,54 @@ class SelectTimings extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              timing.timing,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            Expanded(
+              child: Row(
+                children: [
+                  Text(
+                    timing.timing,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isPendingOrAccepted
+                          ? Colors.black54
+                          : Colors.black87,
+                    ),
+                  ),
+                  const Spacer(),
+
+                  // Show name + status only for Pending & Accepted
+                  if (appliedUser != null && !isRejected)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          appliedUser.name,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          appliedUser.status,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: appliedUser.status == "Accepted"
+                                ? Colors.green
+                                : const Color(0xFFB8A606),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  // If rejected → show nothing (normal free slot)
+                ],
+              ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+
+            // Arrow only when slot is free or rejected
+            if (!isPendingOrAccepted)
+              const Icon(Icons.arrow_forward_ios_rounded, size: 18),
           ],
         ),
       ),

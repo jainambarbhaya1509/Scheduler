@@ -167,7 +167,7 @@ class _SchedulePageState extends State<SchedulePage> {
         _scheduleController.fetchAvailableRooms(dept.deprtmantName!);
 
         Get.to(
-          SelectTimings(deptAvailabilityModel: dept),
+          () => SelectTimings(deptAvailabilityModel: dept),
           transition: Transition.cupertino,
         );
       },
