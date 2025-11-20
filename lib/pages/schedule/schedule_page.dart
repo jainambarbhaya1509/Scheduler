@@ -128,8 +128,6 @@ class _SchedulePageState extends State<SchedulePage> {
                 _scheduleController.selectedDay.value = day;
                 _scheduleController.fetchAllAvailableSlots(
                   _scheduleController.selectedDay.value,
-                  time: _timeController.text.toString(),
-                  nHr: _nHoursController.text.toString(),
                 );
               }
             },
@@ -175,8 +173,6 @@ class _SchedulePageState extends State<SchedulePage> {
 
                   _scheduleController.fetchAllAvailableSlots(
                     _scheduleController.selectedDay.value,
-                    time: _timeController.text.toString(),
-                    nHr: _nHoursController.text.toString(),
                   );
                 },
               ),
@@ -205,8 +201,6 @@ class _SchedulePageState extends State<SchedulePage> {
                 onTap: () {
                   _scheduleController.fetchAllAvailableSlots(
                     _scheduleController.selectedDay.value,
-                    time: _timeController.text.toString(),
-                    nHr: _nHoursController.text.toString(),
                   );
                 },
               ),
