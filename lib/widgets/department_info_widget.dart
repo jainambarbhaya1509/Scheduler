@@ -30,7 +30,7 @@ class DepartmentInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              deptAvailabilityModel.deprtmantName ?? "unknown",
+              deptAvailabilityModel.departmentName ?? "unknown",
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

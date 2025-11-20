@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart' show DateFormat;
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
-import 'package:schedule/helper_func/format_date.dart';
 import 'package:schedule/models/class_avalability_model.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/models/class_timing_model.dart';
@@ -14,7 +12,6 @@ class TimingsController extends GetxController {
   final isLoading = false.obs;
   final classroomList = <ClassAvailabilityModel>[].obs;
   final labList = <ClassAvailabilityModel>[].obs;
-  final date = "".obs;
 
   final ScheduleController _scheduleController = Get.put(
     ScheduleController(),
@@ -30,7 +27,7 @@ class TimingsController extends GetxController {
 
     try {
       final day = _scheduleController.selectedDay.value;
-      final deptName = deptModel.deprtmantName!;
+      final deptName = deptModel.departmentName!;
 
       final results = await Future.wait([
         _fetchSection(day, deptName, "Classrooms", true),
@@ -40,6 +37,7 @@ class TimingsController extends GetxController {
       classroomList.addAll(results[0]);
       labList.addAll(results[1]);
     } catch (e) {
+      print("230784620384762803467");
       print("Error fetching timings: $e");
     } finally {
       isLoading.value = false;
@@ -54,7 +52,7 @@ class TimingsController extends GetxController {
     bool isClassroom,
   ) async {
     final list = <ClassAvailabilityModel>[];
-    final formatted = formatDate(date.value);
+    final date = _scheduleController.selectedDate.value;
 
     try {
       final snapshot = await _firestore
@@ -77,8 +75,8 @@ class TimingsController extends GetxController {
 
           // Filter only selected date
           if (rawApplications is Map<String, dynamic>) {
-            if (rawApplications.containsKey(formatted)) {
-              final appList = rawApplications[formatted];
+            if (rawApplications.containsKey(date)) {
+              final appList = rawApplications[date];
 
               if (appList is List) {
                 appliedUsers = appList
@@ -130,7 +128,7 @@ class TimingsController extends GetxController {
       // Generate bookingId
       final bookingId = _firestore.collection("requests").doc().id;
 
-      final formatted = formatDate(date.value);
+      final date = _scheduleController.selectedDate.value;
 
       // Add to requests
       final requestRef = _firestore
@@ -149,7 +147,7 @@ class TimingsController extends GetxController {
         "timeSlot": timeslot,
         "status": "Pending",
         "day": day,
-        "requestedDate": formatted,
+        "requestedDate": date,
         "createdAt": Timestamp.now(),
       };
 
@@ -160,7 +158,7 @@ class TimingsController extends GetxController {
         "username": _userController.username.value,
         "email": _userController.email.value,
         "reason": reason,
-        "requestedDate": formatted,
+        "requestedDate": date,
         "createdAt": Timestamp.now(),
         "status": "Pending",
       };
@@ -176,7 +174,7 @@ class TimingsController extends GetxController {
           .doc(timeslot);
 
       batch.update(slotRef, {
-        "applications.$formatted": FieldValue.arrayUnion([application]),
+        "applications.$date": FieldValue.arrayUnion([application]),
       });
 
       await batch.commit();
