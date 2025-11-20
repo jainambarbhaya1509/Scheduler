@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/helper_func/format_date.dart';
 import 'package:schedule/models/class_avalability_model.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/models/class_timing_model.dart';
@@ -53,8 +54,8 @@ class TimingsController extends GetxController {
     bool isClassroom,
   ) async {
     final list = <ClassAvailabilityModel>[];
-    final dt = DateTime.parse(date.value);
-    final formatted = DateFormat("dd-MM-yyyy").format(dt);
+    final formatted = formatDate(date.value);
+
     try {
       final snapshot = await _firestore
           .collection('slots')
@@ -129,8 +130,7 @@ class TimingsController extends GetxController {
       // Generate bookingId
       final bookingId = _firestore.collection("requests").doc().id;
 
-      final dt = DateTime.parse(date.value);
-      final formatted = DateFormat("dd-MM-yyyy").format(dt);
+      final formatted = formatDate(date.value);
 
       // Add to requests
       final requestRef = _firestore

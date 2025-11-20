@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:schedule/logic/tt_to_json.dart';
+import 'package:schedule/helper_func/convert_time.dart';
+import 'package:schedule/helper_func/tt_to_json.dart';
 
 class UploadTTController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -81,7 +82,7 @@ class UploadTTController extends GetxController {
   Future<void> _uploadSlotsFromJson(Map<String, dynamic> data) async {
     try {
       // Load and decode JSON file
-
+      data = convertScheduleTo24(data);
       final department = data["department"]?.toString();
       final className = data["class"]?.toString();
       final slotDays = data["slots"] as List?;
