@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
-import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/helper_func/date_to_day.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
@@ -20,7 +19,6 @@ class _SchedulePageState extends State<SchedulePage> {
   final TextEditingController _nHoursController = TextEditingController();
 
   final ScheduleController _scheduleController = Get.put(ScheduleController());
-  final TimingsController _timingsController = Get.put(TimingsController());
 
   @override
   void dispose() {

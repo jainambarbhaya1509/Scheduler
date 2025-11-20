@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
@@ -19,7 +21,6 @@ class TimingsController extends GetxController {
   );
   late final UserController _userController = Get.find<UserController>();
 
-  /// Optimized to fetch both classrooms and labs in parallel
   Future<void> fetchTimings(DepartmentAvailabilityModel deptModel) async {
     isLoading.value = true;
     classroomList.clear();
@@ -36,15 +37,14 @@ class TimingsController extends GetxController {
 
       classroomList.addAll(results[0]);
       labList.addAll(results[1]);
+      
     } catch (e) {
-      print("230784620384762803467");
       print("Error fetching timings: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Helper method to reduce code duplication
   Future<List<ClassAvailabilityModel>> _fetchSection(
     String day,
     String deptName,
@@ -64,28 +64,23 @@ class TimingsController extends GetxController {
           .get();
 
       for (var doc in snapshot.docs) {
-        if (doc.id == "_meta") continue; // Skip metadata
+        if (doc.id == "_meta") continue;
 
         final slotsSnapshot = await doc.reference.collection('slots').get();
 
         final timingList = slotsSnapshot.docs.map((slot) {
           final rawApplications = slot['applications'];
-
           List<UsersAppliedModel> appliedUsers = [];
 
-          // Filter only selected date
-          if (rawApplications is Map<String, dynamic>) {
-            if (rawApplications.containsKey(date)) {
-              final appList = rawApplications[date];
-
-              if (appList is List) {
-                appliedUsers = appList
-                    .map(
-                      (e) =>
-                          UsersAppliedModel.fromMap(e as Map<String, dynamic>),
-                    )
-                    .toList();
-              }
+          if (rawApplications is Map<String, dynamic> &&
+              rawApplications.containsKey(date)) {
+            final appList = rawApplications[date];
+            if (appList is List) {
+              appliedUsers = appList
+                  .map(
+                    (e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>),
+                  )
+                  .toList();
             }
           }
 
@@ -111,7 +106,6 @@ class TimingsController extends GetxController {
     return list;
   }
 
-  /// Optimized apply with better error handling
   Future<void> apply({
     required ClassAvailabilityModel classModel,
     required String timeslot,
@@ -121,16 +115,11 @@ class TimingsController extends GetxController {
       final day = _scheduleController.selectedDay.value;
       final dept = _scheduleController.selectedDept.value;
       final section = classModel.isClassroom ? "Classrooms" : "Labs";
-
-      final batch = _firestore.batch();
-
-      // Add to requests
-      // Generate bookingId
-      final bookingId = _firestore.collection("requests").doc().id;
-
       final date = _scheduleController.selectedDate.value;
 
-      // Add to requests
+      final batch = _firestore.batch();
+      final bookingId = _firestore.collection("requests").doc().id;
+
       final requestRef = _firestore
           .collection("requests")
           .doc(dept)
@@ -178,7 +167,6 @@ class TimingsController extends GetxController {
       });
 
       await batch.commit();
-
       Get.snackbar("Success", "Application submitted");
     } catch (e) {
       Get.snackbar("Error", "Failed to submit: $e");

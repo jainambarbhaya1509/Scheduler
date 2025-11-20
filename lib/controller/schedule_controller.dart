@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:schedule/helper_func/check_interval.dart';
+import 'package:schedule/helper_func/n_hrs_slot.dart';
 import 'package:schedule/models/availability_model.dart';
 
 class ScheduleController extends GetxController {
@@ -159,8 +161,28 @@ class ScheduleController extends GetxController {
         }
       }
     }
-    print("=================");
-    print(availableData);
+    // print("============CLASS ROOM===================");
+    // final slots = [];
+
+    // for (var element in availableData["Classrooms"]!) {
+    //   slots.add(element["slotTime"]);
+    // }
+    // final result = getSlotsAfter([
+    //   "08:00-08:30",
+    //   "08:30-09:00",
+    //   "09:00-09:30",
+    //   "09:30-10:00",
+    //   "11:00-11:30",
+    //   "01:30-02:00",
+    //   "03:00-03:30",
+    //   "03:30-04:00",
+    //   "04:00-04:30",
+    //   "04:30-05:00",
+    //   "05:00-05:30",
+    //   "05:30-06:00",
+    // ], "08:30");
+    // print(result);
+
     return availableData;
   }
 
