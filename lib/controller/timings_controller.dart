@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/helper_func/n_hrs_slot.dart';
 import 'package:schedule/models/class_avalability_model.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/models/class_timing_model.dart';
@@ -14,6 +15,8 @@ class TimingsController extends GetxController {
   final isLoading = false.obs;
   final classroomList = <ClassAvailabilityModel>[].obs;
   final labList = <ClassAvailabilityModel>[].obs;
+  final hoursRequired = 0.0.obs;
+  final initialTiming = "".obs;
 
   final ScheduleController _scheduleController = Get.put(
     ScheduleController(),
@@ -21,7 +24,11 @@ class TimingsController extends GetxController {
   );
   late final UserController _userController = Get.find<UserController>();
 
-  Future<void> fetchTimings(DepartmentAvailabilityModel deptModel) async {
+  Future<void> fetchTimings(
+    DepartmentAvailabilityModel deptModel, {
+    double? reqHrs,
+    String? initialTime,
+  }) async {
     isLoading.value = true;
     classroomList.clear();
     labList.clear();
@@ -37,7 +44,6 @@ class TimingsController extends GetxController {
 
       classroomList.addAll(results[0]);
       labList.addAll(results[1]);
-      
     } catch (e) {
       print("Error fetching timings: $e");
     } finally {
@@ -98,6 +104,18 @@ class TimingsController extends GetxController {
             timingsList: timingList,
           ),
         );
+        if (initialTiming.value.isNotEmpty) {}
+        if (hoursRequired.value != 0.0) {
+          final rooms = findConsecutiveSlots(
+            list,
+            hoursRequired.value,
+          ); // 2 hours
+          for (var room in rooms) {
+            for (var time in room.timingsList) {
+              print(time.timing);
+            }
+          }
+        }
       }
     } catch (e) {
       print("Error fetching $section: $e");

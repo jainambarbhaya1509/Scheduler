@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:schedule/helper_func/check_interval.dart';
-import 'package:schedule/helper_func/n_hrs_slot.dart';
 import 'package:schedule/models/availability_model.dart';
 
 class ScheduleController extends GetxController {
@@ -19,9 +17,9 @@ class ScheduleController extends GetxController {
   final List<String> _sections = ["Classrooms", "Labs"];
 
   /// Fetch availability for a given day
-  Future<void> fetchAvailabilityForDay(String day) async {
+  Future<void> fetchAvailabilityForDay(
+    String day, ) async {
     selectedDay.value = day;
-    print(selectedDate.value);
     isLoading.value = true;
     try {
       departmentAvailabilityList.clear();
@@ -94,26 +92,12 @@ class ScheduleController extends GetxController {
     return await _fetchRooms(selectedDay.value, [department]);
   }
 
-  /// Fetch all available slots across all departments
-  Future<Map<String, List<Map<String, dynamic>>>> fetchAllAvailableSlots(
-    String day,
-  ) async {
-    final deptsSnapshot = await _firestore
-        .collection("slots")
-        .doc(day)
-        .collection("departments")
-        .get();
-
-    final departments = deptsSnapshot.docs.map((d) => d.id).toList();
-
-    return await _fetchRooms(day, departments);
-  }
-
   /// Generic function to fetch rooms and slots for given departments
   Future<Map<String, List<Map<String, dynamic>>>> _fetchRooms(
     String day,
     List<String> departments,
   ) async {
+
     final availableData = {
       "Classrooms": <Map<String, dynamic>>[],
       "Labs": <Map<String, dynamic>>[],
@@ -161,27 +145,6 @@ class ScheduleController extends GetxController {
         }
       }
     }
-    // print("============CLASS ROOM===================");
-    // final slots = [];
-
-    // for (var element in availableData["Classrooms"]!) {
-    //   slots.add(element["slotTime"]);
-    // }
-    // final result = getSlotsAfter([
-    //   "08:00-08:30",
-    //   "08:30-09:00",
-    //   "09:00-09:30",
-    //   "09:30-10:00",
-    //   "11:00-11:30",
-    //   "01:30-02:00",
-    //   "03:00-03:30",
-    //   "03:30-04:00",
-    //   "04:00-04:30",
-    //   "04:30-05:00",
-    //   "05:00-05:30",
-    //   "05:30-06:00",
-    // ], "08:30");
-    // print(result);
 
     return availableData;
   }

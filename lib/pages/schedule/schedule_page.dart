@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
+import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/helper_func/date_to_day.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
@@ -19,6 +20,7 @@ class _SchedulePageState extends State<SchedulePage> {
   final TextEditingController _nHoursController = TextEditingController();
 
   final ScheduleController _scheduleController = Get.put(ScheduleController());
+  final TimingsController _timingsController = Get.put(TimingsController());
 
   @override
   void dispose() {
@@ -188,13 +190,11 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         onPressed: () {
-          print(_scheduleController.selectedDay.value);
+          _timingsController.hoursRequired.value = double.parse(_nHoursController.text);
+          _timingsController.initialTiming.value = _timeController.text.toString();
           _scheduleController.fetchAvailabilityForDay(
             _scheduleController.selectedDay.value,
           );
-          // _scheduleController.fetchAllAvailableSlots(
-          //   _scheduleController.selectedDay.value,
-          // );
         },
         child: const Text(
           "Find Slots",
@@ -216,10 +216,10 @@ class _SchedulePageState extends State<SchedulePage> {
         if (list.isEmpty) {
           return const Center(
             child: Text(
-              "No Details Found",
+              "Please Enter The Details",
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.redAccent,
+                color: Colors.black54,
                 fontWeight: FontWeight.bold,
               ),
             ),
