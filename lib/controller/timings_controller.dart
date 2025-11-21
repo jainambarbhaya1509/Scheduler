@@ -111,9 +111,8 @@ class TimingsController extends GetxController {
             hoursRequired.value,
           ); // 2 hours
           for (var room in rooms) {
-            for (var time in room.timingsList) {
-              print(time.timing);
-            }
+            print(room);
+            list.add(room);
           }
         }
       }

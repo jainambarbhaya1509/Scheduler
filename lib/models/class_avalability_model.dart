@@ -5,12 +5,14 @@ class ClassAvailabilityModel {
   final bool isClassroom;
   final String className;
   final List<ClassTiming> timingsList;
+  List<ClassTiming>? filteredTimings;
 
   ClassAvailabilityModel({
     required this.id,
     required this.isClassroom,
     required this.className,
     required this.timingsList,
+    this.filteredTimings
   });
 }
 

@@ -48,25 +48,47 @@ List<ClassTiming> _findConsecutiveBlocks(
   List<ClassTiming> result = [];
   if (minutesList.isEmpty) return result;
 
-  int start = minutesList.first["start"];
-  int end = minutesList.first["end"];
-  List<UsersAppliedModel> applied = minutesList.first["applied"];
+  int? start;
+  int? end;
+  List<UsersAppliedModel> applied = [];
 
-  for (int i = 1; i < minutesList.length; i++) {
+  for (int i = 0; i < minutesList.length; i++) {
     final curr = minutesList[i];
-    final prev = minutesList[i - 1];
 
-    if (curr["start"] == prev["end"]) {
+    // ❌ If slot is already accepted → stop block & skip this slot
+    if (curr["applied"] != null && curr["applied"].isNotEmpty) {
+      if (start != null) {
+        result.addAll(splitBlock(start!, end!, requiredMinutes, applied));
+      }
+
+      start = null; // reset block
+      end = null;
+      continue; // do NOT include this slot in block
+    }
+
+    if (start == null) {
+      // start new block
+      start = curr["start"];
+      end = curr["end"];
+      applied = curr["applied"];
+      continue;
+    }
+
+    // consecutive check
+    if (curr["start"] == end) {
       end = curr["end"];
     } else {
-      result.addAll(splitBlock(start, end, requiredMinutes, applied));
+      result.addAll(splitBlock(start, end!, requiredMinutes, applied));
       start = curr["start"];
       end = curr["end"];
       applied = curr["applied"];
     }
   }
 
-  result.addAll(splitBlock(start, end, requiredMinutes, applied));
+  // final block
+  if (start != null) {
+    result.addAll(splitBlock(start, end!, requiredMinutes, applied));
+  }
 
   return result;
 }

@@ -154,7 +154,7 @@ class _SchedulePageState extends State<SchedulePage> {
         child: TextField(
           controller: _nHoursController,
           keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: const InputDecoration(
             border: InputBorder.none,
             hintText: "Enter Hours",
