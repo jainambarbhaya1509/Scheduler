@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/helper_func/date_to_day.dart';
+import 'package:schedule/helper_func/parse_double.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
@@ -190,7 +191,7 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         onPressed: () {
-          _timingsController.hoursRequired.value = double.parse(_nHoursController.text);
+          _timingsController.hoursRequired.value = safeParseDouble(_nHoursController.text);;
           _timingsController.initialTiming.value = _timeController.text.toString();
           _scheduleController.fetchAvailabilityForDay(
             _scheduleController.selectedDay.value,

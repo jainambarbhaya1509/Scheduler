@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
@@ -57,7 +55,9 @@ class TimingsController extends GetxController {
     String section,
     bool isClassroom,
   ) async {
-    final list = <ClassAvailabilityModel>[];
+    final allSlots = <ClassAvailabilityModel>[];
+    var list = <ClassAvailabilityModel>[];
+
     final date = _scheduleController.selectedDate.value;
 
     try {
@@ -96,7 +96,7 @@ class TimingsController extends GetxController {
           );
         }).toList();
 
-        list.add(
+        allSlots.add(
           ClassAvailabilityModel(
             id: doc.id,
             className: doc.id,
@@ -104,14 +104,16 @@ class TimingsController extends GetxController {
             timingsList: timingList,
           ),
         );
+        if (initialTiming.value.isEmpty && hoursRequired.value == 0.0) {
+          list = allSlots;
+        }
         if (initialTiming.value.isNotEmpty) {}
         if (hoursRequired.value != 0.0) {
           final rooms = findConsecutiveSlots(
-            list,
+            allSlots,
             hoursRequired.value,
           ); // 2 hours
           for (var room in rooms) {
-            print(room);
             list.add(room);
           }
         }

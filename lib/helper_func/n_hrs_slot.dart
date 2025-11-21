@@ -58,7 +58,7 @@ List<ClassTiming> _findConsecutiveBlocks(
     // ❌ If slot is already accepted → stop block & skip this slot
     if (curr["applied"] != null && curr["applied"].isNotEmpty) {
       if (start != null) {
-        result.addAll(splitBlock(start!, end!, requiredMinutes, applied));
+        result.addAll(splitBlock(start, end!, requiredMinutes, applied));
       }
 
       start = null; // reset block
