@@ -184,6 +184,7 @@ class SelectTimings extends StatelessWidget {
                       timingController.apply(
                         classModel: classModel,
                         timeslot: timing.timing,
+                        consideredSlots: timing.consideredSlots,
                         reason: reason,
                       );
                     },

@@ -92,6 +92,7 @@ class RequestsController extends GetxController {
     required String timeSlot,
     required bool isClassroom,
     required String requestedDate,
+    List<String>? consideredSlots,
   }) async {
     try {
       final ref = _firestore
@@ -99,12 +100,15 @@ class RequestsController extends GetxController {
           .doc(dept)
           .collection("requests_list")
           .doc(bookingId);
+      final snap = await ref.get();
+
+      final consideredSlots = List<String>.from(
+        snap.data()?["consideredSlots"] ?? [],
+      );
 
       await ref.update({"status": newStatus});
 
-      // ───────────────────────────────────────
-      // UPDATE slot applications also
-      // ───────────────────────────────────────
+      // Update slot applications
       await _updateSlotApplicationStatus(
         day: day,
         dept: dept,
@@ -112,9 +116,10 @@ class RequestsController extends GetxController {
         timeSlot: timeSlot,
         bookingId: bookingId,
         newStatus: newStatus,
-        isClassroom: isClassroom
+        isClassroom: isClassroom,
+        consideredSlots: consideredSlots,
       );
-      print(isClassroom);
+
       Get.snackbar("Success", "Application updated");
     } catch (e) {
       Get.snackbar("Error", "Failed: $e");
@@ -129,40 +134,53 @@ class RequestsController extends GetxController {
     required String bookingId,
     required String newStatus,
     required bool isClassroom,
+    List<String>? consideredSlots,
   }) async {
     try {
-      final slotRef = _firestore
-          .collection("slots")
-          .doc(day)
-          .collection("departments")
-          .doc(dept)
-          .collection(isClassroom ? "Classrooms" : "Labs")
-          .doc(roomId)
-          .collection("slots")
-          .doc(timeSlot);
+      final slotsToUpdate =
+          consideredSlots != null && consideredSlots.isNotEmpty
+          ? consideredSlots
+          : [timeSlot];
 
-      final snapshot = await slotRef.get();
-      if (!snapshot.exists) return;
+      // print(slotsToUpdate);
 
-      final raw = snapshot.data()?['applications'];
+      for (final slot in slotsToUpdate) {
+        final slotRef = _firestore
+            .collection("slots")
+            .doc(day)
+            .collection("departments")
+            .doc(dept)
+            .collection(isClassroom ? "Classrooms" : "Labs")
+            .doc(roomId)
+            .collection("slots")
+            .doc(slot);
 
-      if (raw == null || raw is! Map<String, dynamic>) return;
+        final snapshot = await slotRef.get();
+        if (!snapshot.exists) continue;
 
-      final Map<String, dynamic> applications = Map.from(raw);
+        final raw = snapshot.data()?['applications'];
+        if (raw == null || raw is! Map<String, dynamic>) continue;
 
-      // Iterate through dates and update booking status
-      applications.forEach((dateKey, list) {
-        if (list is List) {
-          for (int i = 0; i < list.length; i++) {
-            final app = list[i];
-            if (app['bookingId'] == bookingId) {
-              list[i] = {...app, "status": newStatus};
+        final Map<String, dynamic> applications = Map.from(raw);
+
+        bool updated = false;
+
+        applications.forEach((dateKey, list) {
+          if (list is List) {
+            for (int i = 0; i < list.length; i++) {
+              final app = list[i];
+              if (app['bookingId'] == bookingId) {
+                list[i] = {...app, "status": newStatus};
+                updated = true;
+              }
             }
           }
-        }
-      });
+        });
 
-      await slotRef.update({"applications": applications});
+        if (updated) {
+          await slotRef.update({"applications": applications});
+        }
+      }
     } catch (e) {
       print("ERROR updating slot app status: $e");
     }

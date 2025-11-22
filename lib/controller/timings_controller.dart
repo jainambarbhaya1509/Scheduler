@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
@@ -109,10 +110,7 @@ class TimingsController extends GetxController {
         }
         if (initialTiming.value.isNotEmpty) {}
         if (hoursRequired.value != 0.0) {
-          final rooms = findConsecutiveSlots(
-            allSlots,
-            hoursRequired.value,
-          ); // 2 hours
+          final rooms = findConsecutiveSlots(allSlots, hoursRequired.value);
           for (var room in rooms) {
             list.add(room);
           }
@@ -127,8 +125,9 @@ class TimingsController extends GetxController {
 
   Future<void> apply({
     required ClassAvailabilityModel classModel,
-    required String timeslot,
+    required String timeslot, // might not exist in DB (merged slot)
     required String reason,
+    List<String>? consideredSlots, // actual existing slots
   }) async {
     try {
       final day = _scheduleController.selectedDay.value;
@@ -139,6 +138,7 @@ class TimingsController extends GetxController {
       final batch = _firestore.batch();
       final bookingId = _firestore.collection("requests").doc().id;
 
+      // ---------- REQUEST DATA (always stored once) ----------
       final requestRef = _firestore
           .collection("requests")
           .doc(dept)
@@ -152,7 +152,8 @@ class TimingsController extends GetxController {
         "department": dept,
         "roomId": classModel.className,
         "reason": reason,
-        "timeSlot": timeslot,
+        "timeSlot": timeslot, // merged readable slot range
+        "consideredSlots": consideredSlots ?? [],
         "status": "Pending",
         "day": day,
         "requestedDate": date,
@@ -161,6 +162,7 @@ class TimingsController extends GetxController {
 
       batch.set(requestRef, requestData);
 
+      // Application object for each slot
       final application = {
         "bookingId": bookingId,
         "username": _userController.username.value,
@@ -171,19 +173,41 @@ class TimingsController extends GetxController {
         "status": "Pending",
       };
 
-      final slotRef = _firestore
-          .collection("slots")
-          .doc(day)
-          .collection("departments")
-          .doc(dept)
-          .collection(section)
-          .doc(classModel.className)
-          .collection("slots")
-          .doc(timeslot);
+      // ---------- SLOT UPDATES ----------
+      // CASE 1: Timeslot exists normally → update only that slot
+      if (consideredSlots == null || consideredSlots.isEmpty) {
+        final slotRef = _firestore
+            .collection("slots")
+            .doc(day)
+            .collection("departments")
+            .doc(dept)
+            .collection(section)
+            .doc(classModel.className)
+            .collection("slots")
+            .doc(timeslot);
 
-      batch.update(slotRef, {
-        "applications.$date": FieldValue.arrayUnion([application]),
-      });
+        batch.update(slotRef, {
+          "applications.$date": FieldValue.arrayUnion([application]),
+        });
+      }
+      // CASE 2: Merged slots → update all individual existing slots
+      else {
+        for (final slot in consideredSlots) {
+          final slotRef = _firestore
+              .collection("slots")
+              .doc(day)
+              .collection("departments")
+              .doc(dept)
+              .collection(section)
+              .doc(classModel.className)
+              .collection("slots")
+              .doc(slot);
+
+          batch.update(slotRef, {
+            "applications.$date": FieldValue.arrayUnion([application]),
+          });
+        }
+      }
 
       await batch.commit();
       Get.snackbar("Success", "Application submitted");

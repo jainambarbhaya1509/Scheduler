@@ -3,10 +3,12 @@ import 'class_avalability_model.dart';
 class ClassTiming {
   final String timing;
   final List<UsersAppliedModel> appliedUsers;
+  List<String>? consideredSlots;
 
   ClassTiming({
     required this.timing,
     required this.appliedUsers,
+    this.consideredSlots,
   });
 
   /// Slot is booked if at least 1 person applied
@@ -36,9 +38,6 @@ class ClassTiming {
       }
     }
 
-    return ClassTiming(
-      timing: map['timing'] ?? '',
-      appliedUsers: parsed,
-    );
+    return ClassTiming(timing: map['timing'] ?? '', appliedUsers: parsed);
   }
 }

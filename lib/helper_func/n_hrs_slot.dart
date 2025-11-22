@@ -11,7 +11,7 @@ List<ClassAvailabilityModel> findConsecutiveSlots(
   for (var room in classAvailabilityList) {
     // Convert "HH:MM-HH:MM" to minutes map list
     final minutesList = room.timingsList.map((slot) {
-      final parts = slot.timing.split('-'); // FIXED
+      final parts = slot.timing.split('-'); 
       return {
         "start": toMinutes(parts[0]),
         "end": toMinutes(parts[1]),
@@ -31,7 +31,7 @@ List<ClassAvailabilityModel> findConsecutiveSlots(
     );
   }
 
-  return finalList; // FIXED
+  return finalList; 
 }
 
 /// Convert HH:MM to minutes
@@ -105,13 +105,30 @@ List<ClassTiming> splitBlock(
     final sTime = toTime(start);
     final eTime = toTime(start + requiredMinutes);
 
-    slots.add(ClassTiming(timing: "$sTime-$eTime", appliedUsers: appliedUsers));
+    // build list of 30 min considered slots
+    final considered = <String>[];
+    int cStart = start;
+
+    while (cStart < start + requiredMinutes) {
+      final cEnd = cStart + 30;
+      considered.add("${toTime(cStart)}-${toTime(cEnd)}");
+      cStart += 30;
+    }
+
+    slots.add(
+      ClassTiming(
+        timing: "$sTime-$eTime",
+        appliedUsers: appliedUsers,
+        consideredSlots: considered,
+      ),
+    );
 
     start += 30; // sliding window
   }
 
   return slots;
 }
+
 
 /// Convert minutes back to HH:MM
 String toTime(int m) {
