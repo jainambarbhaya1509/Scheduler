@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
         label: "Add Time Table",
       ));
 
-      pages.add(ViewReservations());
+      pages.add(ITSlotsDashboardFull());
       navItems.add(const BottomNavigationBarItem(
         icon: Icon(Icons.view_agenda),
         label: "Reservations",
