@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/helper_func/check_interval.dart';
 import 'package:schedule/helper_func/n_hrs_slot.dart';
 import 'package:schedule/models/class_avalability_model.dart';
 import 'package:schedule/models/availability_model.dart';
@@ -107,14 +108,24 @@ class TimingsController extends GetxController {
             timingsList: timingList,
           ),
         );
+
+        // Case 1: No initial time & no hours required → take all slots
         if (initialTiming.value.isEmpty && hoursRequired.value == 0.0) {
           list = allSlots;
-        }
-        if (initialTiming.value.isNotEmpty) {}
-        if (hoursRequired.value != 0.0) {
-          final rooms = findConsecutiveSlots(allSlots, hoursRequired.value);
-          for (var room in rooms) {
-            list.add(room);
+        } else {
+          // Start with filtered slots if initial timing is set
+          List<ClassAvailabilityModel> tempList = allSlots;
+          if (initialTiming.value.isNotEmpty) {
+            tempList = filterSlotsAfter(allSlots, initialTiming.value);
+          }
+
+          // Case 2: If hoursRequired is set, find consecutive slots
+          if (hoursRequired.value != 0.0) {
+            final rooms = findConsecutiveSlots(tempList, hoursRequired.value);
+            list.addAll(rooms); // Add all matching rooms
+          } else {
+            // Case 3: Just initial time filtering, no consecutive requirement
+            list = tempList;
           }
         }
       }
