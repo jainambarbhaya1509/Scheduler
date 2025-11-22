@@ -87,6 +87,8 @@ class TimingsController extends GetxController {
                   .map(
                     (e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>),
                   )
+                  // ignore rejected users
+                  .where((user) => user.status.toLowerCase() != 'rejected')
                   .toList();
             }
           }
