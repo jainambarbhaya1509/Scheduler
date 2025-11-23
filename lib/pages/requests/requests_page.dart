@@ -74,7 +74,7 @@ class RequestsPage extends StatelessWidget {
         }).toList();
 
         if (controller.appliedRequests.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: Text("No requests found"));
         }
 
         if (filteredRequests.isEmpty) {

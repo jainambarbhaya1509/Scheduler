@@ -41,27 +41,40 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (widget.isSuperAdmin && !widget.isAdmin && !widget.isHOD) {
       pages.add(SuperAdminPage());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.group),
-        label: "User Management",
-      ));
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.group),
+          label: "User Management",
+        ),
+      );
     }
 
     // ---------------------------------------------------
     // ADMIN ONLY
     // ---------------------------------------------------
     if (widget.isAdmin && !widget.isSuperAdmin && !widget.isHOD) {
-      pages.add(AddTimeTable());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.add),
-        label: "Add Time Table",
-      ));
+      pages.add(const SchedulePage());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: "Schedule",
+        ),
+      );
 
-      pages.add(ITSlotsDashboardFull());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.view_agenda),
-        label: "Reservations",
-      ));
+      pages.add(const ApplicationStatusPage());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.call_missed_outgoing),
+          label: "Status",
+        ),
+      );
+      pages.add(AddTimeTable());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.add),
+          label: "Add Time Table",
+        ),
+      );
     }
 
     // ---------------------------------------------------
@@ -69,22 +82,28 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (widget.isHOD && !widget.isAdmin && !widget.isSuperAdmin) {
       pages.add(const SchedulePage());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: "Schedule",
-      ));
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: "Schedule",
+        ),
+      );
 
       pages.add(const ApplicationStatusPage());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.call_missed_outgoing),
-        label: "Status",
-      ));
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.call_missed_outgoing),
+          label: "Status",
+        ),
+      );
 
       pages.add(const RequestsPage());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.approval_rounded),
-        label: "Requests",
-      ));
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.approval_rounded),
+          label: "Requests",
+        ),
+      );
     }
 
     // ---------------------------------------------------
@@ -92,26 +111,29 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (!widget.isAdmin && !widget.isSuperAdmin && !widget.isHOD) {
       pages.add(const SchedulePage());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: "Schedule",
-      ));
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: "Schedule",
+        ),
+      );
 
       pages.add(const ApplicationStatusPage());
-      navItems.add(const BottomNavigationBarItem(
-        icon: Icon(Icons.call_missed_outgoing),
-        label: "Status",
-      ));
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.call_missed_outgoing),
+          label: "Status",
+        ),
+      );
     }
 
     // ---------------------------------------------------
     // PROFILE — ALWAYS LAST
     // ---------------------------------------------------
     pages.add(ProfilePage(loggedEmail: widget.loggedEmail));
-    navItems.add(const BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: "Profile",
-    ));
+    navItems.add(
+      const BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+    );
   }
 
   @override

@@ -36,9 +36,9 @@ class ProfilePage extends StatelessWidget {
               _buildInfoTile(
                 "Role",
                 controller.isHOD.value
-                    ? "Head of Department"
-                    : controller.isAdmin.value
-                    ? "Time Table Coordinator"
+                    ? "Head of Department / Faculty"
+                    : controller.isAdmin.value && !controller.isSuperAdmin.value && !controller.isHOD.value
+                    ? "Time Table Coordinator / Faculty"
                     : controller.isSuperAdmin.value
                     ? "Super Admin"
                     : "Faculty",
