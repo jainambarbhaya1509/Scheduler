@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '288826539666',
     projectId: 'scheduler-1a878',
     storageBucket: 'scheduler-1a878.firebasestorage.app',
-    iosBundleId: 'com.example.schedule',
+    iosBundleId: 'com.djsce.schedule',
   );
 
 }
