@@ -19,6 +19,7 @@ class UploadTTController extends GetxController {
   /// department → class/lab list
   final Map<String, List<String>> departmentData = {
     'Information Technology': ['64', '65', '66', 'L1', 'L2', 'L3'],
+    'Computer Engineering': ['61', '62', '63', 'CL1', 'CL2', 'CL3'],
   };
 
   List<String> get classOptions => departmentData[department.value] ?? [];
@@ -83,6 +84,7 @@ class UploadTTController extends GetxController {
     try {
       // Load and decode JSON file
       data = convertScheduleTo24(data);
+      print(data);
       final department = data["department"]?.toString();
       final className = data["class"]?.toString();
       final slotDays = data["slots"] as List?;
@@ -102,6 +104,8 @@ class UploadTTController extends GetxController {
         final day = dayData["day"]?.toString();
         final emptySlots = dayData["empty_slots"] as List?;
 
+        print(day);
+        print(emptySlots);
         if (day == null || emptySlots == null) {
           print("⚠️ Skipping invalid entry: $dayData");
           continue;

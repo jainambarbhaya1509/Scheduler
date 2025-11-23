@@ -51,90 +51,103 @@ class TimingsController extends GetxController {
     }
   }
 
-  Future<List<ClassAvailabilityModel>> _fetchSection(
-    String day,
-    String deptName,
-    String section,
-    bool isClassroom,
-  ) async {
-    final allSlots = <ClassAvailabilityModel>[];
-    var list = <ClassAvailabilityModel>[];
+Future<List<ClassAvailabilityModel>> _fetchSection(
+  String day,
+  String deptName,
+  String section,
+  bool isClassroom,
+) async {
+  final allSlots = <ClassAvailabilityModel>[];
+  List<ClassAvailabilityModel> finalList = [];
 
-    final date = _scheduleController.selectedDate.value;
+  final date = _scheduleController.selectedDate.value;
 
-    try {
-      final snapshot = await _firestore
-          .collection('slots')
-          .doc(day)
-          .collection('departments')
-          .doc(deptName)
-          .collection(section)
-          .get();
+  try {
+    final snapshot = await _firestore
+        .collection('slots')
+        .doc(day)
+        .collection('departments')
+        .doc(deptName)
+        .collection(section)
+        .get();
 
-      for (var doc in snapshot.docs) {
-        if (doc.id == "_meta") continue;
+    // -----------------------------
+    //  STEP 1: COLLECT ALL ROOMS
+    // -----------------------------
+    for (var doc in snapshot.docs) {
+      if (doc.id == "_meta") continue;
 
-        final slotsSnapshot = await doc.reference.collection('slots').get();
+      final slotsSnapshot = await doc.reference.collection('slots').get();
 
-        final timingList = slotsSnapshot.docs.map((slot) {
-          final rawApplications = slot['applications'];
-          List<UsersAppliedModel> appliedUsers = [];
+      final timingList = slotsSnapshot.docs.map((slot) {
+        final rawApplications = slot['applications'];
+        List<UsersAppliedModel> appliedUsers = [];
 
-          if (rawApplications is Map<String, dynamic> &&
-              rawApplications.containsKey(date)) {
-            final appList = rawApplications[date];
-            if (appList is List) {
-              appliedUsers = appList
-                  .map(
-                    (e) => UsersAppliedModel.fromMap(e as Map<String, dynamic>),
-                  )
-                  // ignore rejected users
-                  .where((user) => user.status.toLowerCase() != 'rejected')
-                  .toList();
-            }
-          }
-
-          return ClassTiming(
-            timing: "${slot['start_time'] ?? ''}-${slot['end_time'] ?? ''}",
-            appliedUsers: appliedUsers,
-          );
-        }).toList();
-
-        allSlots.add(
-          ClassAvailabilityModel(
-            id: doc.id,
-            className: doc.id,
-            isClassroom: isClassroom,
-            timingsList: timingList,
-          ),
-        );
-
-        // Case 1: No initial time & no hours required → take all slots
-        if (initialTiming.value.isEmpty && hoursRequired.value == 0.0) {
-          list = allSlots;
-        } else {
-          // Start with filtered slots if initial timing is set
-          List<ClassAvailabilityModel> tempList = allSlots;
-          if (initialTiming.value.isNotEmpty) {
-            tempList = filterSlotsAfter(allSlots, initialTiming.value);
-          }
-
-          // Case 2: If hoursRequired is set, find consecutive slots
-          if (hoursRequired.value != 0.0) {
-            final rooms = findConsecutiveSlots(tempList, hoursRequired.value);
-            list.addAll(rooms); // Add all matching rooms
-          } else {
-            // Case 3: Just initial time filtering, no consecutive requirement
-            list = tempList;
+        if (rawApplications is Map<String, dynamic> &&
+            rawApplications.containsKey(date)) {
+          final appList = rawApplications[date];
+          if (appList is List) {
+            appliedUsers = appList
+                .map((e) =>
+                    UsersAppliedModel.fromMap(e as Map<String, dynamic>))
+                .where((u) => u.status.toLowerCase() != "rejected")
+                .toList();
           }
         }
-      }
-    } catch (e) {
-      print("Error fetching $section: $e");
+
+        return ClassTiming(
+          timing: "${slot['start_time'] ?? ''}-${slot['end_time'] ?? ''}",
+          appliedUsers: appliedUsers,
+        );
+      }).toList();
+
+      // Build model
+      allSlots.add(
+        ClassAvailabilityModel(
+          id: doc.id,
+          className: doc.id,
+          isClassroom: isClassroom,
+          timingsList: timingList,
+        ),
+      );
     }
 
-    return list;
+    // ---------------------------------------
+    //  STEP 2: APPLY FILTERS **ONCE**
+    // ---------------------------------------
+
+    final hasInitialTiming = initialTiming.value.isNotEmpty;
+    final hasHoursRequired = hoursRequired.value != 0.0;
+
+    // Case A: No filters → return all slots
+    if (!hasInitialTiming && !hasHoursRequired) {
+      return allSlots;
+    }
+
+    // Case B: Start with initial timing filter if needed
+    List<ClassAvailabilityModel> filteredList = allSlots;
+
+    if (hasInitialTiming) {
+      filteredList =
+          filterSlotsAfter(allSlots, initialTiming.value);
+    }
+
+    // Case C: Apply consecutive hours requirement
+    if (hasHoursRequired) {
+      finalList =
+          findConsecutiveSlots(filteredList, hoursRequired.value);
+    } else {
+      // Only initial timing filter applied
+      finalList = filteredList;
+    }
+
+  } catch (e) {
+    print("❌ Error fetching $section: $e");
   }
+
+  return finalList;
+}
+
 
   Future<void> apply({
     required ClassAvailabilityModel classModel,
