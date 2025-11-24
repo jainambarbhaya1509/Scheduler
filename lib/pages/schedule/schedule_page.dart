@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/helper_func/date_to_day.dart';
 import 'package:schedule/helper_func/parse_double.dart';
 import 'package:schedule/models/availability_model.dart';
+import 'package:schedule/pages/schedule/notification_page.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -56,7 +56,9 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
         const Spacer(),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Get.to(() => NotificationPage(), transition: Transition.cupertino);
+          },
           icon: const Icon(Icons.notifications_active_rounded),
         ),
       ],
@@ -121,7 +123,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget _buildTimeField(BuildContext context) {
     return Expanded(
       child: _buildInputContainer(
-        child: TextField(
+        child: TextFormField(
           controller: _timeController,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Colors.black,
@@ -137,7 +139,24 @@ class _SchedulePageState extends State<SchedulePage> {
               context: context,
               initialTime: TimeOfDay.now(),
             );
+
             if (selectedTime != null) {
+              final int totalMinutes =
+                  selectedTime.hour * 60 + selectedTime.minute;
+
+              const int minMinutes = 8 * 60; // 8:00 AM
+              const int maxMinutes = 18 * 60; // 6:00 PM
+
+              // Check if within allowed range
+              if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
+                Get.snackbar(
+                  "Invalid Time",
+                  "Please select a time between 8:00 AM and 6:00 PM",
+                );
+                return;
+              }
+
+              // Passed validation → update text field
               setState(() {
                 _timeController.text =
                     "${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}";
@@ -152,7 +171,7 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget _buildHoursField() {
     return Expanded(
       child: _buildInputContainer(
-        child: TextField(
+        child: TextFormField(
           controller: _nHoursController,
           keyboardType: TextInputType.number,
           // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -191,8 +210,11 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         onPressed: () {
-          _timingsController.hoursRequired.value = safeParseDouble(_nHoursController.text);;
-          _timingsController.initialTiming.value = _timeController.text.toString();
+          _timingsController.hoursRequired.value = safeParseDouble(
+            _nHoursController.text,
+          );
+          _timingsController.initialTiming.value = _timeController.text
+              .toString();
           _scheduleController.fetchAvailabilityForDay(
             _scheduleController.selectedDay.value,
           );

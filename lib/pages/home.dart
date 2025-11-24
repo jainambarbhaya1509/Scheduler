@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
       pages.add(AddTimeTable());
       navItems.add(
         const BottomNavigationBarItem(
-          icon: Icon(Icons.add),
+          icon: Icon(Icons.settings),
           label: "Add Time Table",
         ),
       );

@@ -20,7 +20,7 @@ class ProfilePage extends StatelessWidget {
         }
 
         return Container(
-          margin: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(bottom: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
