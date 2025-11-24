@@ -31,6 +31,23 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               _buildLoginCard(context, controller),
+              TextButton(
+                onPressed: () {
+                  print(123);
+                },
+                style: ButtonStyle(
+                  padding: WidgetStateProperty.all(EdgeInsets.zero),
+                  minimumSize: WidgetStateProperty.all(Size.zero),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  overlayColor: WidgetStateProperty.all(
+                    Colors.white,
+                  ), // optional: remove ripple padding
+                ),
+                child: const Text(
+                  "Forgot Password ?",
+                  style: TextStyle(color: Colors.black87),
+                ),
+              ),
             ],
           ),
         ),
