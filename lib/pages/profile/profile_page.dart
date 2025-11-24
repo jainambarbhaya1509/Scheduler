@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:schedule/controller/login_controller.dart';
 import 'package:schedule/controller/profile_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
 import 'package:schedule/pages/login/login_page.dart';
@@ -7,7 +8,10 @@ import 'package:schedule/pages/login/login_page.dart';
 class ProfilePage extends StatelessWidget {
   final String loggedEmail;
 
-  const ProfilePage({super.key, required this.loggedEmail});
+  ProfilePage({super.key, required this.loggedEmail});
+
+  final loginController = Get.put(LoginController());
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +25,7 @@ class ProfilePage extends StatelessWidget {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 20),
+          padding: EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,13 +42,26 @@ class ProfilePage extends StatelessWidget {
                 "Role",
                 controller.isHOD.value
                     ? "Head of Department / Faculty"
-                    : controller.isAdmin.value && !controller.isSuperAdmin.value && !controller.isHOD.value
+                    : controller.isAdmin.value &&
+                          !controller.isSuperAdmin.value &&
+                          !controller.isHOD.value
                     ? "Time Table Coordinator / Faculty"
                     : controller.isSuperAdmin.value
                     ? "Super Admin"
                     : "Faculty",
               ),
+              const SizedBox(height: 30),
+
+              Text(
+                "Change Password",
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              _buildChangePassword(),
               const Spacer(),
+
               _buildLogoutButton(),
             ],
           ),
@@ -70,6 +88,70 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  Widget _buildChangePassword() {
+    return Column(
+      children: [
+        _buildInputContainer(
+          child: TextFormField(
+            controller: loginController.oldPasswordController,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              hintText: "Enter Old Password",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        _buildInputContainer(
+          child: TextFormField(
+            controller: loginController.newPasswordController,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              hintText: "Enter New Password",
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        _buildSubmitButton(),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.black87),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        onPressed: loginController.changePassword,
+        child: const Text(
+          "Reset Password",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputContainer({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: child,
+    );
+  }
+
   Widget _buildLogoutButton() {
     return SizedBox(
       width: double.infinity,
@@ -77,11 +159,11 @@ class ProfilePage extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.redAccent,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         onPressed: () {
           // Clear user state

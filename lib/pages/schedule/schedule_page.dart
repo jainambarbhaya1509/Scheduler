@@ -33,15 +33,19 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeader(context),
-        const SizedBox(height: 20),
-        _buildSlotSelector(context),
-        const SizedBox(height: 20),
-        _buildAvailableClasses(),
-      ],
+    return Container(
+          padding: EdgeInsets.all(10),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          const SizedBox(height: 20),
+          _buildSlotSelector(context),
+          const SizedBox(height: 20),
+          _buildAvailableClasses(),
+        ],
+      ),
     );
   }
 

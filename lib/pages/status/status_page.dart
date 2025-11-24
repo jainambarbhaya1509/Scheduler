@@ -10,23 +10,27 @@ class ApplicationStatusPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final RequestsController controller = Get.put(RequestsController());
 
-    return DefaultTabController(
-      length: 4,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Your Requests",
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+    return Container(
+      padding: EdgeInsets.all(10),
+
+      child: DefaultTabController(
+        length: 4,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Your Requests",
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 20),
-          _buildTabBar(),
-          const SizedBox(height: 20),
-          Expanded(child: _buildTabView(controller)),
-        ],
+            const SizedBox(height: 20),
+            _buildTabBar(),
+            const SizedBox(height: 20),
+            Expanded(child: _buildTabView(controller)),
+          ],
+        ),
       ),
     );
   }
@@ -99,5 +103,4 @@ class ApplicationStatusPage extends StatelessWidget {
       );
     });
   }
-
 }

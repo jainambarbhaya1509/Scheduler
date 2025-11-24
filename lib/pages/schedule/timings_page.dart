@@ -228,7 +228,7 @@ class SelectTimings extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          appliedUser.status,
+                          appliedUser.status == "Accepted" ? "Booked" : "Pending",
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -239,13 +239,9 @@ class SelectTimings extends StatelessWidget {
                         ),
                       ],
                     ),
-
-                  // If rejected → show nothing (normal free slot)
                 ],
               ),
             ),
-
-            // Arrow only when slot is free or rejected
             if (!isPendingOrAccepted)
               const Icon(Icons.arrow_forward_ios_rounded, size: 18),
           ],

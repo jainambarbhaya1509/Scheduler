@@ -11,20 +11,24 @@ class RequestsPage extends StatelessWidget {
     final RequestsController controller = Get.put(RequestsController());
     final searchQuery = "".obs;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Requests",
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 20),
-        _buildSearchBar(context, searchQuery),
-        const SizedBox(height: 20),
-        _buildRequestsList(context, controller, searchQuery),
-      ],
+    return Container(
+      padding: EdgeInsets.all(10),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Requests",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          _buildSearchBar(context, searchQuery),
+          const SizedBox(height: 20),
+          _buildRequestsList(context, controller, searchQuery),
+        ],
+      ),
     );
   }
 
