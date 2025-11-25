@@ -1,7 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import '../../controller/timetable_controller.dart';
+import 'dart:io';
 
 class AddTimeTable extends StatelessWidget {
   const AddTimeTable({super.key});
@@ -35,6 +41,9 @@ class AddTimeTable extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
+
+        _downloadTemplate(),
+        const SizedBox(height: 30),
 
         /// ------------------ Department dropdown ------------------
         Obx(
@@ -119,6 +128,40 @@ class AddTimeTable extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _downloadTemplate() {
+    return InkWell(
+      onTap: () {},
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.black45.withOpacity(0.1), // slight transparency
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.black45, // highlighted border
+            width: 2,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              "Download .xlsx Template",
+              style: TextStyle(
+                color: Colors.black45,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            Spacer(),
+            Icon(Icons.arrow_downward_rounded, size: 15, color: Colors.black45),
+          ],
+        ),
+      ),
     );
   }
 
