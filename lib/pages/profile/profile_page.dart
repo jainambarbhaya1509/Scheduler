@@ -1,72 +1,97 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/login_controller.dart';
-import 'package:schedule/controller/profile_controller.dart';
-import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/pages/login/login_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   final String loggedEmail;
+  const ProfilePage({super.key, required this.loggedEmail});
 
-  ProfilePage({super.key, required this.loggedEmail});
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
 
+class _ProfilePageState extends State<ProfilePage> {
   final loginController = Get.put(LoginController());
+  final SessionController _sessionController = Get.put(SessionController());
 
+  String username = '';
+  String email = '';
+  bool isHOD = false;
+  bool isAdmin = false;
+  bool isSuperAdmin = false;
+
+  late Future<void> _loadSessionFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSessionFuture = _loadSessionData();
+  }
+
+  Future<void> _loadSessionData() async {
+    final session = await _sessionController.getSession();
+    setState(() {
+      username = session['username'] ?? '';
+      email = session['email'] ?? '';
+      isHOD = session['isHOD'] ?? false;
+      isAdmin = session['isAdmin'] ?? false;
+      isSuperAdmin = session['isSuperAdmin'] ?? false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ProfileController(loggedEmail));
-
-    return Scaffold(
-      body: Obx(() {
-        if (controller.loading.value) {
+    return FutureBuilder(
+      future: _loadSessionFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 20),
-          padding: EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Profile Details",
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+        return Scaffold(
+          body: Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Profile Details",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              _buildInfoTile("Name", controller.username.value),
-              _buildInfoTile("Email", controller.email.value),
-              _buildInfoTile(
-                "Role",
-                controller.isHOD.value
-                    ? "Head of Department / Faculty"
-                    : controller.isAdmin.value &&
-                          !controller.isSuperAdmin.value &&
-                          !controller.isHOD.value
-                    ? "Time Table Coordinator / Faculty"
-                    : controller.isSuperAdmin.value
-                    ? "Super Admin"
-                    : "Faculty",
-              ),
-              const SizedBox(height: 30),
-
-              Text(
-                "Change Password",
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              _buildChangePassword(),
-              const Spacer(),
-
-              _buildLogoutButton(),
-            ],
+                const SizedBox(height: 30),
+                _buildInfoTile("Name", username),
+                _buildInfoTile("Email", email),
+                _buildInfoTile(
+                  "Role",
+                  isHOD
+                      ? "Head of Department / Faculty"
+                      : isAdmin && !isSuperAdmin && !isHOD
+                      ? "Time Table Coordinator / Faculty"
+                      : isSuperAdmin
+                      ? "Super Admin"
+                      : "Faculty",
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  "Change Password",
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                _buildChangePassword(),
+                const Spacer(),
+                _buildLogoutButton(),
+              ],
+            ),
           ),
         );
-      }),
+      },
     );
   }
 
@@ -119,7 +144,6 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSubmitButton() {
-
     return SizedBox(
       width: double.infinity,
       child: TextButton(
@@ -165,14 +189,8 @@ class ProfilePage extends StatelessWidget {
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
-        onPressed: () {
-          // Clear user state
-          if (Get.isRegistered<UserController>()) {
-            final userController = Get.find<UserController>();
-            userController.clearUser();
-          }
-
-          // Navigate to login page and remove all previous routes
+        onPressed: () async {
+          await _sessionController.clearSession();
           Get.offAll(() => const LoginPage());
         },
         child: const Text("Logout"),

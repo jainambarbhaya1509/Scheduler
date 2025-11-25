@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/profile_controller.dart';
-import 'user_controller.dart';
+import 'package:schedule/controller/session_controller.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -12,9 +11,8 @@ class LoginController extends GetxController {
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
 
-
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  late final UserController _userController = Get.find<UserController>();
+  final SessionController _sessionController = SessionController();
 
   /// Optimized login with validation
   Future<Map<String, dynamic>?> login() async {
@@ -48,14 +46,14 @@ class LoginController extends GetxController {
         return null;
       }
 
-      _userController.setUser(
-        doc.id,
+      await _sessionController.setSession(
         user["username"] ?? "",
         user["email"] ?? "",
+        user["password"] ?? "",
         user["department"] ?? "",
-        hod: user["isHOD"] ?? false,
-        admin: user["isAdmin"] ?? false,
-        superadmin: user["isSuperAdmin"] ?? false,
+        user["isHOD"] ?? false,
+        user["isSuperAdmin"] ?? false,
+        user["isAdmin"] ?? false,
       );
 
       Get.snackbar("Success", "Welcome ${user['username']}");
@@ -68,25 +66,25 @@ class LoginController extends GetxController {
     }
   }
 
+  /// Change password with session update
   Future<void> changePassword() async {
-    final ProfileController profileController = Get.find<ProfileController>();
-    print(profileController.userEmail);
+    // final ProfileController profileController = Get.find<ProfileController>();
+    final session = await _sessionController.getSession();
+
     try {
       isLoading.value = true;
 
       final oldPassword = oldPasswordController.text.trim();
       final newPassword = newPasswordController.text.trim();
 
-      // Basic validation
       if (oldPassword.isEmpty || newPassword.isEmpty) {
         Get.snackbar("Error", "Please fill all fields");
         return;
       }
 
-      // Fetch user
       final query = await _db
           .collection("faculty")
-          .where("email", isEqualTo: profileController.userEmail)
+          .where("email", isEqualTo: session["email"])
           .limit(1)
           .get();
 
@@ -98,20 +96,28 @@ class LoginController extends GetxController {
       final doc = query.docs.first;
       final user = doc.data();
 
-      // Old password validation
       if (user["password"] != oldPassword) {
         Get.snackbar("Failed", "Old password is incorrect");
         return;
       }
 
-      // Update new password
       await _db.collection("faculty").doc(doc.id).update({
         "password": newPassword,
       });
 
+      // ✅ Update session after password change
+      await _sessionController.setSession(
+        user["username"] ?? "",
+        user["email"],
+        newPassword,
+        user["department"] ?? "",
+        user["isHOD"] ?? false,
+        user["isSuperAdmin"] ?? false,
+        user["isAdmin"] ?? false,
+      );
+
       Get.snackbar("Success", "Password changed successfully");
 
-      // Clear fields
       oldPasswordController.clear();
       newPasswordController.clear();
     } catch (e) {
@@ -121,10 +127,18 @@ class LoginController extends GetxController {
     }
   }
 
+  /// Optional logout
+  Future<void> logout() async {
+    await _sessionController.clearSession();
+    Get.offAllNamed("/login");
+  }
+
   @override
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
     super.onClose();
   }
 }

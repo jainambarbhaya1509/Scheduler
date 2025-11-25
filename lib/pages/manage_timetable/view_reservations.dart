@@ -81,7 +81,9 @@ class _ViewReservationsState extends State<ViewReservations> {
             .doc(d.id)
             .collection('departments')
             .get();
-        for (final dd in depts.docs) deptSet.add(dd.id);
+        for (final dd in depts.docs) {
+          deptSet.add(dd.id);
+        }
       }
       final sorted = deptSet.toList()
         ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
@@ -157,7 +159,9 @@ class _ViewReservationsState extends State<ViewReservations> {
       'sun': 'sunday',
     };
     if (map.containsKey(n)) return map[n]!;
-    for (final v in map.values) if (n.contains(v.substring(0, 3))) return v;
+    for (final v in map.values) {
+      if (n.contains(v.substring(0, 3))) return v;
+    }
     return n;
   }
 
@@ -185,8 +189,9 @@ class _ViewReservationsState extends State<ViewReservations> {
     if (m1 != null) {
       final h = int.parse(m1.group(1)!);
       final mm = int.parse(m1.group(2)!);
-      if (h >= 0 && h < 24 && mm >= 0 && mm < 60)
+      if (h >= 0 && h < 24 && mm >= 0 && mm < 60) {
         return '${h.toString().padLeft(2, '0')}:${mm.toString().padLeft(2, '0')}';
+      }
     }
     final ampm = RegExp(r'^(\d{1,2}):(\d{2})\s*(am|pm)$');
     final m2 = ampm.firstMatch(x.replaceAll(' ', ''));
@@ -217,8 +222,9 @@ class _ViewReservationsState extends State<ViewReservations> {
     if (m4 != null) {
       final h = int.parse(m4.group(1)!);
       final mm = int.parse(m4.group(2)!);
-      if (h >= 0 && h < 24 && mm >= 0 && mm < 60)
+      if (h >= 0 && h < 24 && mm >= 0 && mm < 60) {
         return '${h.toString().padLeft(2, '0')}:${mm.toString().padLeft(2, '0')}';
+      }
     }
     return null;
   }
@@ -248,10 +254,14 @@ class _ViewReservationsState extends State<ViewReservations> {
     ];
     final lower = days.map((d) => d.toLowerCase()).toList();
     final present = <String>[];
-    for (final o in order)
-      if (lower.contains(o))
+    for (final o in order) {
+      if (lower.contains(o)) {
         present.add(days.firstWhere((d) => d.toLowerCase() == o));
-    for (final d in days) if (!present.contains(d)) present.add(d);
+    }
+      }
+    for (final d in days) {
+      if (!present.contains(d)) present.add(d);
+    }
     return present;
   }
 
@@ -339,8 +349,9 @@ class _ViewReservationsState extends State<ViewReservations> {
           final related = _requests.where((r) {
             final rdClass = _norm(r.className);
             final rdDay = _normDay(r.day);
-            if (!(rdClass == _norm(_selectedClass) && rdDay == _normDay(day)))
+            if (!(rdClass == _norm(_selectedClass) && rdDay == _normDay(day))) {
               return false;
+            }
 
             if (r.consideredSlots != null && r.consideredSlots!.isNotEmpty) {
               final canonList = r.consideredSlots!
@@ -359,9 +370,9 @@ class _ViewReservationsState extends State<ViewReservations> {
             final st = r.status.toLowerCase();
             if (st == 'accepted' || st == 'booked') {
               info.booked = true;
-              info.bookedBy ??= (r.username ?? r.email ?? r.id)?.toString();
+              info.bookedBy ??= (r.username ?? r.email ?? r.id).toString();
             } else {
-              final display = (r.username ?? r.email ?? r.id ?? '').toString();
+              final display = (r.username ?? r.email ?? r.id).toString();
               if (display.isNotEmpty) info.applicants.add(display);
             }
           }
@@ -385,8 +396,9 @@ class _ViewReservationsState extends State<ViewReservations> {
             }
           }
           final single = _canonicalizeSlot((r.slotTime ?? '').toString());
-          if (!matched && single.isNotEmpty && slotTimesSet.contains(single))
+          if (!matched && single.isNotEmpty && slotTimesSet.contains(single)) {
             matched = true;
+          }
           if (!matched) unmatchedRequests.add(r);
         }
 
@@ -712,27 +724,30 @@ class _ViewReservationsState extends State<ViewReservations> {
   }
 
   Widget _buildGrid() {
-    if (_selectedClass == null)
+    if (_selectedClass == null) {
       return const Center(
         child: Text(
           'Select department, section and class/lab to view slots.',
           style: TextStyle(color: Colors.black),
         ),
       );
-    if (_loadingSlots)
+    }
+    if (_loadingSlots) {
       return const Center(
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           backgroundColor: Colors.black12,
           color: Colors.black,
         ),
       );
-    if (_dayList.isEmpty)
+    }
+    if (_dayList.isEmpty) {
       return const Center(
         child: Text(
           'No slots found for the selected class/lab.',
           style: TextStyle(color: Colors.black),
         ),
       );
+    }
 
     return SingleChildScrollView(
       child: Column(

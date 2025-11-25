@@ -94,7 +94,7 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
 
                   const SizedBox(height: 26),
 
-                  Container(
+                  SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: submitUser,
@@ -154,7 +154,7 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
 
   Widget _departmentDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedDept,
+      initialValue: selectedDept,
       validator: (v) => v == null ? "Please select a department" : null,
       decoration: InputDecoration(
         filled: true,
@@ -179,7 +179,7 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
           text,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
-        Switch(value: value, onChanged: onChange, activeColor: Colors.green),
+        Switch(value: value, onChanged: onChange, activeThumbColor: Colors.green),
       ],
     );
   }

@@ -1,12 +1,10 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/user_controller.dart';
+import 'package:schedule/controller/session_controller.dart';
 
 class RequestsController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late final UserController _userController = Get.find<UserController>();
 
   final appliedRequests = <Map<String, dynamic>>[].obs;
   final allRequests = <Map<String, dynamic>>[].obs;
@@ -17,6 +15,8 @@ class RequestsController extends GetxController {
   StreamSubscription? _userRequestsSubscription;
   StreamSubscription? _adminRequestsSubscription;
 
+  final SessionController _sessionController = Get.put(SessionController());
+
   @override
   void onInit() {
     super.onInit();
@@ -24,16 +24,20 @@ class RequestsController extends GetxController {
   }
 
   /// Set up real-time listeners instead of manual fetches
-  void _initializeListeners() {
-    if (_userController.isHOD.value) {
+
+  void _initializeListeners() async {
+    final session = await _sessionController.getSession();
+    if (session["isHOD"]) {
       _setupAdminListener();
     }
     _setupUserListener();
   }
 
   /// Real-time listener for user requests
-  void _setupUserListener() {
-    final userEmail = _userController.email.value;
+  void _setupUserListener() async {
+    final session = await _sessionController.getSession();
+
+    final userEmail = session["email"];
 
     _userRequestsSubscription = _firestore
         .collectionGroup('requests_list')
@@ -48,7 +52,6 @@ class RequestsController extends GetxController {
           for (var doc in snapshot.docs) {
             final data = doc.data();
 
-            print(data);
             allRequests.add(data);
 
             switch (data['status']?.toString().toLowerCase() ?? 'pending') {
@@ -66,12 +69,12 @@ class RequestsController extends GetxController {
   }
 
   /// Real-time listener for admin requests
-  void _setupAdminListener() {
-    final dept = _userController.department.value;
+  void _setupAdminListener() async {
+    final session = await _sessionController.getSession();
 
     _adminRequestsSubscription = _firestore
         .collection('requests')
-        .doc(dept)
+        .doc(session["department"])
         .collection('requests_list')
         .snapshots()
         .listen((snapshot) {
