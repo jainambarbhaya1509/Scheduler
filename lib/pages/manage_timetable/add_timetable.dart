@@ -141,10 +141,7 @@ class AddTimeTable extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.black45.withOpacity(0.1), // slight transparency
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.black45, // highlighted border
-            width: 2,
-          ),
+      
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
