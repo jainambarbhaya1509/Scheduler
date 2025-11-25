@@ -2,20 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/profile_controller.dart';
-import 'package:schedule/controller/session_controller.dart';
+import 'user_controller.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final isLoading = false.obs;
+
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
 
-  final isLoading = false.obs;
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late final UserController _userController = Get.find<UserController>();
 
-  late final SessionController session = Get.find<SessionController>();
-
+  /// Optimized login with validation
   Future<Map<String, dynamic>?> login() async {
     try {
       isLoading.value = true;
@@ -24,11 +25,10 @@ class LoginController extends GetxController {
       final password = passwordController.text.trim();
 
       if (email.isEmpty || password.isEmpty) {
-        Get.snackbar("Error", "Email or Password cannot be empty");
+        Get.snackbar("Error", "Please fill all fields");
         return null;
       }
 
-      // Fetch user from Firestore — using "users" collection ONLY
       final query = await _db
           .collection("faculty")
           .where("email", isEqualTo: email)
@@ -36,29 +36,32 @@ class LoginController extends GetxController {
           .get();
 
       if (query.docs.isEmpty) {
-        Get.snackbar("Error", "User not found");
+        Get.snackbar("Login Failed", "User not found");
         return null;
       }
 
-      final user = query.docs.first.data();
+      final doc = query.docs.first;
+      final user = doc.data();
 
       if (user["password"] != password) {
-        Get.snackbar("Error", "Incorrect password");
+        Get.snackbar("Login Failed", "Incorrect password");
         return null;
       }
 
-      // Save session
-      await session.setSession(
-        email,
-        password,
-        user["isHOD"] ?? false,
-        user["isSuperAdmin"] ?? false,
-        user["isAdmin"] ?? false,
+      _userController.setUser(
+        doc.id,
+        user["username"] ?? "",
+        user["email"] ?? "",
+        user["department"] ?? "",
+        hod: user["isHOD"] ?? false,
+        admin: user["isAdmin"] ?? false,
+        superadmin: user["isSuperAdmin"] ?? false,
       );
 
+      Get.snackbar("Success", "Welcome ${user['username']}");
       return user;
     } catch (e) {
-      Get.snackbar("Login Error", e.toString());
+      Get.snackbar("Error", e.toString());
       return null;
     } finally {
       isLoading.value = false;
@@ -66,24 +69,24 @@ class LoginController extends GetxController {
   }
 
   Future<void> changePassword() async {
+    final ProfileController profileController = Get.find<ProfileController>();
+    print(profileController.userEmail);
     try {
       isLoading.value = true;
-
-      final profile = Get.find<ProfileController>();
-      final email = profile.userEmail.trim();
 
       final oldPassword = oldPasswordController.text.trim();
       final newPassword = newPasswordController.text.trim();
 
+      // Basic validation
       if (oldPassword.isEmpty || newPassword.isEmpty) {
         Get.snackbar("Error", "Please fill all fields");
         return;
       }
 
-      // Fetch user from Firestore (same users collection)
+      // Fetch user
       final query = await _db
           .collection("faculty")
-          .where("email", isEqualTo: email)
+          .where("email", isEqualTo: profileController.userEmail)
           .limit(1)
           .get();
 
@@ -95,27 +98,20 @@ class LoginController extends GetxController {
       final doc = query.docs.first;
       final user = doc.data();
 
+      // Old password validation
       if (user["password"] != oldPassword) {
         Get.snackbar("Failed", "Old password is incorrect");
         return;
       }
 
-      // Update Firestore
-      await _db.collection("users").doc(doc.id).update({
+      // Update new password
+      await _db.collection("faculty").doc(doc.id).update({
         "password": newPassword,
       });
 
-      // Update local session
-      await session.setSession(
-        email,
-        newPassword,
-        user["isHOD"] ?? false,
-        user["isSuperAdmin"] ?? false,
-        user["isAdmin"] ?? false,
-      );
-
       Get.snackbar("Success", "Password changed successfully");
 
+      // Clear fields
       oldPasswordController.clear();
       newPasswordController.clear();
     } catch (e) {
@@ -129,8 +125,6 @@ class LoginController extends GetxController {
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
-    oldPasswordController.dispose();
-    newPasswordController.dispose();
     super.onClose();
   }
 }

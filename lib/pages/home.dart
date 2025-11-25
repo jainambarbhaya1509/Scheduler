@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schedule/pages/manage_timetable/add_timetable.dart';
+import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import 'package:schedule/pages/profile/profile_page.dart';
 import 'package:schedule/pages/requests/requests_page.dart';
 import 'package:schedule/pages/schedule/schedule_page.dart';

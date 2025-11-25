@@ -42,8 +42,6 @@ dependencies:
   cloud_firestore: ^5.6.12
   intl: ^0.20.2
   file_picker: ^10.3.6
-  shared_preferences: ^2.5.3
-  uuid: ^4.5.2
 
 dev_dependencies:
   flutter_test:

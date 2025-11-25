@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:schedule/controller/login_controller.dart';
 import 'package:schedule/pages/home.dart';
 
-
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -18,33 +17,31 @@ class LoginPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Logo
-              Image.asset(
-                "assets/icon.png",
-                height: MediaQuery.sizeOf(context).height / 4,
-                width: MediaQuery.sizeOf(context).width / 4,
+              Center(
+                child: Image.asset(
+                  "assets/icon.png",
+                  height: MediaQuery.sizeOf(context).height / 4,
+                  width: MediaQuery.sizeOf(context).width / 4,
+                ),
               ),
 
               const Text(
                 "Scheduler Login",
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 30),
-
               _buildLoginCard(context, controller),
-
-              // Forgot password
               TextButton(
                 onPressed: () {
-                  Get.snackbar("Coming soon", "Forgot password feature");
+                  print(123);
                 },
                 style: ButtonStyle(
                   padding: WidgetStateProperty.all(EdgeInsets.zero),
                   minimumSize: WidgetStateProperty.all(Size.zero),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  overlayColor:
-                      WidgetStateProperty.all(Colors.transparent),
+                  overlayColor: WidgetStateProperty.all(
+                    Colors.white,
+                  ), // optional: remove ripple padding
                 ),
                 child: const Text(
                   "Forgot Password ?",
@@ -58,36 +55,36 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  /// Login Card UI
+  /// Extracted login card widget
   Widget _buildLoginCard(BuildContext context, LoginController controller) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 25),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+        // color: const Color.fromARGB(34, 193, 193, 193),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
+          // const SizedBox(height: 20),
           TextFormField(
             controller: controller.emailController,
             decoration: _buildInputDecoration("Email"),
           ),
           const SizedBox(height: 12),
-
           TextFormField(
             controller: controller.passwordController,
             decoration: _buildInputDecoration("Password"),
             obscureText: true,
           ),
           const SizedBox(height: 20),
-
           _buildLoginButton(controller),
         ],
       ),
     );
   }
 
-  /// Login Button
+  /// Extracted login button widget
   Widget _buildLoginButton(LoginController controller) {
     return Obx(() {
       return SizedBox(
@@ -98,14 +95,18 @@ class LoginPage extends StatelessWidget {
               ? null
               : () async {
                   final user = await controller.login();
+
                   if (user != null) {
                     final email = controller.emailController.text.trim();
-                    Get.offAll(
+                    final isHOD = user["isHOD"] ?? false;
+                    final isAdmin = user["isAdmin"] ?? false;
+                    final isSuperAdmin = user["isSuperAdmin"] ?? false;
+                    Get.off(
                       () => HomePage(
                         loggedEmail: email,
-                        isHOD: user["isHOD"] ?? false,
-                        isAdmin: user["isAdmin"] ?? false,
-                        isSuperAdmin: user["isSuperAdmin"] ?? false,
+                        isHOD: isHOD,
+                        isAdmin: isAdmin,
+                        isSuperAdmin: isSuperAdmin,
                       ),
                     );
                   }
@@ -114,7 +115,9 @@ class LoginPage extends StatelessWidget {
               ? const Text(
                   "Loading…",
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w500),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
                 )
               : const Text(
                   "Login",
@@ -122,10 +125,9 @@ class LoginPage extends StatelessWidget {
                 ),
           icon: const Icon(Icons.arrow_right_alt_rounded),
           style: TextButton.styleFrom(
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.grey[900],
             foregroundColor: Colors.white,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -135,7 +137,7 @@ class LoginPage extends StatelessWidget {
     });
   }
 
-  /// Field decoration
+  /// Extracted input decoration helper
   InputDecoration _buildInputDecoration(String hint) {
     return InputDecoration(
       filled: true,
@@ -145,8 +147,7 @@ class LoginPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
     );
   }
 }
