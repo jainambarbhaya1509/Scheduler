@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/login_controller.dart';
 import 'package:schedule/controller/profile_controller.dart';
+import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/controller/user_controller.dart';
 import 'package:schedule/pages/login/login_page.dart';
 
@@ -11,7 +12,6 @@ class ProfilePage extends StatelessWidget {
   ProfilePage({super.key, required this.loggedEmail});
 
   final loginController = Get.put(LoginController());
-
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +119,6 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSubmitButton() {
-
     return SizedBox(
       width: double.infinity,
       child: TextButton(
@@ -169,7 +168,10 @@ class ProfilePage extends StatelessWidget {
           // Clear user state
           if (Get.isRegistered<UserController>()) {
             final userController = Get.find<UserController>();
+            final session = Get.find<SessionController>();
+
             userController.clearUser();
+            session.clearSession();
           }
 
           // Navigate to login page and remove all previous routes
