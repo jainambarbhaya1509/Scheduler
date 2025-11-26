@@ -58,13 +58,13 @@ class _SchedulePageState extends State<SchedulePage> {
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        const Spacer(),
-        IconButton(
-          onPressed: () {
-            Get.to(() => NotificationPage(), transition: Transition.cupertino);
-          },
-          icon: const Icon(Icons.notifications_active_rounded),
-        ),
+        // const Spacer(),
+        // IconButton(
+        //   onPressed: () {
+        //     Get.to(() => NotificationPage(), transition: Transition.cupertino);
+        //   },
+        //   icon: const Icon(Icons.notifications_active_rounded),
+        // ),
       ],
     );
   }
