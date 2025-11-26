@@ -1,13 +1,14 @@
-import 'dart:typed_data';
+import 'dart:io';
+import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:schedule/helper_func/download.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import '../../controller/timetable_controller.dart';
-import 'dart:io';
 
 class AddTimeTable extends StatelessWidget {
   const AddTimeTable({super.key});
@@ -133,15 +134,19 @@ class AddTimeTable extends StatelessWidget {
 
   Widget _downloadTemplate() {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        downloadExcelFile(
+          "https://docs.google.com/spreadsheets/d/1dNVlk9n47tl3xqS5viNG4UXwFpQ8ypTW/edit?usp=sharing&ouid=113030285759050171649&rtpof=true&sd=true",
+          "template",
+        );
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.black45.withOpacity(0.1), // slight transparency
+          color: Colors.black45.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-      
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,

@@ -51,46 +51,68 @@ class _ProfilePageState extends State<ProfilePage> {
         }
 
         return Scaffold(
-          body: Container(
-            margin: const EdgeInsets.only(bottom: 20),
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Profile Details",
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+  body: SafeArea(
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Profile Details",
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    _buildInfoTile("Name", username),
+                    _buildInfoTile("Email", email),
+                    _buildInfoTile(
+                      "Role",
+                      isHOD
+                          ? "Head of Department / Faculty"
+                          : isAdmin && !isSuperAdmin && !isHOD
+                              ? "Time Table Coordinator / Faculty"
+                              : isSuperAdmin
+                                  ? "Super Admin"
+                                  : "Faculty",
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    Text(
+                      "Change Password",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+
+                    _buildChangePassword(),
+
+                    const Spacer(),
+
+                    _buildLogoutButton(),
+
+                    const SizedBox(height: 20),
+                  ],
                 ),
-                const SizedBox(height: 30),
-                _buildInfoTile("Name", username),
-                _buildInfoTile("Email", email),
-                _buildInfoTile(
-                  "Role",
-                  isHOD
-                      ? "Head of Department / Faculty"
-                      : isAdmin && !isSuperAdmin && !isHOD
-                      ? "Time Table Coordinator / Faculty"
-                      : isSuperAdmin
-                      ? "Super Admin"
-                      : "Faculty",
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  "Change Password",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                _buildChangePassword(),
-                const Spacer(),
-                _buildLogoutButton(),
-              ],
+              ),
             ),
           ),
         );
+      },
+    ),
+  ),
+);
+
       },
     );
   }
