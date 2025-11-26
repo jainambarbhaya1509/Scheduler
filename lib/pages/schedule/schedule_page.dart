@@ -5,7 +5,6 @@ import 'package:schedule/controller/timings_controller.dart';
 import 'package:schedule/helper_func/date_to_day.dart';
 import 'package:schedule/helper_func/parse_double.dart';
 import 'package:schedule/models/availability_model.dart';
-import 'package:schedule/pages/schedule/notification_page.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
 class SchedulePage extends StatefulWidget {

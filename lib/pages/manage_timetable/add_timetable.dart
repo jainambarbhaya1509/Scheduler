@@ -1,11 +1,5 @@
-import 'dart:io';
-import 'dart:ui';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:schedule/helper_func/download.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import '../../controller/timetable_controller.dart';

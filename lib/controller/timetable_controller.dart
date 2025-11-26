@@ -84,7 +84,6 @@ class UploadTTController extends GetxController {
     try {
       // Load and decode JSON file
       data = convertScheduleTo24(data);
-      print(data);
       final department = data["department"]?.toString();
       final className = data["class"]?.toString();
       final slotDays = data["slots"] as List?;
