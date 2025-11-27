@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/email_controller.dart';
+import 'package:schedule/helper_func/send_mail.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/helper_func/check_interval.dart';
@@ -236,11 +236,10 @@ class TimingsController extends GetxController {
         await sendEmailNotification(
           facultyEmail: facultyEmail,
           userName: userName,
+          subject: 'New Booking Request',
           userEmail: userEmail,
-          room: classModel.className,
-          date: date,
-          time: timeslot,
-          reason: reason,
+          emailMessage:
+              'Hello, Your request for application of booking ${classModel.className} on $date at $timeslot for $reason is successful!.\n\nThank you!\n\nScheduler App Team',
         );
       }
 

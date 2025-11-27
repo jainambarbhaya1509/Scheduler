@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:schedule/controller/forget_password_controller.dart';
 import 'package:schedule/controller/login_controller.dart';
 import 'package:schedule/pages/home.dart';
 
@@ -35,52 +36,168 @@ class LoginPage extends StatelessWidget {
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.white,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                    ),
                     builder: (BuildContext builder) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 25),
-                        height: MediaQuery.sizeOf(context).height / 3,
-                        width: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Forgot Password ?",
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                      return GetBuilder<ForgetPasswordController>(
+                        init: ForgetPasswordController(),
+                        builder: (logic) {
+                          return SizedBox(
+                            height: MediaQuery.sizeOf(context).height / 3,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                left: 25,
+                                right: 25,
+                                top: 20,
+                                bottom:
+                                    MediaQuery.of(context).viewInsets.bottom +
+                                    20,
                               ),
-                            ),
-                            SizedBox(height: 20),
-                            TextFormField(
-                              controller: controller.emailController,
-                              decoration: _buildInputDecoration("Email"),
-                            ),
-                            SizedBox(height: 10),
+                              child: Obx(() {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // ---------- Title ----------
+                                    Text(
+                                      "Forgot Password?",
+                                      style: const TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
 
-                            SizedBox(
-                              width: double.infinity,
-                              child: TextButton.icon(
-                                iconAlignment: IconAlignment.end,
-                                onPressed: () {},
-                                label: Text("Send Code"),
-                                icon: const Icon(Icons.arrow_right_alt_rounded),
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Colors.grey[900],
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 25,
-                                    vertical: 10,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
+                                    const SizedBox(height: 20),
+
+                                    // ---------- Email Input ----------
+                                    TextFormField(
+                                      controller: logic.emailController,
+                                      decoration: _buildInputDecoration(
+                                        "Email",
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 15),
+
+                                    // ---------- SEND OTP BUTTON ----------
+                                    if (logic.showOtpField.value == false)
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: TextButton.icon(
+                                          iconAlignment: IconAlignment.end,
+                                          onPressed: logic.isOtpSending.value
+                                              ? null
+                                              : () async {
+                                                  await logic.sendOtp(
+                                                    logic.emailController.text,
+                                                  );
+                                                  logic.showOtpField.value =
+                                                      true;
+                                                },
+                                          label: Text(
+                                            logic.isOtpSending.value
+                                                ? "Sending..."
+                                                : "Send Code",
+                                          ),
+                                          icon: const Icon(
+                                            Icons.arrow_right_alt_rounded,
+                                          ),
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.grey[900],
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 25,
+                                              vertical: 10,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                    // ---------- OTP FIELD ----------
+                                    if (logic.showOtpField.value) ...[
+                                      TextFormField(
+                                        controller: logic.otpController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: _buildInputDecoration(
+                                          "Enter OTP",
+                                        ),
+                                      ),
+                                      const SizedBox(height: 15),
+
+                                      // ---------- VERIFY OTP BUTTON ----------
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: TextButton.icon(
+                                          iconAlignment: IconAlignment.end,
+                                          onPressed:
+                                              logic.isPasswordSending.value
+                                              ? null
+                                              : () async {
+                                                  if (logic.verifyOtp(
+                                                    logic.otpController.text,
+                                                  )) {
+                                                    await logic.sendNewPassword(
+                                                      logic
+                                                          .emailController
+                                                          .text,
+                                                    );
+
+                                                    Get.snackbar(
+                                                      "Success",
+                                                      "New password sent to your email",
+                                                      snackPosition:
+                                                          SnackPosition.BOTTOM,
+                                                    );
+
+                                                    Navigator.pop(context);
+                                                  } else {
+                                                    Get.snackbar(
+                                                      "Error",
+                                                      "Invalid OTP",
+                                                      snackPosition:
+                                                          SnackPosition.BOTTOM,
+                                                    );
+                                                  }
+                                                },
+                                          label: Text(
+                                            logic.isPasswordSending.value
+                                                ? "Verifying..."
+                                                : "Verify Code",
+                                          ),
+                                          icon: const Icon(
+                                            Icons.check_circle_outline,
+                                          ),
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.grey[900],
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 25,
+                                              vertical: 10,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              }),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       );
                     },
                   );
