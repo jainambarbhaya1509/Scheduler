@@ -33,7 +33,57 @@ class LoginPage extends StatelessWidget {
               _buildLoginCard(context, controller),
               TextButton(
                 onPressed: () {
-                  print(123);
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext builder) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 25),
+                        height: MediaQuery.sizeOf(context).height / 3,
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Forgot Password ?",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextFormField(
+                              controller: controller.emailController,
+                              decoration: _buildInputDecoration("Email"),
+                            ),
+                            SizedBox(height: 10),
+
+                            SizedBox(
+                              width: double.infinity,
+                              child: TextButton.icon(
+                                iconAlignment: IconAlignment.end,
+                                onPressed: () {},
+                                label: Text("Send Code"),
+                                icon: const Icon(Icons.arrow_right_alt_rounded),
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.grey[900],
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 25,
+                                    vertical: 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
                 },
                 style: ButtonStyle(
                   padding: WidgetStateProperty.all(EdgeInsets.zero),
