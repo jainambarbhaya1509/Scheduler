@@ -1,1 +1,33 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"scheduler-1a878","appId":"1:288826539666:android:4f1ab658b21b066cd0304b","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"scheduler-1a878","appId":"1:288826539666:ios:362ceb547e99f309d0304b","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"scheduler-1a878","configurations":{"android":"1:288826539666:android:4f1ab658b21b066cd0304b","ios":"1:288826539666:ios:362ceb547e99f309d0304b"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "scheduler-1a878",
+          "appId": "1:288826539666:android:4f1ab658b21b066cd0304b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "scheduler-1a878",
+          "appId": "1:288826539666:ios:362ceb547e99f309d0304b",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "scheduler-1a878",
+          "configurations": {
+            "android": "1:288826539666:android:4f1ab658b21b066cd0304b",
+            "ios": "1:288826539666:ios:362ceb547e99f309d0304b"
+          }
+        }
+      }
+    }
+  },
+  "functions": {
+    "source": "backend_notifications"
+  }
+}
