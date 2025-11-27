@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:schedule/controller/email_controller.dart';
 import 'package:schedule/controller/schedule_controller.dart';
 import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/helper_func/check_interval.dart';
@@ -24,6 +25,7 @@ class TimingsController extends GetxController {
 
   final SessionController _sessionController = Get.put(SessionController());
 
+  /// Fetch timings for classrooms and labs
   Future<void> fetchTimings(
     DepartmentAvailabilityModel deptModel, {
     double? reqHrs,
@@ -51,6 +53,7 @@ class TimingsController extends GetxController {
     }
   }
 
+  /// Fetch section (Classrooms/Labs) slots
   Future<List<ClassAvailabilityModel>> _fetchSection(
     String day,
     String deptName,
@@ -71,9 +74,7 @@ class TimingsController extends GetxController {
           .collection(section)
           .get();
 
-      // -----------------------------
-      //  STEP 1: COLLECT ALL ROOMS
-      // -----------------------------
+      // STEP 1: Collect all rooms
       for (var doc in snapshot.docs) {
         if (doc.id == "_meta") continue;
 
@@ -102,7 +103,6 @@ class TimingsController extends GetxController {
           );
         }).toList();
 
-        // Build model
         allSlots.add(
           ClassAvailabilityModel(
             id: doc.id,
@@ -113,30 +113,19 @@ class TimingsController extends GetxController {
         );
       }
 
-      // ---------------------------------------
-      //  STEP 2: APPLY FILTERS **ONCE**
-      // ---------------------------------------
-
+      // STEP 2: Apply filters
       final hasInitialTiming = initialTiming.value.isNotEmpty;
       final hasHoursRequired = hoursRequired.value != 0.0;
 
-      // Case A: No filters → return all slots
-      if (!hasInitialTiming && !hasHoursRequired) {
-        return allSlots;
-      }
-
-      // Case B: Start with initial timing filter if needed
       List<ClassAvailabilityModel> filteredList = allSlots;
 
       if (hasInitialTiming) {
         filteredList = filterSlotsAfter(allSlots, initialTiming.value);
       }
 
-      // Case C: Apply consecutive hours requirement
       if (hasHoursRequired) {
         finalList = findConsecutiveSlots(filteredList, hoursRequired.value);
       } else {
-        // Only initial timing filter applied
         finalList = filteredList;
       }
     } catch (e) {
@@ -146,11 +135,12 @@ class TimingsController extends GetxController {
     return finalList;
   }
 
+  /// Apply booking request
   Future<void> apply({
     required ClassAvailabilityModel classModel,
-    required String timeslot, // might not exist in DB (merged slot)
+    required String timeslot,
     required String reason,
-    List<String>? consideredSlots, // actual existing slots
+    List<String>? consideredSlots,
   }) async {
     try {
       final day = _scheduleController.selectedDay.value;
@@ -161,9 +151,12 @@ class TimingsController extends GetxController {
       final batch = _firestore.batch();
       final bookingId = _firestore.collection("requests").doc().id;
 
+      // Get current user info
       final session = await _sessionController.getSession();
+      final userName = session["username"];
+      final userEmail = session["email"];
 
-      // ---------- REQUEST DATA (always stored once) ----------
+      // ---------- Store the request ----------
       final requestRef = _firestore
           .collection("requests")
           .doc(dept)
@@ -172,34 +165,31 @@ class TimingsController extends GetxController {
 
       final requestData = {
         "bookingId": bookingId,
-        "username": session["username"],
-        "email": session["email"],
+        "username": userName,
+        "email": userEmail,
         "department": dept,
         "roomId": classModel.className,
         "reason": reason,
-        "timeSlot": timeslot, // merged readable slot range
+        "timeSlot": timeslot,
         "consideredSlots": consideredSlots ?? [],
         "status": "Pending",
         "day": day,
         "requestedDate": date,
         "createdAt": Timestamp.now(),
       };
-
       batch.set(requestRef, requestData);
 
-      // Application object for each slot
+      // ---------- Update slot applications ----------
       final application = {
         "bookingId": bookingId,
-        "username": session["username"],
-        "email": session["email"],
+        "username": userName,
+        "email": userEmail,
         "reason": reason,
         "requestedDate": date,
         "createdAt": Timestamp.now(),
         "status": "Pending",
       };
 
-      // ---------- SLOT UPDATES ----------
-      // CASE 1: Timeslot exists normally → update only that slot
       if (consideredSlots == null || consideredSlots.isEmpty) {
         final slotRef = _firestore
             .collection("slots")
@@ -214,9 +204,7 @@ class TimingsController extends GetxController {
         batch.update(slotRef, {
           "applications.$date": FieldValue.arrayUnion([application]),
         });
-      }
-      // CASE 2: Merged slots → update all individual existing slots
-      else {
+      } else {
         for (final slot in consideredSlots) {
           final slotRef = _firestore
               .collection("slots")
@@ -235,7 +223,28 @@ class TimingsController extends GetxController {
       }
 
       await batch.commit();
-      Get.snackbar("Success", "Application submitted");
+
+      // ---------- Send email to faculty ----------
+      final facultySnapshot = await _firestore
+          .collection('faculty')
+          .where('department', isEqualTo: dept)
+          .where('isHOD', isEqualTo: false)
+          .get();
+
+      for (final doc in facultySnapshot.docs) {
+        final facultyEmail = doc['email'];
+        await sendEmailNotification(
+          facultyEmail: facultyEmail,
+          userName: userName,
+          userEmail: userEmail,
+          room: classModel.className,
+          date: date,
+          time: timeslot,
+          reason: reason,
+        );
+      }
+
+      Get.snackbar("Success", "Application submitted and faculty notified");
     } catch (e) {
       Get.snackbar("Error", "Failed to submit: $e");
       print("ERROR: $e");
