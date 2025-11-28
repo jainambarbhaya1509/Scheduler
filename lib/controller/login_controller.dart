@@ -8,7 +8,7 @@ class LoginController extends GetxController {
   final passwordController = TextEditingController();
   final isLoading = false.obs;
 
-  final oldPasswordController = TextEditingController();
+  // final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -74,10 +74,10 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
 
-      final oldPassword = oldPasswordController.text.trim();
+      // final oldPassword = oldPasswordController.text.trim();
       final newPassword = newPasswordController.text.trim();
 
-      if (oldPassword.isEmpty || newPassword.isEmpty) {
+      if (newPassword.isEmpty) {
         Get.snackbar("Error", "Please fill all fields");
         return;
       }
@@ -96,10 +96,10 @@ class LoginController extends GetxController {
       final doc = query.docs.first;
       final user = doc.data();
 
-      if (user["password"] != oldPassword) {
-        Get.snackbar("Failed", "Old password is incorrect");
-        return;
-      }
+      // if (user["password"] != oldPassword) {
+      //   Get.snackbar("Failed", "Old password is incorrect");
+      //   return;
+      // }
 
       await _db.collection("faculty").doc(doc.id).update({
         "password": newPassword,
@@ -118,7 +118,7 @@ class LoginController extends GetxController {
 
       Get.snackbar("Success", "Password changed successfully");
 
-      oldPasswordController.clear();
+      // oldPasswordController.clear();
       newPasswordController.clear();
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -137,7 +137,7 @@ class LoginController extends GetxController {
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
-    oldPasswordController.dispose();
+    // oldPasswordController.dispose();
     newPasswordController.dispose();
     super.onClose();
   }

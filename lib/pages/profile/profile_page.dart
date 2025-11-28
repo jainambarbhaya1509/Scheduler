@@ -138,17 +138,17 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildChangePassword() {
     return Column(
       children: [
-        _buildInputContainer(
-          child: TextFormField(
-            controller: loginController.oldPasswordController,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              hintText: "Enter Old Password",
-              hintStyle: TextStyle(color: Colors.grey),
-            ),
-          ),
-        ),
-        const SizedBox(height: 15),
+        // _buildInputContainer(
+        //   child: TextFormField(
+        //     controller: loginController.oldPasswordController,
+        //     decoration: const InputDecoration(
+        //       border: InputBorder.none,
+        //       hintText: "Enter Old Password",
+        //       hintStyle: TextStyle(color: Colors.grey),
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: 15),
         _buildInputContainer(
           child: TextFormField(
             controller: loginController.newPasswordController,
