@@ -84,7 +84,7 @@ class AddTimeTable extends StatelessWidget {
             () => Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.upload_rounded, size: 100, color: Colors.black45),
+                Icon(Icons.upload_rounded, size: 100, color: Colors.black87),
           
                 TextButton(
                   onPressed: controller.running.value
