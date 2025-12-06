@@ -1,11 +1,9 @@
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
+import 'package:schedule/services/session_service.dart';
 
-class SessionController {
-  final SharedPreferencesAsync pref = SharedPreferencesAsync();
-  final uuid = Uuid();
+class SessionController extends GetxController {
+  final _sessionService = SessionService();
 
-  /// Save user session after login or password change
   Future<void> setSession(
     String username,
     String email,
@@ -14,39 +12,19 @@ class SessionController {
     bool isHOD,
     bool isSuperAdmin,
     bool isAdmin,
-  ) async {
-    await pref.setString("uuid", uuid.v4());
-    await pref.setString("username", username);
-    await pref.setString("email", email);
-    await pref.setString("password", password);
-    await pref.setString("department", dept);
-    await pref.setBool("isHOD", isHOD);
-    await pref.setBool("isSuperAdmin", isSuperAdmin);
-    await pref.setBool("isAdmin", isAdmin);
-  }
+  ) => _sessionService.setSession(
+    username: username,
+    email: email,
+    password: password,
+    dept: dept,
+    isHOD: isHOD,
+    isSuperAdmin: isSuperAdmin,
+    isAdmin: isAdmin,
+  );
 
-  /// Fetch session
-  Future<Map<String, dynamic>> getSession() async {
-    return {
-      "uuid": await pref.getString("uuid"),
-      "username": await pref.getString("username"),
-      "email": await pref.getString("email"),
-      "password": await pref.getString("password"),
-      "department": await pref.getString("department"),
-      "isHOD": await pref.getBool("isHOD") ?? false,
-      "isSuperAdmin": await pref.getBool("isSuperAdmin") ?? false,
-      "isAdmin": await pref.getBool("isAdmin") ?? false,
-    };
-  }
+  Future<Map<String, dynamic>> getSession() => _sessionService.getSession();
 
-  /// Check if login exists
-  Future<bool> isLoggedIn() async {
-    final id = await pref.getString("uuid");
-    return id != null;
-  }
+  Future<bool> isLoggedIn() => _sessionService.isLoggedIn();
 
-  /// Clear all session info
-  Future<void> clearSession() async {
-    await pref.clear();
-  }
+  Future<void> clearSession() => _sessionService.clearSession();
 }

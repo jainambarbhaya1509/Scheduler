@@ -9,7 +9,7 @@ class AddTimeTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(UploadTTController());
+    final controller = Get.put(TimetableController());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -157,45 +157,6 @@ class AddTimeTable extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDropdownRow({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?)? onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: DropdownButton<String>(
-            value: value,
-            isExpanded: true,
-            underline: const SizedBox(),
-            hint: Text("Select $label"),
-            items: items
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
-            onChanged: onChanged,
-          ),
-        ),
-      ],
     );
   }
 }

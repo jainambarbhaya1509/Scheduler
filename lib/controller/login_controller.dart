@@ -1,26 +1,27 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:schedule/controller/session_controller.dart';
+import 'package:schedule/utils/firestore_helpers.dart';
+import 'package:schedule/services/firestore_service.dart';
+import 'package:schedule/services/error_handler.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+
   final isLoading = false.obs;
 
   bool isAuthenticated = false;
   bool isAuthenticating = false;
   String error = '';
 
-  // final oldPasswordController = TextEditingController();
-  final newPasswordController = TextEditingController();
+  final _db = FirestoreService().instance;
+  final auth = LocalAuthentication();
+  final _sessionController = SessionController();
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final LocalAuthentication auth = LocalAuthentication();
-
-  final SessionController _sessionController = SessionController();
-
+  /// Authenticate using biometrics
   Future<void> authenticate() async {
     isAuthenticating = true;
     try {
@@ -30,6 +31,7 @@ class LoginController extends GetxController {
       );
     } on Exception catch (e) {
       error = e.toString();
+      ErrorHandler.showError(e);
     }
     isAuthenticating = false;
   }
@@ -43,7 +45,7 @@ class LoginController extends GetxController {
       final password = passwordController.text.trim();
 
       if (email.isEmpty || password.isEmpty) {
-        Get.snackbar("Error", "Please fill all fields");
+        ErrorHandler.handleError("Error", "Please fill all fields");
         return null;
       }
 
@@ -54,32 +56,31 @@ class LoginController extends GetxController {
           .get();
 
       if (query.docs.isEmpty) {
-        Get.snackbar("Login Failed", "User not found");
+        ErrorHandler.handleError("Login Failed", "User not found");
         return null;
       }
 
-      final doc = query.docs.first;
-      final user = doc.data();
+      final user = query.docs.first.data();
 
-      if (user["password"] != password) {
-        Get.snackbar("Login Failed", "Incorrect password");
+      if (FirestoreHelpers.safeGet<String>(user, "password") != password) {
+        ErrorHandler.handleError("Login Failed", "Incorrect password");
         return null;
       }
 
       await _sessionController.setSession(
-        user["username"] ?? "",
-        user["email"] ?? "",
-        user["password"] ?? "",
-        user["department"] ?? "",
-        user["isHOD"] ?? false,
-        user["isSuperAdmin"] ?? false,
-        user["isAdmin"] ?? false,
+        FirestoreHelpers.safeGet<String>(user, "username") ?? "",
+        FirestoreHelpers.safeGet<String>(user, "email") ?? "",
+        password,
+        FirestoreHelpers.safeGet<String>(user, "department") ?? "",
+        FirestoreHelpers.safeGet<bool>(user, "isHOD") ?? false,
+        FirestoreHelpers.safeGet<bool>(user, "isSuperAdmin") ?? false,
+        FirestoreHelpers.safeGet<bool>(user, "isAdmin") ?? false,
       );
 
-      Get.snackbar("Success", "Welcome ${user['username']}");
+      ErrorHandler.handleSuccess("Success", "Welcome ${user['username']}");
       return user;
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      ErrorHandler.showError(e);
       return null;
     } finally {
       isLoading.value = false;
@@ -88,17 +89,14 @@ class LoginController extends GetxController {
 
   /// Change password with session update
   Future<void> changePassword() async {
-    // final ProfileController profileController = Get.find<ProfileController>();
     final session = await _sessionController.getSession();
 
     try {
       isLoading.value = true;
-
-      // final oldPassword = oldPasswordController.text.trim();
       final newPassword = newPasswordController.text.trim();
 
       if (newPassword.isEmpty) {
-        Get.snackbar("Error", "Please fill all fields");
+        ErrorHandler.handleError("Error", "Please enter new password");
         return;
       }
 
@@ -109,45 +107,35 @@ class LoginController extends GetxController {
           .get();
 
       if (query.docs.isEmpty) {
-        Get.snackbar("Failed", "User not found");
+        ErrorHandler.handleError("Failed", "User not found");
         return;
       }
 
-      final doc = query.docs.first;
-      final user = doc.data();
+      final docId = query.docs.first.id;
+      final user = query.docs.first.data();
 
-      // if (user["password"] != oldPassword) {
-      //   Get.snackbar("Failed", "Old password is incorrect");
-      //   return;
-      // }
+      await _db.collection("faculty").doc(docId).update({"password": newPassword});
 
-      await _db.collection("faculty").doc(doc.id).update({
-        "password": newPassword,
-      });
-
-      // ✅ Update session after password change
       await _sessionController.setSession(
-        user["username"] ?? "",
-        user["email"],
+        FirestoreHelpers.safeGet<String>(user, "username") ?? "",
+        session["email"],
         newPassword,
-        user["department"] ?? "",
-        user["isHOD"] ?? false,
-        user["isSuperAdmin"] ?? false,
-        user["isAdmin"] ?? false,
+        FirestoreHelpers.safeGet<String>(user, "department") ?? "",
+        FirestoreHelpers.safeGet<bool>(user, "isHOD") ?? false,
+        FirestoreHelpers.safeGet<bool>(user, "isSuperAdmin") ?? false,
+        FirestoreHelpers.safeGet<bool>(user, "isAdmin") ?? false,
       );
 
-      Get.snackbar("Success", "Password changed successfully");
-
-      // oldPasswordController.clear();
+      ErrorHandler.handleSuccess("Success", "Password changed successfully");
       newPasswordController.clear();
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      ErrorHandler.showError(e);
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Optional logout
+  /// Logout
   Future<void> logout() async {
     await _sessionController.clearSession();
     Get.offAllNamed("/login");
@@ -157,7 +145,6 @@ class LoginController extends GetxController {
   void onClose() {
     emailController.dispose();
     passwordController.dispose();
-    // oldPasswordController.dispose();
     newPasswordController.dispose();
     super.onClose();
   }

@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/models/availability_model.dart';
+import 'package:schedule/services/firestore_service.dart';
+import 'package:schedule/utils/slot_helpers.dart';
 
 class ScheduleController extends GetxController {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _firestore = FirestoreService().instance;
 
   final departmentAvailabilityList = <DepartmentAvailabilityModel>[].obs;
   final selectedDay = "".obs;
@@ -14,11 +15,10 @@ class ScheduleController extends GetxController {
 
   StreamSubscription? _availabilitySubscription;
 
-  final List<String> _sections = ["Classrooms", "Labs"];
+  static const List<String> _sections = ["Classrooms", "Labs"];
 
   /// Fetch availability for a given day
-  Future<void> fetchAvailabilityForDay(
-    String day, ) async {
+  Future<void> fetchAvailabilityForDay(String day) async {
     selectedDay.value = day;
     isLoading.value = true;
     try {
@@ -32,10 +32,9 @@ class ScheduleController extends GetxController {
 
       if (deptSnapshot.docs.isEmpty) return;
 
-      final futures = deptSnapshot.docs.map(
-        (deptDoc) => _fetchDeptAvailability(day, deptDoc.id),
+      final results = await Future.wait(
+        deptSnapshot.docs.map((doc) => _fetchDeptAvailability(day, doc.id)),
       );
-      final results = await Future.wait(futures);
 
       departmentAvailabilityList.addAll(
         results.whereType<DepartmentAvailabilityModel>(),
@@ -47,7 +46,7 @@ class ScheduleController extends GetxController {
     }
   }
 
-  /// Fetch availability counts for a single department
+  /// Fetch availability for single department
   Future<DepartmentAvailabilityModel?> _fetchDeptAvailability(
     String day,
     String departmentId,
@@ -65,9 +64,8 @@ class ScheduleController extends GetxController {
         ),
       );
 
-      final classroomCount = results[0].docs
-          .where((d) => d.id != "_meta")
-          .length;
+      final classroomCount =
+          results[0].docs.where((d) => d.id != "_meta").length;
       final labCount = results[1].docs.where((d) => d.id != "_meta").length;
 
       return DepartmentAvailabilityModel(
@@ -83,21 +81,19 @@ class ScheduleController extends GetxController {
     }
   }
 
-  /// Fetch available rooms for a specific department
+  /// Fetch available rooms for specific department
   Future<Map<String, List<Map<String, dynamic>>>> fetchAvailableRooms(
     String department,
   ) async {
     selectedDept.value = department;
-
-    return await _fetchRooms(selectedDay.value, [department]);
+    return _fetchRooms(selectedDay.value, [department]);
   }
 
-  /// Generic function to fetch rooms and slots for given departments
+  /// Optimized room/slot fetching with batch processing
   Future<Map<String, List<Map<String, dynamic>>>> _fetchRooms(
     String day,
     List<String> departments,
   ) async {
-
     final availableData = {
       "Classrooms": <Map<String, dynamic>>[],
       "Labs": <Map<String, dynamic>>[],
@@ -115,32 +111,24 @@ class ScheduleController extends GetxController {
             .collection(section)
             .get();
 
-        final roomDocs = roomsSnapshot.docs.where((d) => d.id != "_meta");
-
-        for (final roomDoc in roomDocs) {
-          final slotSnapshot = await roomDoc.reference
-              .collection("slots")
-              .get();
+        for (final roomDoc
+            in roomsSnapshot.docs.where((d) => d.id != "_meta")) {
+          final slotSnapshot = await roomDoc.reference.collection("slots").get();
 
           for (final slotDoc in slotSnapshot.docs) {
             final data = slotDoc.data();
 
-            // Skip if there is at least 1 application for the selected date
-            if (data["applications"] != null &&
-                data["applications"][date] != null &&
-                (data["applications"][date] as List).isNotEmpty) {
-              continue;
+            if (SlotHelpers.isSlotAvailable(data, date)) {
+              availableData[section]!.add({
+                "day": day,
+                "department": dept,
+                "section": section,
+                "className": roomDoc.id,
+                "slotTime": slotDoc.id,
+                ...data,
+                "applications": {},
+              });
             }
-
-            availableData[section]!.add({
-              "day": day,
-              "department": dept,
-              "section": section,
-              "className": roomDoc.id,
-              "slotTime": slotDoc.id,
-              ...data,
-              "applications": {}, // empty because no applications
-            });
           }
         }
       }

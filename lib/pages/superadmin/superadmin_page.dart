@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/superadmin_controller.dart';
+import 'package:schedule/helper_func/generate_password.dart';
 
 class SuperAdminPage extends StatefulWidget {
   const SuperAdminPage({super.key});
@@ -14,7 +15,7 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
 
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
-  final TextEditingController passwordCtrl = TextEditingController();
+  // final TextEditingController passwordCtrl = TextEditingController();
 
   String? selectedDept;
   bool isAdmin = false;
@@ -29,9 +30,9 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
     if (!_formKey.currentState!.validate()) return;
 
     Map<String, dynamic> data = {
-      "name": nameCtrl.text.trim(),
+      "username": nameCtrl.text.trim(),
       "email": emailCtrl.text.trim(),
-      "password": passwordCtrl.text.trim(),
+      "password": generateRandomPassword().trim(),
       "department": selectedDept,
       "isAdmin": isAdmin,
       "isHOD": isHod,
@@ -65,28 +66,18 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _textField(nameCtrl, "Enter name"),
-
                   const SizedBox(height: 16),
-
                   _textField(emailCtrl, "Enter email"),
-
                   const SizedBox(height: 16),
-
-                  _textField(passwordCtrl, "Enter password", isPassword: true),
-
-                  const SizedBox(height: 16),
-
                   _departmentDropdown(),
-
                   const SizedBox(height: 20),
-
                   Row(
                     children: [
-                      _toggle("Is Admin", isAdmin, (v) {
+                      _toggle("Time Table Coordinator", isAdmin, (v) {
                         setState(() => isAdmin = v);
                       }),
                       const SizedBox(width: 25),
-                      _toggle("Is HOD", isHod, (v) {
+                      _toggle("HOD", isHod, (v) {
                         setState(() => isHod = v);
                       }),
                     ],
@@ -155,6 +146,7 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
   Widget _departmentDropdown() {
     return DropdownButtonFormField<String>(
       initialValue: selectedDept,
+      hint: const Text("Select Department"),
       validator: (v) => v == null ? "Please select a department" : null,
       decoration: InputDecoration(
         filled: true,
@@ -179,7 +171,11 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
           text,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
-        Switch(value: value, onChanged: onChange, activeThumbColor: Colors.green),
+        Switch(
+          value: value,
+          onChanged: onChange,
+          activeThumbColor: Colors.green,
+        ),
       ],
     );
   }

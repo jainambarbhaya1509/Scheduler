@@ -4,41 +4,42 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/helper_func/convert_time.dart';
 import 'package:schedule/helper_func/tt_to_json.dart';
+import 'package:schedule/services/firestore_service.dart';
+import 'package:schedule/services/error_handler.dart';
 
-class UploadTTController extends GetxController {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class TimetableController extends GetxController {
+  final _firestore = FirestoreService().instance;
 
-  final RxString department = "".obs;
-  final RxString classNo = "".obs;
-  final RxBool running = false.obs;
-  final RxString status = "".obs;
+  final department = "".obs;
+  final classNo = "".obs;
+  final running = false.obs;
+  final status = "".obs;
 
   String? path;
 
-  /// department → class/lab list
-  final List<String> departmentData = [
+  static const departmentData = [
     'Information Technology',
     'Computer Engineering',
   ];
 
-  final SessionController _sessionController = Get.put(SessionController());
+  static const sections = ["Classrooms", "Labs"];
+  static const maxBatchOps = 450;
 
-  // List<String> get classOptions => departmentData[department.value] ?? [];
-
-  // void resetSelections() => classNo.value = "";
+  final _sessionController = Get.put(SessionController());
 
   void setRunning(bool v) => running.value = v;
 
+  /// Pick and process file
   Future<void> pickFileAndProcess() async {
     department.value = await _sessionController.getSession().then(
-      (session) => session['department'] ?? '',
-    );
+          (session) => session['department'] ?? '',
+        );
 
     setRunning(true);
     status.value = "Picking file...";
 
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["xlsx", "xls"],
         withData: true,
@@ -59,31 +60,29 @@ class UploadTTController extends GetxController {
 
       status.value = "Converting Excel to JSON...";
 
-      final List<Map<String, dynamic>> jsonResults = await excelToJson(
+      final jsonResults = await excelToJson(
         department.value,
         path!,
         saveHtml: false,
         saveJson: false,
       );
 
-      status.value = "Uploading extracted slots to Firestore...";
-
+      status.value = "Uploading to Firestore...";
       await _uploadSlotsFromJsonList(jsonResults);
 
       status.value = "Success: Uploaded!";
     } catch (e) {
       status.value = "Error: $e";
+      ErrorHandler.showError(e);
     } finally {
       setRunning(false);
     }
   }
 
-  // Updated function to handle list of JSON objects with safe batching
+  /// Optimized upload with batching and validation
   Future<void> _uploadSlotsFromJsonList(
     List<Map<String, dynamic>> jsonList,
   ) async {
-    const int maxBatchOps = 450; // safe margin under Firestore 500-op limit
-
     for (var data in jsonList) {
       try {
         data = convertScheduleTo24(data);
@@ -92,109 +91,124 @@ class UploadTTController extends GetxController {
         final slotDays = data["slots"] as List?;
 
         if (departmentName == null || className == null || slotDays == null) {
-          print("⚠️ Skipping invalid JSON: $data");
+          print("Skipping invalid JSON: $data");
           continue;
         }
 
         final section = className.contains('L') ? "Labs" : "Classrooms";
-        print("📁 Detected section: $section for class $className");
+        print("Processing section: $section for class $className");
 
-        // Create a batch and op counter for this JSON payload
-        WriteBatch batch = _firestore.batch();
-        int ops = 0;
-
-        Future<void> commitIfNeeded([int extraOps = 0]) async {
-          if (ops + extraOps >= maxBatchOps) {
-            await batch.commit();
-            batch = _firestore.batch();
-            ops = 0;
-          }
-        }
-
-        for (var dayData in slotDays) {
-          final day = dayData["day"]?.toString();
-          final emptySlots = dayData["empty_slots"] as List?;
-
-          if (day == null || emptySlots == null) continue;
-
-          final now = Timestamp.now();
-
-          final dayRef = _firestore.collection("slots").doc(day);
-          final deptRef = dayRef.collection("departments").doc(departmentName);
-          final sectionRef = deptRef.collection(section).doc("_meta");
-          final classRef = deptRef.collection(section).doc(className);
-
-          // Ensure we have room for the 4 meta writes before adding them
-          await commitIfNeeded(4);
-          batch.set(dayRef, {
-            "createdAt": now,
-            "lastUpdated": now,
-          }, SetOptions(merge: true));
-          ops++;
-
-          batch.set(deptRef, {
-            "createdAt": now,
-            "lastUpdated": now,
-          }, SetOptions(merge: true));
-          ops++;
-
-          batch.set(sectionRef, {
-            "sectionType": section,
-            "createdAt": now,
-            "lastUpdated": now,
-          }, SetOptions(merge: true));
-          ops++;
-
-          batch.set(classRef, {
-            "className": className,
-            "createdAt": now,
-            "lastUpdated": now,
-          }, SetOptions(merge: true));
-          ops++;
-
-          for (var slotTime in emptySlots) {
-            if (slotTime == null) continue;
-            final slotId = slotTime.toString();
-            final parts = slotId.split('-');
-            final start = parts.isNotEmpty ? parts.first : slotId;
-            final end = parts.length > 1 ? parts.last : slotId;
-
-            final slotRef = classRef.collection("slots").doc(slotId);
-
-            // Ensure we have room for this slot write
-            await commitIfNeeded(1);
-            batch.set(slotRef, {
-              "start_time": start,
-              "end_time": end,
-              "applications": {},
-              "createdAt": now,
-              "lastUpdated": now,
-            }, SetOptions(merge: true));
-            ops++;
-          }
-
-          // commit intermediate batch for this day if approaching limit (or continue accumulating)
-          if (ops > 0 && ops >= (maxBatchOps * 0.8).toInt()) {
-            await batch.commit();
-            batch = _firestore.batch();
-            ops = 0;
-          }
-
-          print(
-            "✅ Prepared uploads for → $day / $departmentName / $section / $className",
-          );
-        }
-
-        // commit any remaining operations for this JSON item
-        if (ops > 0) {
-          await batch.commit();
-        }
+        await _uploadClassSlots(departmentName, className, section, slotDays);
       } catch (e, st) {
-        print("❌ Error uploading slots: $e");
+        print("Error uploading slots: $e");
         print(st);
       }
     }
 
-    print("🎉 All slot documents uploaded successfully!");
+    print("All slots uploaded successfully!");
+  }
+
+  /// Extracted slot upload logic with better batch management
+  Future<void> _uploadClassSlots(
+    String departmentName,
+    String className,
+    String section,
+    List<dynamic> slotDays,
+  ) async {
+    var batch = _firestore.batch();
+    var ops = 0;
+    final now = Timestamp.now();
+
+    for (var dayData in slotDays) {
+      final day = dayData["day"]?.toString();
+      final emptySlots = dayData["empty_slots"] as List?;
+
+      if (day == null || emptySlots == null) continue;
+
+      // Ensure space for metadata writes
+      if (ops + 4 > maxBatchOps) {
+        await batch.commit();
+        batch = _firestore.batch();
+        ops = 0;
+      }
+
+      // Write metadata
+      _createMetadataWrites(batch, day, departmentName, section, className, now);
+      ops += 4;
+
+      // Write slots
+      for (var slotTime in emptySlots) {
+        if (slotTime == null) continue;
+
+        if (ops >= maxBatchOps) {
+          await batch.commit();
+          batch = _firestore.batch();
+          ops = 0;
+        }
+
+        final slotId = slotTime.toString();
+        final (:start, :end) = _parseSlotTime(slotId);
+
+        final slotRef = _firestore
+            .collection("slots")
+            .doc(day)
+            .collection("departments")
+            .doc(departmentName)
+            .collection(section)
+            .doc(className)
+            .collection("slots")
+            .doc(slotId);
+
+        batch.set(slotRef, {
+          "start_time": start,
+          "end_time": end,
+          "applications": {},
+          "createdAt": now,
+          "lastUpdated": now,
+        }, SetOptions(merge: true));
+
+        ops++;
+      }
+
+      print("Prepared uploads for → $day / $departmentName / $section");
+    }
+
+    if (ops > 0) await batch.commit();
+  }
+
+  /// Create metadata writes for day/department/section
+  void _createMetadataWrites(
+    WriteBatch batch,
+    String day,
+    String departmentName,
+    String section,
+    String className,
+    Timestamp now,
+  ) {
+    final dayRef = _firestore.collection("slots").doc(day);
+    final deptRef = dayRef.collection("departments").doc(departmentName);
+    final sectionRef = deptRef.collection(section).doc("_meta");
+    final classRef = deptRef.collection(section).doc(className);
+
+    batch.set(dayRef, {"createdAt": now, "lastUpdated": now},
+        SetOptions(merge: true));
+    batch.set(deptRef, {"createdAt": now, "lastUpdated": now},
+        SetOptions(merge: true));
+    batch.set(sectionRef, {
+      "sectionType": section,
+      "createdAt": now,
+      "lastUpdated": now,
+    }, SetOptions(merge: true));
+    batch.set(classRef, {"className": className, "createdAt": now, "lastUpdated": now},
+        SetOptions(merge: true));
+  }
+
+  /// Parse slot time string
+  ({String start, String end}) _parseSlotTime(String slotId) {
+    final parts = slotId.split('-');
+    return (
+      start: parts.isNotEmpty ? parts.first : slotId,
+      end: parts.length > 1 ? parts.last : slotId,
+    );
   }
 }
