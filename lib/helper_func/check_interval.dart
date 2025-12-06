@@ -11,7 +11,7 @@ List<ClassAvailabilityModel> filterSlotsAfter(
     final filteredTimings = room.timingsList.where((slot) {
       final startParts = slot.timing.split("-")[0].split(":").map(int.parse).toList();
       final startMinutes = startParts[0] * 60 + startParts[1];
-      return startMinutes > initialMinutes;
+      return startMinutes >= initialMinutes;
     }).toList();
 
     return ClassAvailabilityModel(
