@@ -47,7 +47,7 @@ class AddTimeTable extends StatelessWidget {
             value: controller.department.value.isEmpty
                 ? null
                 : controller.department.value,
-            items: controller.departmentData.keys.toList(),
+            items: controller.departmentData.map((e) => e).toList(),
             onChanged: controller.running.value
                 ? null
                 : (v) {
@@ -61,23 +61,22 @@ class AddTimeTable extends StatelessWidget {
         const SizedBox(height: 16),
 
         /// ------------------ Class/Lab dropdown ------------------
-        Obx(
-          () => _buildDropdownRow(
-            label: 'Select Class/Lab',
-            value: controller.classNo.value.isEmpty
-                ? null
-                : controller.classNo.value,
-            items: controller.classOptions,
-            onChanged: controller.running.value
-                ? null
-                : (v) {
-                    if (v != null) {
-                      controller.classNo.value = v;
-                    }
-                  },
-          ),
-        ),
-
+        // Obx(
+        //   () => _buildDropdownRow(
+        //     label: 'Select Class/Lab',
+        //     value: controller.classNo.value.isEmpty
+        //         ? null
+        //         : controller.classNo.value,
+        //     items: controller.classOptions,
+        //     onChanged: controller.running.value
+        //         ? null
+        //         : (v) {
+        //             if (v != null) {
+        //               controller.classNo.value = v;
+        //             }
+        //           },
+        //   ),
+        // ),
         const SizedBox(height: 30),
 
         /// ------------------ Upload button ------------------
@@ -86,7 +85,7 @@ class AddTimeTable extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed:
-                    controller.running.value || controller.classNo.value.isEmpty
+                    controller.running.value 
                     ? null
                     : () => controller.pickFileAndProcess(),
                 icon: const Icon(

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:schedule/controller/session_controller.dart';
 
 class LoginController extends GetxController {
@@ -8,11 +9,30 @@ class LoginController extends GetxController {
   final passwordController = TextEditingController();
   final isLoading = false.obs;
 
+  bool isAuthenticated = false;
+  bool isAuthenticating = false;
+  String error = '';
+
   // final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final LocalAuthentication auth = LocalAuthentication();
+
   final SessionController _sessionController = SessionController();
+
+  Future<void> authenticate() async {
+    isAuthenticating = true;
+    try {
+      isAuthenticated = await auth.authenticate(
+        localizedReason: 'Please authenticate to access the app',
+        biometricOnly: true,
+      );
+    } on Exception catch (e) {
+      error = e.toString();
+    }
+    isAuthenticating = false;
+  }
 
   /// Optimized login with validation
   Future<Map<String, dynamic>?> login() async {

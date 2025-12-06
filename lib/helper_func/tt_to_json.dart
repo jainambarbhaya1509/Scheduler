@@ -185,34 +185,68 @@ Map<String, dynamic> extractEmptySlotsFromHtml(String html, String department, S
   return result;
 }
 
-Future<Map<String, dynamic>> excelToJson(
+// Future<Map<String, dynamic>> excelToJson(
+//   String department,
+//   String className,
+//   String filePath,
+//   String? sheetName, {
+//   bool saveHtml = false,
+//   bool saveJson = true,
+// }) async {
+//   final bytes = File(filePath).readAsBytesSync();
+//   final excel = Excel.decodeBytes(bytes);
+
+//   final sheetKey = sheetName ?? excel.tables.keys.first;
+//   final sheet = excel.tables[sheetKey]!;
+
+//   final html = excelToHtml(excel, sheetKey, sheet);
+//   final jsonResult = extractEmptySlotsFromHtml(html, department, className);
+
+//   if (saveHtml) {
+//     File('table_output.html').writeAsStringSync(html);
+//   }
+//   if (saveJson) {
+//     File(
+//       'empty_slots.json',
+//     ).writeAsStringSync(JsonEncoder.withIndent('  ').convert(jsonResult));
+//   }
+
+//   return jsonResult;
+// }
+
+Future<List<Map<String, dynamic>>> excelToJson(
   String department,
-  String className,
-  String filePath,
-  String? sheetName, {
+  String filePath, {
   bool saveHtml = false,
   bool saveJson = true,
 }) async {
   final bytes = File(filePath).readAsBytesSync();
   final excel = Excel.decodeBytes(bytes);
 
-  final sheetKey = sheetName ?? excel.tables.keys.first;
-  final sheet = excel.tables[sheetKey]!;
+  final results = <Map<String, dynamic>>[];
 
-  final html = excelToHtml(excel, sheetKey, sheet);
-  final jsonResult = extractEmptySlotsFromHtml(html, department, className);
+  for (final sheetKey in excel.tables.keys) {
+    final sheet = excel.tables[sheetKey]!;
 
-  if (saveHtml) {
-    File('table_output.html').writeAsStringSync(html);
+    final html = excelToHtml(excel, sheetKey, sheet);
+    final jsonResult = extractEmptySlotsFromHtml(html, department, sheetKey);
+
+    results.add(jsonResult);
+
+    if (saveHtml) {
+      File('${sheetKey}_table_output.html').writeAsStringSync(html);
+    }
   }
+
   if (saveJson) {
     File(
-      'empty_slots.json',
-    ).writeAsStringSync(JsonEncoder.withIndent('  ').convert(jsonResult));
+      'empty_slots_all_sheets.json',
+    ).writeAsStringSync(JsonEncoder.withIndent('  ').convert(results));
   }
 
-  return jsonResult;
+  return results;
 }
+
 
 // void main() async {
 //   stdout.write('Excel file path (e.g. test.xlsx): ');

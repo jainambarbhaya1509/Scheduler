@@ -189,6 +189,132 @@ class RequestsController extends GetxController {
     }
   }
 
+  // Future<void> transferBooking({
+  //   required String bookingId,
+  //   required String fromDept,
+  //   required String toDept,
+  // }) async {
+  //   try {
+  //     final fromRef = _firestore
+  //         .collection("requests")
+  //         .doc(fromDept)
+  //         .collection("requests_list")
+  //         .doc(bookingId);
+
+  //     final toRef = _firestore
+  //         .collection("requests")
+  //         .doc(toDept)
+  //         .collection("requests_list")
+  //         .doc(bookingId);
+
+  //     final snap = await fromRef.get();
+  //     if (!snap.exists) {
+  //       Get.snackbar("Error", "Booking not found in $fromDept");
+  //       return;
+  //     }
+
+  //     final data = snap.data()!;
+  //     await toRef.set(data);
+  //     await fromRef.delete();
+
+  //     Get.snackbar("Success", "Booking transferred to $toDept");
+  //   } catch (e) {
+  //     Get.snackbar("Error", "Transfer failed: $e");
+  //   }
+  // }
+
+  // Future<void> releaseRemainingSlots({
+  //   required String dept,
+  //   required String bookingId,
+  //   required bool isClassroom,
+  // }) async {
+  //   try {
+  //     final requestRef = _firestore
+  //         .collection("requests")
+  //         .doc(dept)
+  //         .collection("requests_list")
+  //         .doc(bookingId);
+
+  //     final requestSnap = await requestRef.get();
+  //     if (!requestSnap.exists) return;
+
+  //     final requestData = requestSnap.data();
+  //     if (requestData == null) return;
+
+  //     final consideredSlots = List<String>.from(
+  //       requestData["consideredSlots"] ?? [],
+  //     );
+
+  //     for (final slotInfo in requestData["slotDetails"] ?? []) {
+  //       final day = slotInfo["day"];
+  //       final roomId = slotInfo["roomId"];
+  //       final timeSlot = slotInfo["timeSlot"];
+
+  //       if (!consideredSlots.contains(timeSlot)) {
+  //         await _updateSlotApplicationStatus(
+  //           day: day,
+  //           dept: dept,
+  //           roomId: roomId,
+  //           timeSlot: timeSlot,
+  //           bookingId: bookingId,
+  //           newStatus: "released",
+  //           isClassroom: isClassroom,
+  //         );
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print("ERROR releasing remaining slots: $e");
+  //   }
+  // }
+
+
+  // Future<void> releaseSlot({
+  //   required String day,
+  //   required String dept,
+  //   required String roomId,
+  //   required String timeSlot,
+  //   required String bookingId,
+  //   required bool isClassroom,
+  //   required String requestedDate,
+  // }) async {
+  //   try {
+  //     final slotRef = _firestore
+  //         .collection("slots")
+  //         .doc(day)
+  //         .collection("departments")
+  //         .doc(dept)
+  //         .collection(isClassroom ? "Classrooms" : "Labs")
+  //         .doc(roomId)
+  //         .collection("slots")
+  //         .doc(timeSlot);
+
+  //     final snapshot = await slotRef.get();
+  //     if (!snapshot.exists) return;
+
+  //     final raw = snapshot.data()?['applications'];
+  //     if (raw == null || raw is! Map<String, dynamic>) return;
+
+  //     final Map<String, dynamic> applications = Map.from(raw);
+
+  //     bool updated = false;
+
+  //     applications.forEach((dateKey, list) {
+  //       if (dateKey == requestedDate && list is List) {
+  //         list.removeWhere((app) => app['bookingId'] == bookingId);
+  //         updated = true;
+  //       }
+  //     });
+
+  //     if (updated) {
+  //       await slotRef.update({"applications": applications});
+  //     }
+
+  //     Get.snackbar("Success", "Slot released successfully");
+  //   } catch (e) {
+  //     Get.snackbar("Error", "Failed to release slot: $e");
+  //   }
+  // }
+
   @override
   void onClose() {
     _userRequestsSubscription?.cancel();
