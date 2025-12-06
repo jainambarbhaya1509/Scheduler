@@ -12,7 +12,7 @@ class AddTimeTable extends StatelessWidget {
     final controller = Get.put(UploadTTController());
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -41,23 +41,23 @@ class AddTimeTable extends StatelessWidget {
         const SizedBox(height: 30),
 
         /// ------------------ Department dropdown ------------------
-        Obx(
-          () => _buildDropdownRow(
-            label: 'Select Department',
-            value: controller.department.value.isEmpty
-                ? null
-                : controller.department.value,
-            items: controller.departmentData.map((e) => e).toList(),
-            onChanged: controller.running.value
-                ? null
-                : (v) {
-                    if (v != null) {
-                      controller.department.value = v;
-                      controller.resetSelections();
-                    }
-                  },
-          ),
-        ),
+        // Obx(
+        //   () => _buildDropdownRow(
+        //     label: 'Select Department',
+        //     value: controller.department.value.isEmpty
+        //         ? null
+        //         : controller.department.value,
+        //     items: controller.departmentData.map((e) => e).toList(),
+        //     onChanged: controller.running.value
+        //         ? null
+        //         : (v) {
+        //             if (v != null) {
+        //               controller.department.value = v;
+        //               controller.resetSelections();
+        //             }
+        //           },
+        //   ),
+        // ),
         const SizedBox(height: 16),
 
         /// ------------------ Class/Lab dropdown ------------------
@@ -77,48 +77,48 @@ class AddTimeTable extends StatelessWidget {
         //           },
         //   ),
         // ),
-        const SizedBox(height: 30),
 
         /// ------------------ Upload button ------------------
-        Obx(
-          () => Column(
-            children: [
-              ElevatedButton.icon(
-                onPressed:
-                    controller.running.value 
-                    ? null
-                    : () => controller.pickFileAndProcess(),
-                icon: const Icon(
-                  Icons.upload_file_rounded,
-                  color: Colors.white,
-                ),
-                label: const Text(
-                  'Pick & Upload Excel',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+        Expanded(
+          child: Obx(
+            () => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.upload_rounded, size: 100, color: Colors.black45),
+          
+                TextButton(
+                  onPressed: controller.running.value
+                      ? null
+                      : () => controller.pickFileAndProcess(),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.black87,
+                    disabledBackgroundColor: Colors.grey,
+          
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+          
+                  child: Text(
+                    'Pick & Upload Excel',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black87,
-                  disabledBackgroundColor: Colors.grey,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+          
+                if (controller.running.value) ...[
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(
+                    backgroundColor: Colors.grey[300],
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.black87,
+                    ),
                   ),
-                ),
-              ),
-
-              if (controller.running.value) ...[
-                const SizedBox(height: 16),
-                LinearProgressIndicator(
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Colors.black87,
-                  ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],
@@ -136,7 +136,7 @@ class AddTimeTable extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.black45.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
@@ -149,11 +149,11 @@ class AddTimeTable extends StatelessWidget {
               style: TextStyle(
                 color: Colors.black45,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: 14,
               ),
             ),
             Spacer(),
-            Icon(Icons.arrow_downward_rounded, size: 15, color: Colors.black45),
+            Icon(Icons.arrow_downward_rounded, size: 20, color: Colors.black45),
           ],
         ),
       ),

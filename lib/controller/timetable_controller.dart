@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/helper_func/convert_time.dart';
 import 'package:schedule/helper_func/tt_to_json.dart';
 
@@ -22,17 +23,18 @@ class UploadTTController extends GetxController {
     'Computer Engineering',
   ];
 
+  final SessionController _sessionController = Get.put(SessionController());
+
   // List<String> get classOptions => departmentData[department.value] ?? [];
 
-  void resetSelections() => classNo.value = "";
+  // void resetSelections() => classNo.value = "";
 
   void setRunning(bool v) => running.value = v;
 
   Future<void> pickFileAndProcess() async {
-    if (department.value.isEmpty) {
-      status.value = "Please select department!";
-      return;
-    }
+    department.value = await _sessionController.getSession().then(
+      (session) => session['department'] ?? '',
+    );
 
     setRunning(true);
     status.value = "Picking file...";
