@@ -105,14 +105,14 @@ class RequestsController extends GetxController {
           .doc(bookingId);
       final snap = await ref.get();
 
-      final consideredSlots = List<String>.from(
-        snap.data()?["consideredSlots"] ?? [],
-      );
+      // Use provided consideredSlots if passed, otherwise fall back to stored value
+      final List<String> effectiveConsideredSlots = consideredSlots ??
+          List<String>.from(snap.data()?["consideredSlots"] ?? []);
 
       await ref.update({"status": newStatus});
 
-      // Update slot applications
-      await _updateSlotApplicationStatus(
+      // Batch update slot applications
+      await _updateSlotApplicationStatusBatch(
         day: day,
         dept: dept,
         roomId: roomId,
@@ -120,7 +120,7 @@ class RequestsController extends GetxController {
         bookingId: bookingId,
         newStatus: newStatus,
         isClassroom: isClassroom,
-        consideredSlots: consideredSlots,
+        consideredSlots: effectiveConsideredSlots,
       );
 
       Get.snackbar("Success", "Application updated");
@@ -129,7 +129,8 @@ class RequestsController extends GetxController {
     }
   }
 
-  Future<void> _updateSlotApplicationStatus({
+  // Replaced per-document sequential updates with a batch-based updater
+  Future<void> _updateSlotApplicationStatusBatch({
     required String day,
     required String dept,
     required String roomId,
@@ -142,10 +143,11 @@ class RequestsController extends GetxController {
     try {
       final slotsToUpdate =
           consideredSlots != null && consideredSlots.isNotEmpty
-          ? consideredSlots
-          : [timeSlot];
+              ? consideredSlots
+              : [timeSlot];
 
-      // print(slotsToUpdate);
+      final WriteBatch batch = _firestore.batch();
+      final List<DocumentReference> docsToUpdate = [];
 
       for (final slot in slotsToUpdate) {
         final slotRef = _firestore
@@ -164,7 +166,7 @@ class RequestsController extends GetxController {
         final raw = snapshot.data()?['applications'];
         if (raw == null || raw is! Map<String, dynamic>) continue;
 
-        final Map<String, dynamic> applications = Map.from(raw);
+        final Map<String, dynamic> applications = Map<String, dynamic>.from(raw);
 
         bool updated = false;
 
@@ -172,8 +174,9 @@ class RequestsController extends GetxController {
           if (list is List) {
             for (int i = 0; i < list.length; i++) {
               final app = list[i];
-              if (app['bookingId'] == bookingId) {
-                list[i] = {...app, "status": newStatus};
+              if (app is Map && app['bookingId'] == bookingId) {
+                // create a new map to avoid mutating original references unexpectedly
+                list[i] = {...Map<String, dynamic>.from(app), "status": newStatus};
                 updated = true;
               }
             }
@@ -181,11 +184,17 @@ class RequestsController extends GetxController {
         });
 
         if (updated) {
-          await slotRef.update({"applications": applications});
+          // queue update in batch
+          batch.update(slotRef, {"applications": applications});
+          docsToUpdate.add(slotRef);
         }
       }
+
+      if (docsToUpdate.isNotEmpty) {
+        await batch.commit();
+      }
     } catch (e) {
-      print("ERROR updating slot app status: $e");
+      print("ERROR updating slot app status (batch): $e");
     }
   }
 
