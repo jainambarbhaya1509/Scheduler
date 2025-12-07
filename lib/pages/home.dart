@@ -49,6 +49,41 @@ class _HomePageState extends State<HomePage> {
     }
 
     // ---------------------------------------------------
+    // ADMIN + HOD ONLY
+    // ---------------------------------------------------
+    if (widget.isAdmin && !widget.isSuperAdmin && widget.isHOD) {
+      pages.add(const SchedulePage());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: "Schedule",
+        ),
+      );
+
+      pages.add(const ApplicationStatusPage());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.call_missed_outgoing),
+          label: "Status",
+        ),
+      );
+      pages.add(const RequestsPage());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.approval_rounded),
+          label: "Requests",
+        ),
+      );
+      pages.add(AddTimeTable());
+      navItems.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: "Add Time Table",
+        ),
+      );
+    }
+
+    // ---------------------------------------------------
     // ADMIN ONLY
     // ---------------------------------------------------
     if (widget.isAdmin && !widget.isSuperAdmin && !widget.isHOD) {

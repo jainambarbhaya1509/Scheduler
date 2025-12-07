@@ -192,17 +192,19 @@ class TimingsController extends GetxController {
 
       await batch.commit();
 
-      // Notify faculty
-      final facultySnapshot = await _firestore
+      // email notification logic to be implemented here for HOD
+      final hodSnapshot = await _firestore
           .collection('faculty')
           .where('department', isEqualTo: dept)
-          .where('isHOD', isEqualTo: false)
+          .where('isHOD', isEqualTo: true)
           .get();
 
-      // email notification logic to be implemented here for HOD
+      for (final doc in hodSnapshot.docs) {
+        final hodEmail = doc['email'];
+        final subject = "New Booking Request from $userName";
+        final emailMessage = "Dear HOD,\n\n$userName has submitted a booking request for ${classModel.className} on $date. \nTime Slot: $timeslot \n\nReason: $reason\n\nBest regards,\nScheduling System";
 
-      for (final doc in facultySnapshot.docs) {
-        //  sendEmailNotification(facultyEmail: facultyEmail, userName: userName, userEmail: userEmail, subject: subject, emailMessage: emailMessage)
+        sendEmailNotification(facultyEmail: hodEmail, userName: userName, userEmail: userEmail, subject: subject, emailMessage: emailMessage);
       }
 
       Get.snackbar("Success", "Application submitted and faculty notified");

@@ -107,9 +107,10 @@ class RequestsController extends GetxController {
           .doc(bookingId);
 
       final snap = await ref.get();
+      final requestData = snap.data();
 
       final effectiveSlots = consideredSlots ??
-          List<String>.from(snap.data()?["consideredSlots"] ?? []);
+          List<String>.from(requestData?["consideredSlots"] ?? []);
 
       await ref.update({"status": newStatus});
 
@@ -123,8 +124,28 @@ class RequestsController extends GetxController {
         isClassroom: isClassroom,
         consideredSlots: effectiveSlots,
       );
+      
       ErrorHandler.handleSuccess("Success", "Application updated");
-      // sendEmailNotification(facultyEmail: facultyEmail, userName: userName, userEmail: userEmail, subject: subject, emailMessage: emailMessage);
+
+      // Send notification based on status
+      if (newStatus.toLowerCase() == 'accepted' || newStatus.toLowerCase() == 'rejected') {
+        final userEmail = requestData?['email'];
+        final userName = requestData?['username'];
+        final subject = newStatus.toLowerCase() == 'accepted' 
+        ? 'Room Request Accepted' 
+        : 'Room Request Rejected';
+        final emailMessage = newStatus.toLowerCase() == 'accepted'
+        ? 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been accepted.\n\nBest regards,\nSchedule Team'
+        : 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been rejected.\n\nBest regards,\nSchedule Team';
+
+        sendEmailNotification(
+          facultyEmail: userEmail,
+          userName: userName,
+          userEmail: userEmail,
+          subject: subject,
+          emailMessage: emailMessage,
+        );
+      }
     } catch (e) {
       ErrorHandler.showError(e);
     }
