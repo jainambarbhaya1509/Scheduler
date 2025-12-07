@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:schedule/helper_func/check_interval.dart';
@@ -45,7 +47,7 @@ class TimingsController extends GetxController {
       classroomList.addAll(results[0]);
       labList.addAll(results[1]);
     } catch (e) {
-      print("Error fetching timings: $e");
+      log("Error fetching timings: $e");
     } finally {
       isLoading.value = false;
     }
@@ -110,7 +112,7 @@ class TimingsController extends GetxController {
 
       return finalList;
     } catch (e) {
-      print("Error fetching $section: $e");
+      log("Error fetching $section: $e");
       return [];
     }
   }

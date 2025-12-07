@@ -159,7 +159,7 @@ class LoginPage extends StatelessWidget {
                                                           SnackPosition.BOTTOM,
                                                     );
 
-                                                    Navigator.pop(context);
+                                                    Get.back();
                                                   } else {
                                                     Get.snackbar(
                                                       "Error",

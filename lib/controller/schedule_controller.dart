@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:schedule/models/availability_model.dart';
 import 'package:schedule/services/firestore_service.dart';
@@ -40,7 +41,7 @@ class ScheduleController extends GetxController {
         results.whereType<DepartmentAvailabilityModel>(),
       );
     } catch (e) {
-      print("Error fetching availability: $e");
+      log("Error fetching availability: $e");
     } finally {
       isLoading.value = false;
     }
@@ -76,7 +77,7 @@ class ScheduleController extends GetxController {
         totalClass: classroomCount.toString(),
       );
     } catch (e) {
-      print("Error fetching department $departmentId: $e");
+      log("Error fetching department $departmentId: $e");
       return null;
     }
   }

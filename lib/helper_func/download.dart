@@ -1,4 +1,5 @@
-  import 'dart:io';
+  import 'dart:developer';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -45,18 +46,18 @@ Future<bool> _requestPermissions() async {
           filePath,
           onReceiveProgress: (received, total) {
             if (total != -1) {
-              print(
+              log(
                 "Download: ${(received / total * 100).toStringAsFixed(0)}%",
               );
             }
           },
         );
 
-        print("File saved at: $filePath");
+        log("File saved at: $filePath");
       } catch (e) {
-        print("Error downloading file: $e");
+        log("Error downloading file: $e");
       }
     } else {
-      print("Storage permission not granted.");
+      log("Storage permission not granted.");
     }
   }

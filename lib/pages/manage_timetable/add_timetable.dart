@@ -138,7 +138,7 @@ class AddTimeTable extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.black45.withOpacity(0.1),
+          color: Colors.black45.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(

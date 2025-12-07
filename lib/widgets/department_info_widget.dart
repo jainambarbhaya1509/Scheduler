@@ -17,7 +17,7 @@ class DepartmentInfo extends StatelessWidget {
               ),
           transition: Transition.rightToLeft),
       borderRadius: BorderRadius.circular(10),
-      splashColor: Colors.white.withOpacity(0.2),
+      splashColor: Colors.white.withValues(alpha: 0.2),
       child: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -34,7 +34,7 @@ class DepartmentInfo extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 37, 37, 37).withOpacity(0.8),
+                color: const Color.fromARGB(255, 37, 37, 37).withValues(alpha: 0.8),
               ),
             ),
             const SizedBox(height: 7),

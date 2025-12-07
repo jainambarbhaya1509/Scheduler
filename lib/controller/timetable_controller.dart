@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -91,21 +93,21 @@ class TimetableController extends GetxController {
         final slotDays = data["slots"] as List?;
 
         if (departmentName == null || className == null || slotDays == null) {
-          print("Skipping invalid JSON: $data");
+          log("Skipping invalid JSON: $data");
           continue;
         }
 
         final section = className.contains('L') ? "Labs" : "Classrooms";
-        print("Processing section: $section for class $className");
+        log("Processing section: $section for class $className");
 
         await _uploadClassSlots(departmentName, className, section, slotDays);
       } catch (e, st) {
-        print("Error uploading slots: $e");
-        print(st);
+        log("Error uploading slots: $e");
+        log(st as String);
       }
     }
 
-    print("All slots uploaded successfully!");
+    log("All slots uploaded successfully!");
   }
 
   /// Extracted slot upload logic with better batch management
@@ -170,7 +172,7 @@ class TimetableController extends GetxController {
         ops++;
       }
 
-      print("Prepared uploads for → $day / $departmentName / $section");
+      log("Prepared uploads for → $day / $departmentName / $section");
     }
 
     if (ops > 0) await batch.commit();

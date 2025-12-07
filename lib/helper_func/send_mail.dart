@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
@@ -21,8 +23,8 @@ Future<void> sendEmailNotification({
 
   try {
     final sendReport = await send(message, smtpServer);
-    print('Email sent: ' + sendReport.toString());
+    log('Email sent: $sendReport');
   } catch (e) {
-    print('Failed to send email: $e');
+    log('Failed to send email: $e');
   }
 }

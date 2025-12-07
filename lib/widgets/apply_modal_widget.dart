@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:schedule/controller/timings_controller.dart';
-import 'package:schedule/models/class_avalability_model.dart';
+// import 'package:get/get.dart';
+// import 'package:schedule/controller/timings_controller.dart';
+// import 'package:schedule/models/class_avalability_model.dart';
 
 // class ApplyModal extends StatelessWidget {
 //   final String title;

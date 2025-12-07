@@ -1,4 +1,6 @@
 // lib/pages/it_slots_dashboard_full.dart
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -93,7 +95,7 @@ class _ViewReservationsState extends State<ViewReservations> {
       });
       if (_selectedDepartment != null) await _fetchClassesForSection();
     } catch (e, st) {
-      debugPrint('fetchDepartments error: $e\n$st');
+      log('fetchDepartments error: $e\n$st');
     } finally {
       setState(() {
         _loadingDepartments = false;
@@ -127,7 +129,7 @@ class _ViewReservationsState extends State<ViewReservations> {
         _classList = sorted;
       });
     } catch (e, st) {
-      debugPrint('fetchClasses error: $e\n$st');
+      log('fetchClasses error: $e\n$st');
     } finally {
       setState(() {
         _loadingClasses = false;
@@ -285,13 +287,13 @@ class _ViewReservationsState extends State<ViewReservations> {
       final allRequests = requestsSnap.docs
           .map((d) => RequestModel.fromMap(d.data(), d.id))
           .toList();
-      debugPrint('Total requests: ${allRequests.length}');
+      log('Total requests: ${allRequests.length}');
 
       final nonRejected = allRequests
           .where((r) => r.status.toLowerCase() != 'rejected')
           .toList();
       _requests = nonRejected;
-      debugPrint('Non-rejected requests: ${_requests.length}');
+      log('Non-rejected requests: ${_requests.length}');
 
       final daysSnap = await _firestore.collection(_slotsRoot).get();
       final days = daysSnap.docs.map((d) => d.id).toList();
@@ -422,21 +424,21 @@ class _ViewReservationsState extends State<ViewReservations> {
       });
 
       if (unmatchedRequests.isNotEmpty) {
-        debugPrint(
+        log(
           '--- UNMATCHED non-rejected requests (refer to non-existing slots) ---',
         );
         for (final r in unmatchedRequests) {
-          debugPrint(
+          log(
             'req id=${r.id} class=${r.className} day=${r.day} considered=${r.consideredSlots} slot=${r.slotTime} status=${r.status}',
           );
         }
       } else {
-        debugPrint(
+        log(
           'All non-rejected requests matched existing slots (or there were none).',
         );
       }
     } catch (e, st) {
-      debugPrint('loadSlotsAndRequests error: $e\n$st');
+      log('loadSlotsAndRequests error: $e\n$st');
     } finally {
       setState(() {
         _loadingSlots = false;
@@ -828,7 +830,7 @@ class _ViewReservationsState extends State<ViewReservations> {
                               horizontal: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.12),
+                              color: color.withValues(alpha: 0.12),
                               border: Border.all(color: color),
                               borderRadius: BorderRadius.circular(8),
                             ),
