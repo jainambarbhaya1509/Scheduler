@@ -1,11 +1,4 @@
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
-import 'package:schedule/controller/session_controller.dart';
-import 'package:schedule/helper_func/send_mail.dart';
-import 'package:schedule/services/firestore_service.dart';
-import 'package:schedule/services/error_handler.dart';
-import 'dart:developer';
+import 'package:schedule/imports.dart';
 
 
 class RequestsController extends GetxController {
@@ -217,7 +210,7 @@ class RequestsController extends GetxController {
 
       if (ops > 0) await batch.commit();
     } catch (e) {
-      log("ERROR updating slot app status: $e");
+      logger.d("ERROR updating slot app status: $e");
     }
   }
 

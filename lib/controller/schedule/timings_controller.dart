@@ -1,17 +1,4 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
-import 'package:schedule/helper_func/check_interval.dart';
-import 'package:schedule/helper_func/n_hrs_slot.dart';
-import 'package:schedule/helper_func/send_mail.dart';
-import 'package:schedule/models/class_avalability_model.dart';
-import 'package:schedule/models/availability_model.dart';
-import 'package:schedule/models/class_timing_model.dart';
-import 'package:schedule/controller/schedule_controller.dart';
-import 'package:schedule/controller/session_controller.dart';
-import 'package:schedule/utils/firestore_helpers.dart';
-import 'package:schedule/services/firestore_service.dart';
+import 'package:schedule/imports.dart';
 
 class TimingsController extends GetxController {
   final _firestore = FirestoreService().instance;
@@ -47,7 +34,7 @@ class TimingsController extends GetxController {
       classroomList.addAll(results[0]);
       labList.addAll(results[1]);
     } catch (e) {
-      log("Error fetching timings: $e");
+      logger.d("Error fetching timings: $e");
     } finally {
       isLoading.value = false;
     }
@@ -112,7 +99,7 @@ class TimingsController extends GetxController {
 
       return finalList;
     } catch (e) {
-      log("Error fetching $section: $e");
+      logger.d("Error fetching $section: $e");
       return [];
     }
   }

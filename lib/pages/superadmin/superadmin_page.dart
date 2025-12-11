@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/superadmin_controller.dart';
-import 'package:schedule/helper_func/generate_password.dart';
+import 'package:schedule/controller/superadmin/superadmin_controller.dart';
+import 'package:schedule/helper/security/generate_password.dart';
 
 class SuperAdminPage extends StatefulWidget {
   const SuperAdminPage({super.key});

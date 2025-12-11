@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/schedule_controller.dart';
-import 'package:schedule/controller/timings_controller.dart';
-import 'package:schedule/helper_func/date_to_day.dart';
-import 'package:schedule/helper_func/parse_double.dart';
-import 'package:schedule/models/availability_model.dart';
+import 'package:schedule/controller/schedule/schedule_controller.dart';
+import 'package:schedule/controller/schedule/timings_controller.dart';
+import 'package:schedule/helper/date_time/date_to_day.dart';
+import 'package:schedule/helper/convert_datatype/parse_double.dart';
+import 'package:schedule/models/dept_availability_model.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
 class SchedulePage extends StatefulWidget {

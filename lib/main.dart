@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:schedule/controller/session_controller.dart';
+import 'package:schedule/controller/session/session_controller.dart';
 
 import 'package:schedule/pages/splash_page.dart';
 import 'firebase_options.dart';

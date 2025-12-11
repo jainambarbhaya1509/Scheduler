@@ -1,7 +1,5 @@
-import 'package:get/get.dart';
-import 'package:schedule/helper_func/send_mail.dart';
-import 'package:schedule/services/firestore_service.dart';
-import 'package:schedule/services/error_handler.dart';
+import 'package:schedule/imports.dart';
+
 
 class SuperAdminController extends GetxController {
   final _firestore = FirestoreService().instance;

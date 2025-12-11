@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/helper_func/download_mobile.dart';
+import 'package:schedule/helper/download/download_mobile.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
-import '../../controller/timetable_controller.dart';
+import '../../controller/schedule/timetable_controller.dart';
 
 class AddTimeTable extends StatelessWidget {
   const AddTimeTable({super.key});

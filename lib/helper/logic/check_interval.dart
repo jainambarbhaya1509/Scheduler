@@ -1,4 +1,4 @@
-import 'package:schedule/models/class_avalability_model.dart';
+import 'package:schedule/imports.dart';
 
 /// Filters timings in each room after [initialTime] and returns a new list
 List<ClassAvailabilityModel> filterSlotsAfter(

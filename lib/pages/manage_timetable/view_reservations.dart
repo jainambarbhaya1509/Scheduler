@@ -1,14 +1,5 @@
-// lib/pages/it_slots_dashboard_full.dart
-import 'dart:developer';
+import 'package:schedule/imports.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-
-/// IT Slots Dashboard - UI updated:
-/// - White background, black text everywhere except slot tiles (colors unchanged)
-/// - Dropdowns: no underline/border, white dropdown background, black text
-/// - Refresh button: black background, white text
-/// - AppBar title removed (no title shown)
 
 class ViewReservations extends StatefulWidget {
   const ViewReservations({super.key});
@@ -95,7 +86,7 @@ class _ViewReservationsState extends State<ViewReservations> {
       });
       if (_selectedDepartment != null) await _fetchClassesForSection();
     } catch (e, st) {
-      log('fetchDepartments error: $e\n$st');
+      logger.d('fetchDepartments error: $e\n$st');
     } finally {
       setState(() {
         _loadingDepartments = false;
@@ -129,7 +120,7 @@ class _ViewReservationsState extends State<ViewReservations> {
         _classList = sorted;
       });
     } catch (e, st) {
-      log('fetchClasses error: $e\n$st');
+      logger.d('fetchClasses error: $e\n$st');
     } finally {
       setState(() {
         _loadingClasses = false;
@@ -287,13 +278,13 @@ class _ViewReservationsState extends State<ViewReservations> {
       final allRequests = requestsSnap.docs
           .map((d) => RequestModel.fromMap(d.data(), d.id))
           .toList();
-      log('Total requests: ${allRequests.length}');
+      logger.d('Total requests: ${allRequests.length}');
 
       final nonRejected = allRequests
           .where((r) => r.status.toLowerCase() != 'rejected')
           .toList();
       _requests = nonRejected;
-      log('Non-rejected requests: ${_requests.length}');
+      logger.d('Non-rejected requests: ${_requests.length}');
 
       final daysSnap = await _firestore.collection(_slotsRoot).get();
       final days = daysSnap.docs.map((d) => d.id).toList();
@@ -424,21 +415,21 @@ class _ViewReservationsState extends State<ViewReservations> {
       });
 
       if (unmatchedRequests.isNotEmpty) {
-        log(
+        logger.d(
           '--- UNMATCHED non-rejected requests (refer to non-existing slots) ---',
         );
         for (final r in unmatchedRequests) {
-          log(
+          logger.d(
             'req id=${r.id} class=${r.className} day=${r.day} considered=${r.consideredSlots} slot=${r.slotTime} status=${r.status}',
           );
         }
       } else {
-        log(
+        logger.d(
           'All non-rejected requests matched existing slots (or there were none).',
         );
       }
     } catch (e, st) {
-      log('loadSlotsAndRequests error: $e\n$st');
+      logger.d('loadSlotsAndRequests error: $e\n$st');
     } finally {
       setState(() {
         _loadingSlots = false;

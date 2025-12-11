@@ -1,8 +1,4 @@
-import 'dart:developer';
-import 'dart:io' show File, Directory, Platform;
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+import "package:schedule/imports.dart";
 
 Future<bool> _requestPermissions() async {
   if (Platform.isAndroid) {
@@ -26,7 +22,7 @@ Future<void> downloadExcelFile(String url, String fileName) async {
   final bytes = byteData.buffer.asUint8List();
 
   if (!await _requestPermissions()) {
-    log("Storage permission not granted.");
+    logger.d("Storage permission not granted.");
     return;
   }
 
@@ -46,5 +42,5 @@ Future<void> downloadExcelFile(String url, String fileName) async {
   }
 
   await File(filePath).writeAsBytes(bytes);
-  log("Template saved at: $filePath");
+  logger.d("Template saved at: $filePath");
 }

@@ -1,10 +1,5 @@
-import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:schedule/helper_func/generate_password.dart';
-import 'package:schedule/helper_func/send_mail.dart';
-import 'package:schedule/services/firestore_service.dart';
-import 'package:schedule/services/error_handler.dart';
+import 'package:schedule/imports.dart';
+
 
 class ForgetPasswordController extends GetxController {
   final otp = "".obs;

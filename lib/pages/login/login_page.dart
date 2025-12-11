@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:schedule/controller/forget_password_controller.dart';
-import 'package:schedule/controller/login_controller.dart';
-import 'package:schedule/pages/home.dart';
+import 'package:schedule/imports.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/login_controller.dart';
-import 'package:schedule/controller/session_controller.dart';
+import 'package:schedule/controller/auth/login_controller.dart';
+import 'package:schedule/controller/session/session_controller.dart';
 import 'package:schedule/pages/login/login_page.dart';
 
 class ProfilePage extends StatefulWidget {

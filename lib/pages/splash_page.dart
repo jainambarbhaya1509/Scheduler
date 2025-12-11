@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/session_controller.dart';
+import 'package:schedule/controller/session/session_controller.dart';
 import 'package:schedule/pages/home.dart';
 import 'package:schedule/pages/login/login_page.dart';
 

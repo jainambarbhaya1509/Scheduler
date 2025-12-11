@@ -1,7 +1,5 @@
-import 'dart:developer';
-import 'dart:js_interop';
+import 'package:schedule/imports.dart';
 import 'package:web/web.dart' as html;
-import 'package:flutter/services.dart';
 
 Future<void> downloadExcelFile(String url, String fileName) async {
   // Load template from assets
@@ -18,5 +16,5 @@ Future<void> downloadExcelFile(String url, String fileName) async {
 
   html.URL.revokeObjectURL(blobUrl);
 
-  log("File downloaded via browser");
+  logger.d("File downloaded via browser");
 }

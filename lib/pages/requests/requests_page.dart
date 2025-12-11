@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/controller/requests_controller.dart';
+import 'package:schedule/controller/requests/requests_controller.dart';
 import 'package:schedule/widgets/request_card_widget.dart';
 
 class RequestsPage extends StatelessWidget {

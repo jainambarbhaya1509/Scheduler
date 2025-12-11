@@ -1,4 +1,4 @@
-import 'class_avalability_model.dart';
+import 'package:schedule/models/users_applied_model.dart';
 
 class ClassTiming {
   final String timing;

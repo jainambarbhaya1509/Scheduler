@@ -1,15 +1,5 @@
-// lib/controller/timetable_controller.dart
-import 'dart:developer';
-import 'dart:typed_data';
+import 'package:schedule/imports.dart';
 
-import 'package:get/get.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:schedule/controller/session_controller.dart';
-import 'package:schedule/helper_func/convert_time.dart';
-import 'package:schedule/helper_func/tt_to_json.dart';
-import 'package:schedule/services/firestore_service.dart';
-import 'package:schedule/services/error_handler.dart';
 
 class TimetableController extends GetxController {
   final _firestore = FirestoreService().instance;
@@ -78,7 +68,7 @@ class TimetableController extends GetxController {
         }
 
         path = file.path;
-        log('Picked file path: $path');
+        logger.d('Picked file path: $path');
 
         status.value = "Converting Excel...";
         jsonResults = await excelToJsonFile(
@@ -96,8 +86,8 @@ class TimetableController extends GetxController {
     } catch (e, st) {
       status.value = "Error: $e";
       ErrorHandler.showError(e);
-      log("pickFileAndProcess error: $e");
-      log(st.toString());
+      logger.d("pickFileAndProcess error: $e");
+      logger.d(st.toString());
     } finally {
       setRunning(false);
     }
@@ -115,21 +105,21 @@ class TimetableController extends GetxController {
         final slotDays = data["slots"] as List?;
 
         if (departmentName == null || className == null || slotDays == null) {
-          log("Skipping invalid JSON: $data");
+          logger.d("Skipping invalid JSON: $data");
           continue;
         }
 
         final section = className.contains('L') ? "Labs" : "Classrooms";
-        log("Processing section: $section for class $className");
+        logger.d("Processing section: $section for class $className");
 
         await _uploadClassSlots(departmentName, className, section, slotDays);
       } catch (e, st) {
-        log("Error uploading slots: $e");
-        log(st.toString());
+        logger.d("Error uploading slots: $e");
+        logger.d(st.toString());
       }
     }
 
-    log("All slots upload attempts completed.");
+    logger.d("All slots upload attempts completed.");
   }
 
   /// Extracted slot upload logic with better batch management
@@ -196,7 +186,7 @@ class TimetableController extends GetxController {
         ops++;
       }
 
-      log("Prepared uploads for → $day / $departmentName / $section");
+      logger.d("Prepared uploads for → $day / $departmentName / $section");
     }
 
     if (ops > 0) {

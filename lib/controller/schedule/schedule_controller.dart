@@ -1,9 +1,4 @@
-import 'dart:async';
-import 'dart:developer';
-import 'package:get/get.dart';
-import 'package:schedule/models/availability_model.dart';
-import 'package:schedule/services/firestore_service.dart';
-import 'package:schedule/utils/slot_helpers.dart';
+import 'package:schedule/imports.dart';
 
 class ScheduleController extends GetxController {
   final _firestore = FirestoreService().instance;
@@ -41,7 +36,7 @@ class ScheduleController extends GetxController {
         results.whereType<DepartmentAvailabilityModel>(),
       );
     } catch (e) {
-      log("Error fetching availability: $e");
+      logger.d("Error fetching availability: $e");
     } finally {
       isLoading.value = false;
     }
@@ -77,7 +72,7 @@ class ScheduleController extends GetxController {
         totalClass: classroomCount.toString(),
       );
     } catch (e) {
-      log("Error fetching department $departmentId: $e");
+      logger.d("Error fetching department $departmentId: $e");
       return null;
     }
   }

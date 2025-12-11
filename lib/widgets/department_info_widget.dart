@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/models/availability_model.dart';
+import 'package:schedule/models/dept_availability_model.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
 

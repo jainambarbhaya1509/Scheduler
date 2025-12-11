@@ -1,5 +1,5 @@
-import 'package:get/get.dart';
-import 'package:schedule/services/session_service.dart';
+import 'package:schedule/imports.dart';
+
 
 class SessionController extends GetxController {
   final _sessionService = SessionService();

@@ -1,9 +1,5 @@
-import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
-import 'package:schedule/controller/session_controller.dart';
-import 'package:schedule/utils/firestore_helpers.dart';
-import 'package:schedule/services/firestore_service.dart';
-import 'package:schedule/services/error_handler.dart';
+import 'package:schedule/imports.dart';
+
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();

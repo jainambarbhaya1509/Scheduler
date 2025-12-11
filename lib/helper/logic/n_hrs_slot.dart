@@ -1,5 +1,4 @@
-import 'package:schedule/models/class_avalability_model.dart';
-import 'package:schedule/models/class_timing_model.dart';
+import 'package:schedule/imports.dart';
 
 List<ClassAvailabilityModel> findConsecutiveSlots(
   List<ClassAvailabilityModel> classAvailabilityList,
