@@ -1,10 +1,14 @@
+// lib/helper_func/tt_to_json.dart
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:excel/excel.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
 
+/// Converts an Excel sheet into an HTML table string (handles merged cells).
 String excelToHtml(Excel excel, String sheetName, Sheet sheet) {
   final mergedCellsMap = <Point<int>, Map<String, int>>{};
   final coveredCells = <Point<int>>{};
@@ -14,6 +18,7 @@ String excelToHtml(Excel excel, String sheetName, Sheet sheet) {
 
   for (final merged in mergedRanges) {
     final range = merged.split(':');
+    if (range.length != 2) continue;
     final start = CellIndex.indexByString(range[0]);
     final end = CellIndex.indexByString(range[1]);
 
@@ -76,7 +81,10 @@ String excelToHtml(Excel excel, String sheetName, Sheet sheet) {
   return html.toString();
 }
 
-Map<String, dynamic> extractEmptySlotsFromHtml(String html, String department, String className) {
+/// Parse HTML produced from excelToHtml and extract empty slots.
+/// Returns a Map with keys: department, class, slots -> list of {day, empty_slots}
+Map<String, dynamic> extractEmptySlotsFromHtml(
+    String html, String department, String className) {
   final document = parse(html);
   final table = document.querySelector('table');
   final rows = table?.querySelectorAll('tr') ?? [];
@@ -174,53 +182,40 @@ Map<String, dynamic> extractEmptySlotsFromHtml(String html, String department, S
 
   for (var day in daySlotsFilled.keys) {
     final filled = daySlotsFilled[day]!;
-    final emptySlots = timeSlotsList
-        .where((ts) => !filled.contains(ts))
-        .toList();
+    final emptySlots = timeSlotsList.where((ts) => !filled.contains(ts)).toList();
 
-    // Add without casting
     (result['slots'] as List).add({'day': day, 'empty_slots': emptySlots});
   }
 
   return result;
 }
 
-// Future<Map<String, dynamic>> excelToJson(
-//   String department,
-//   String className,
-//   String filePath,
-//   String? sheetName, {
-//   bool saveHtml = false,
-//   bool saveJson = true,
-// }) async {
-//   final bytes = File(filePath).readAsBytesSync();
-//   final excel = Excel.decodeBytes(bytes);
-
-//   final sheetKey = sheetName ?? excel.tables.keys.first;
-//   final sheet = excel.tables[sheetKey]!;
-
-//   final html = excelToHtml(excel, sheetKey, sheet);
-//   final jsonResult = extractEmptySlotsFromHtml(html, department, className);
-
-//   if (saveHtml) {
-//     File('table_output.html').writeAsStringSync(html);
-//   }
-//   if (saveJson) {
-//     File(
-//       'empty_slots.json',
-//     ).writeAsStringSync(JsonEncoder.withIndent('  ').convert(jsonResult));
-//   }
-
-//   return jsonResult;
-// }
-
-Future<List<Map<String, dynamic>>> excelToJson(
+/// Decode from a file path (mobile/desktop) and return JSON for all sheets.
+Future<List<Map<String, dynamic>>> excelToJsonFile(
   String department,
   String filePath, {
   bool saveHtml = false,
   bool saveJson = true,
 }) async {
-  final bytes = File(filePath).readAsBytesSync();
+  final bytes = await File(filePath).readAsBytes();
+  return excelToJsonBytes(
+    department,
+    bytes,
+    saveHtml: saveHtml,
+    saveJson: saveJson,
+    fileName: filePath.split(Platform.pathSeparator).last,
+  );
+}
+
+/// Decode from bytes (web) and return JSON for all sheets.
+/// `fileName` is optional and used only for naming saved files (if possible).
+Future<List<Map<String, dynamic>>> excelToJsonBytes(
+  String department,
+  Uint8List bytes, {
+  bool saveHtml = false,
+  bool saveJson = false,
+  String? fileName,
+}) async {
   final excel = Excel.decodeBytes(bytes);
 
   final results = <Map<String, dynamic>>[];
@@ -234,33 +229,20 @@ Future<List<Map<String, dynamic>>> excelToJson(
     results.add(jsonResult);
 
     if (saveHtml) {
-      File('${sheetKey}_table_output.html').writeAsStringSync(html);
+      // Attempt to write if running on non-web platforms; ignore failures on web.
+      try {
+        final outName = '${sheetKey}_table_output.html';
+        File(outName).writeAsStringSync(html);
+      } catch (_) {}
     }
   }
 
   if (saveJson) {
-    File(
-      'empty_slots_all_sheets.json',
-    ).writeAsStringSync(JsonEncoder.withIndent('  ').convert(results));
+    try {
+      final outName = 'empty_slots_all_sheets.json';
+      File(outName).writeAsStringSync(JsonEncoder.withIndent('  ').convert(results));
+    } catch (_) {}
   }
 
   return results;
 }
-
-
-// void main() async {
-//   stdout.write('Excel file path (e.g. test.xlsx): ');
-//   final path = stdin.readLineSync()?.trim() ?? '';
-//   stdout.write('Sheet name (or press Enter for default sheet): ');
-//   final sheet = stdin.readLineSync()?.trim();
-
-//   final result = await excelToJson(
-//     path,
-//     (sheet != null && sheet.isNotEmpty) ? sheet : null,
-//     saveHtml: true,
-//     saveJson: true,
-//   );
-
-//   log('\nFinal Result JSON:');
-//   log(JsonEncoder.withIndent('  ').convert(result));
-// }

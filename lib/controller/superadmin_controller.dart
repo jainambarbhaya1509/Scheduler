@@ -21,7 +21,6 @@ class SuperAdminController extends GetxController {
       }
 
       await _firestore.collection("faculty").add(data);
-      ErrorHandler.handleSuccess("Success", "User added successfully");
       await sendEmailNotification(
         facultyEmail: data["email"],
         userName: data["username"],
@@ -30,6 +29,7 @@ class SuperAdminController extends GetxController {
         emailMessage:
             "Your account has been created successfully. Your password is: ${data["password"]}",
       );
+      ErrorHandler.handleSuccess("Success", "User added successfully & Notification sent");
     } catch (e) {
       ErrorHandler.showError(e);
     }

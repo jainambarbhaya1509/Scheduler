@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:schedule/controller/session_controller.dart';
 import 'package:schedule/utils/firestore_helpers.dart';
 import 'package:schedule/services/firestore_service.dart';
@@ -18,23 +17,7 @@ class LoginController extends GetxController {
   String error = '';
 
   final _db = FirestoreService().instance;
-  final auth = LocalAuthentication();
   final _sessionController = SessionController();
-
-  /// Authenticate using biometrics
-  Future<void> authenticate() async {
-    isAuthenticating = true;
-    try {
-      isAuthenticated = await auth.authenticate(
-        localizedReason: 'Please authenticate to access the app',
-        biometricOnly: true,
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-      ErrorHandler.showError(e);
-    }
-    isAuthenticating = false;
-  }
 
   /// Optimized login with validation
   Future<Map<String, dynamic>?> login() async {

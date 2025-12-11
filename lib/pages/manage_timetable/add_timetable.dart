@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:schedule/helper_func/download.dart';
+import 'package:schedule/helper_func/download_mobile.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import '../../controller/timetable_controller.dart';
 
@@ -85,7 +85,7 @@ class AddTimeTable extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.upload_rounded, size: 100, color: Colors.black87),
-          
+
                 TextButton(
                   onPressed: controller.running.value
                       ? null
@@ -93,12 +93,12 @@ class AddTimeTable extends StatelessWidget {
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.black87,
                     disabledBackgroundColor: Colors.grey,
-          
+
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-          
+
                   child: Text(
                     'Pick & Upload Excel',
                     style: TextStyle(
@@ -107,7 +107,7 @@ class AddTimeTable extends StatelessWidget {
                     ),
                   ),
                 ),
-          
+
                 if (controller.running.value) ...[
                   const SizedBox(height: 16),
                   LinearProgressIndicator(
@@ -128,10 +128,7 @@ class AddTimeTable extends StatelessWidget {
   Widget _downloadTemplate() {
     return InkWell(
       onTap: () {
-        downloadExcelFile(
-          "https://docs.google.com/spreadsheets/d/1dNVlk9n47tl3xqS5viNG4UXwFpQ8ypTW/edit?usp=sharing&ouid=113030285759050171649&rtpof=true&sd=true",
-          "template",
-        );
+        downloadExcelFile("template.xlsx", "timetable_template.xlsx");
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(

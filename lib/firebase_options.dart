@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -66,4 +63,13 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.djsce.schedule',
   );
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAQbNA1MCP7It3ykJghJtD95sQtAhuuC48',
+    authDomain: 'scheduler-1a878.firebaseapp.com',
+    projectId: 'scheduler-1a878',
+    storageBucket: 'scheduler-1a878.firebasestorage.app',
+    messagingSenderId: '288826539666',
+    appId: '1:288826539666:web:70ac13ca0b5f1b3fd0304b',
+    measurementId: 'G-PSW1VFBRG1',
+  );
 }

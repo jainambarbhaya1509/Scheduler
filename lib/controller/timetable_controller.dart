@@ -1,4 +1,6 @@
+// lib/controller/timetable_controller.dart
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
@@ -19,19 +21,13 @@ class TimetableController extends GetxController {
 
   String? path;
 
-  static const departmentData = [
-    'Information Technology',
-    'Computer Engineering',
-  ];
-
-  static const sections = ["Classrooms", "Labs"];
   static const maxBatchOps = 450;
 
   final _sessionController = Get.put(SessionController());
 
   void setRunning(bool v) => running.value = v;
 
-  /// Pick and process file
+  /// Pick and process file (web + mobile compatible)
   Future<void> pickFileAndProcess() async {
     department.value = await _sessionController.getSession().then(
           (session) => session['department'] ?? '',
@@ -44,7 +40,7 @@ class TimetableController extends GetxController {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["xlsx", "xls"],
-        withData: true,
+        withData: true, // required for web
       );
 
       if (result == null || result.files.isEmpty) {
@@ -53,29 +49,55 @@ class TimetableController extends GetxController {
         return;
       }
 
-      path = result.files.single.path;
-      if (path == null) {
-        status.value = "Invalid file path.";
-        setRunning(false);
-        return;
+      final file = result.files.single;
+
+      List<Map<String, dynamic>> jsonResults;
+
+      if (GetPlatform.isWeb) {
+        // Web: use bytes
+        if (file.bytes == null) {
+          status.value = "Invalid web file.";
+          setRunning(false);
+          return;
+        }
+
+        status.value = "Converting Excel (web)...";
+        jsonResults = await excelToJsonBytes(
+          department.value,
+          file.bytes!,
+          saveHtml: false,
+          saveJson: false,
+          fileName: file.name,
+        );
+      } else {
+        // Mobile/Desktop: use file path
+        if (file.path == null) {
+          status.value = "Invalid file path.";
+          setRunning(false);
+          return;
+        }
+
+        path = file.path;
+        log('Picked file path: $path');
+
+        status.value = "Converting Excel...";
+        jsonResults = await excelToJsonFile(
+          department.value,
+          path!,
+          saveHtml: false,
+          saveJson: false,
+        );
       }
-
-      status.value = "Converting Excel to JSON...";
-
-      final jsonResults = await excelToJson(
-        department.value,
-        path!,
-        saveHtml: false,
-        saveJson: false,
-      );
 
       status.value = "Uploading to Firestore...";
       await _uploadSlotsFromJsonList(jsonResults);
 
       status.value = "Success: Uploaded!";
-    } catch (e) {
+    } catch (e, st) {
       status.value = "Error: $e";
       ErrorHandler.showError(e);
+      log("pickFileAndProcess error: $e");
+      log(st.toString());
     } finally {
       setRunning(false);
     }
@@ -103,11 +125,11 @@ class TimetableController extends GetxController {
         await _uploadClassSlots(departmentName, className, section, slotDays);
       } catch (e, st) {
         log("Error uploading slots: $e");
-        log(st as String);
+        log(st.toString());
       }
     }
 
-    log("All slots uploaded successfully!");
+    log("All slots upload attempts completed.");
   }
 
   /// Extracted slot upload logic with better batch management
@@ -127,14 +149,14 @@ class TimetableController extends GetxController {
 
       if (day == null || emptySlots == null) continue;
 
-      // Ensure space for metadata writes
+      // Ensure space for metadata writes (4 writes reserved)
       if (ops + 4 > maxBatchOps) {
         await batch.commit();
         batch = _firestore.batch();
         ops = 0;
       }
 
-      // Write metadata
+      // Write metadata (4 writes)
       _createMetadataWrites(batch, day, departmentName, section, className, now);
       ops += 4;
 
@@ -149,7 +171,9 @@ class TimetableController extends GetxController {
         }
 
         final slotId = slotTime.toString();
-        final (:start, :end) = _parseSlotTime(slotId);
+        final parsed = _parseSlotTime(slotId);
+        final start = parsed.start;
+        final end = parsed.end;
 
         final slotRef = _firestore
             .collection("slots")
@@ -175,7 +199,9 @@ class TimetableController extends GetxController {
       log("Prepared uploads for → $day / $departmentName / $section");
     }
 
-    if (ops > 0) await batch.commit();
+    if (ops > 0) {
+      await batch.commit();
+    }
   }
 
   /// Create metadata writes for day/department/section
@@ -201,16 +227,17 @@ class TimetableController extends GetxController {
       "createdAt": now,
       "lastUpdated": now,
     }, SetOptions(merge: true));
-    batch.set(classRef, {"className": className, "createdAt": now, "lastUpdated": now},
+    batch.set(classRef,
+        {"className": className, "createdAt": now, "lastUpdated": now},
         SetOptions(merge: true));
   }
 
-  /// Parse slot time string
+  /// Parse slot time string into start & end
   ({String start, String end}) _parseSlotTime(String slotId) {
     final parts = slotId.split('-');
     return (
-      start: parts.isNotEmpty ? parts.first : slotId,
-      end: parts.length > 1 ? parts.last : slotId,
+      start: parts.isNotEmpty ? parts.first.trim() : slotId,
+      end: parts.length > 1 ? parts.sublist(1).join('-').trim() : slotId,
     );
   }
 }

@@ -11,7 +11,7 @@ Future<void> sendEmailNotification({
   required String emailMessage
 }) async {
   const String username = 'pranavvdv@gmail.com';
-  const String password = 'ucfnymzzeuwmrcip'; // Use raw string if it has $ signs
+  const String password = 'ucfnymzzeuwmrcip'; 
 
   final smtpServer = gmail(username, password);
 
