@@ -44,6 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-
 .env
 .env.*
+lib/helper/email/web_email/.env
+lib/helper/email/app_email/.env

@@ -15,7 +15,7 @@ Future<void> sendEmailNotification({
   const String password = 'ucfnymzzeuwmrcip';
 
   if (kIsWeb) {
-    final url = Uri.parse('https://email-api.onrender.com/send_email');
+    final url = Uri.parse('https://scheduler-5wif.onrender.com/send_email');
 
     final response = await http.post(
       url,
