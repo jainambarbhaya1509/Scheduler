@@ -26,7 +26,7 @@ def send_email():
 
     # Build email
     msg = EmailMessage()
-    msg["From"] = f"{sender_name} <{sender_email}>"   # <--- FIXED
+    msg["From"] = f"{sender_name} <{sender_email}>"
     msg["To"] = recipient_email
     msg["Subject"] = subject
     msg.set_content(body)

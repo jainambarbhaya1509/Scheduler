@@ -15,7 +15,7 @@ Future<bool> _requestPermissions() async {
   return true;
 }
 
-Future<void> downloadExcelFile(String url, String fileName) async {
+Future<void> downloadExcelFile(String fileName) async {
 
   // Load asset template
   final byteData = await rootBundle.load('assets/template.xlsx');

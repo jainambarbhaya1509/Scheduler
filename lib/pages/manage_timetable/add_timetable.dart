@@ -40,44 +40,6 @@ class AddTimeTable extends StatelessWidget {
         _downloadTemplate(),
         const SizedBox(height: 30),
 
-        /// ------------------ Department dropdown ------------------
-        // Obx(
-        //   () => _buildDropdownRow(
-        //     label: 'Select Department',
-        //     value: controller.department.value.isEmpty
-        //         ? null
-        //         : controller.department.value,
-        //     items: controller.departmentData.map((e) => e).toList(),
-        //     onChanged: controller.running.value
-        //         ? null
-        //         : (v) {
-        //             if (v != null) {
-        //               controller.department.value = v;
-        //               controller.resetSelections();
-        //             }
-        //           },
-        //   ),
-        // ),
-        const SizedBox(height: 16),
-
-        /// ------------------ Class/Lab dropdown ------------------
-        // Obx(
-        //   () => _buildDropdownRow(
-        //     label: 'Select Class/Lab',
-        //     value: controller.classNo.value.isEmpty
-        //         ? null
-        //         : controller.classNo.value,
-        //     items: controller.classOptions,
-        //     onChanged: controller.running.value
-        //         ? null
-        //         : (v) {
-        //             if (v != null) {
-        //               controller.classNo.value = v;
-        //             }
-        //           },
-        //   ),
-        // ),
-
         /// ------------------ Upload button ------------------
         Expanded(
           child: Obx(
@@ -128,7 +90,7 @@ class AddTimeTable extends StatelessWidget {
   Widget _downloadTemplate() {
     return InkWell(
       onTap: () {
-        downloadExcelFile("template.xlsx", "timetable_template.xlsx");
+        downloadExcelFile("timetable_template.xlsx");
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
