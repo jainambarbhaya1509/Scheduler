@@ -30,7 +30,6 @@ class ForgetPasswordController extends GetxController {
       await sendEmailNotification(
         facultyEmail: email,
         userName: "User",
-        userEmail: email,
         subject: "Your Verification Code",
         emailMessage: "Your 6-digit verification code is: ${otp.value}",
       );
@@ -81,7 +80,6 @@ class ForgetPasswordController extends GetxController {
         sendEmailNotification(
           facultyEmail: email,
           userName: "User",
-          userEmail: email,
           subject: "Your New Password",
           emailMessage: "Your new password is: ${generatedPassword.value}",
         ),

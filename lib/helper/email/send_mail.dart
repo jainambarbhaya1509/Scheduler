@@ -7,7 +7,6 @@ import 'package:schedule/imports.dart';
 Future<void> sendEmailNotification({
   required String facultyEmail,
   required String userName,
-  required String userEmail,
   required String subject,
   required String emailMessage,
 }) async {
@@ -15,13 +14,13 @@ Future<void> sendEmailNotification({
   const String password = 'ucfnymzzeuwmrcip';
 
   if (kIsWeb) {
-    final url = Uri.parse('https://scheduler-5wif.onrender.com/send_email');
+    final url = Uri.parse('http://192.168.1.37:8080/send_email');
 
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'recipient_email': facultyEmail,
+        'email': facultyEmail,
         'subject': subject,
         'body': emailMessage,
       }),

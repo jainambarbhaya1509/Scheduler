@@ -136,7 +136,6 @@ class RequestsController extends GetxController {
         sendEmailNotification(
           facultyEmail: userEmail,
           userName: userName,
-          userEmail: userEmail,
           subject: subject,
           emailMessage: emailMessage,
         );

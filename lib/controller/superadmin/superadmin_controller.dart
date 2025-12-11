@@ -22,7 +22,6 @@ class SuperAdminController extends GetxController {
       await sendEmailNotification(
         facultyEmail: data["email"],
         userName: data["username"],
-        userEmail: data["email"],
         subject: "Welcome to Faculty Portal",
         emailMessage:
             "Your account has been created successfully. Your password is: ${data["password"]}",

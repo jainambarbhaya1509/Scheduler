@@ -36,7 +36,7 @@ export 'package:schedule/helper/logic/tt_to_json.dart';
 export 'package:schedule/helper/security/generate_password.dart';
 
 // ================= Email =================
-export 'package:schedule/helper/email/app_email/send_mail.dart';
+export 'package:schedule/helper/email/send_mail.dart';
 export 'package:schedule/services/error_handler.dart';
 export 'package:mailer/mailer.dart';
 export 'package:mailer/smtp_server.dart';

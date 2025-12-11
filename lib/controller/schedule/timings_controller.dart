@@ -193,7 +193,7 @@ class TimingsController extends GetxController {
         final subject = "New Booking Request from $userName";
         final emailMessage = "Dear HOD,\n\n$userName has submitted a booking request for ${classModel.className} on $date. \nTime Slot: $timeslot \n\nReason: $reason\n\nBest regards,\nScheduling System";
 
-        sendEmailNotification(facultyEmail: hodEmail, userName: userName, userEmail: userEmail, subject: subject, emailMessage: emailMessage);
+        sendEmailNotification(facultyEmail: hodEmail, userName: userName, subject: subject, emailMessage: emailMessage);
       }
 
       Get.snackbar("Success", "Application submitted and faculty notified");
