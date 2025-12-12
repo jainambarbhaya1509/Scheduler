@@ -1,6 +1,5 @@
 import 'package:schedule/imports.dart';
 
-
 class SuperAdminController extends GetxController {
   final _firestore = FirestoreService().instance;
 
@@ -18,15 +17,29 @@ class SuperAdminController extends GetxController {
         return;
       }
 
-      await _firestore.collection("faculty").add(data);
-      await sendEmailNotification(
-        facultyEmail: data["email"],
-        userName: data["username"],
-        subject: "Welcome to Faculty Portal",
-        emailMessage:
-            "Your account has been created successfully. Your password is: ${data["password"]}",
+      try {
+        final docRef = await _firestore.collection("faculty").add(data);
+
+        try {
+          await sendEmailNotification(
+            facultyEmail: data["email"],
+            userName: data["username"],
+            subject: "Welcome to Faculty Portal",
+            emailMessage:
+                "Your account has been created successfully. Your password is: ${data["password"]}",
+          );
+        } catch (emailError) {
+          await docRef.delete();
+          rethrow;
+        }
+      } catch (e) {
+        logger.d("Operation failed: $e");
+      }
+
+      ErrorHandler.handleSuccess(
+        "Success",
+        "User added successfully & Notification sent",
       );
-      ErrorHandler.handleSuccess("Success", "User added successfully & Notification sent");
     } catch (e) {
       ErrorHandler.showError(e);
     }
