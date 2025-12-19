@@ -40,8 +40,6 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
     };
 
     await Get.put(SuperAdminController()).addUser(data);
-
-    Get.back();
   }
 
   @override
