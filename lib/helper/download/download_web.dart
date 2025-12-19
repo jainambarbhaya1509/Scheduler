@@ -1,20 +1,29 @@
-import 'package:schedule/imports.dart';
-import 'package:web/web.dart' as html;
+import 'dart:html' as html;
+import 'package:flutter/services.dart';
 
-Future<void> downloadExcelFile(String fileName) async {
-  // Load template from assets
+Future<void> downloadExcelFileWeb(String fileName) async {
+  // 1. Load asset
   final byteData = await rootBundle.load('assets/template.xlsx');
   final bytes = byteData.buffer.asUint8List();
 
-  final blob = html.Blob([bytes] as JSArray<html.BlobPart>);
-  final blobUrl = html.URL.createObjectURL(blob);
+  // 2. Create Blob
+  final blob = html.Blob(
+    [bytes],
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
 
-  html.HTMLAnchorElement()
-    ..href = blobUrl
+  // 3. Create URL
+  final url = html.Url.createObjectUrlFromBlob(blob);
+
+  // 4. Trigger browser download
+  final anchor = html.AnchorElement(href: url)
     ..download = fileName
-    ..click();
+    ..style.display = 'none';
 
-  html.URL.revokeObjectURL(blobUrl);
+  html.document.body!.append(anchor);
+  anchor.click();
+  anchor.remove();
 
-  logger.d("File downloaded via browser");
+  // 5. Cleanup
+  html.Url.revokeObjectUrl(url);
 }

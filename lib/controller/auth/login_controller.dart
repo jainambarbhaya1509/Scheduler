@@ -1,6 +1,5 @@
 import 'package:schedule/imports.dart';
 
-
 class LoginController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -14,6 +13,12 @@ class LoginController extends GetxController {
 
   final _db = FirestoreService().instance;
   final _sessionController = SessionController();
+
+  var isPasswordVisible = false.obs;
+
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
+  }
 
   /// Optimized login with validation
   Future<Map<String, dynamic>?> login() async {
@@ -93,7 +98,9 @@ class LoginController extends GetxController {
       final docId = query.docs.first.id;
       final user = query.docs.first.data();
 
-      await _db.collection("faculty").doc(docId).update({"password": newPassword});
+      await _db.collection("faculty").doc(docId).update({
+        "password": newPassword,
+      });
 
       await _sessionController.setSession(
         FirestoreHelpers.safeGet<String>(user, "username") ?? "",

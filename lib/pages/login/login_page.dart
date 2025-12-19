@@ -16,7 +16,8 @@ class LoginPage extends StatelessWidget {
           return Center(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
-                  horizontal: isWide ? constraints.maxWidth * 0.3 : 25),
+                horizontal: isWide ? constraints.maxWidth * 0.3 : 25,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -65,9 +66,10 @@ class LoginPage extends StatelessWidget {
                                     left: 25,
                                     right: 25,
                                     top: 20,
-                                    bottom: MediaQuery.of(context)
-                                            .viewInsets
-                                            .bottom +
+                                    bottom:
+                                        MediaQuery.of(
+                                          context,
+                                        ).viewInsets.bottom +
                                         20,
                                   ),
                                   child: Obx(() {
@@ -88,7 +90,8 @@ class LoginPage extends StatelessWidget {
                                         TextFormField(
                                           controller: logic.emailController,
                                           decoration: _buildInputDecoration(
-                                              "Email"),
+                                            hint: "Email",
+                                          ),
                                         ),
                                         const SizedBox(height: 15),
                                         if (!logic.showOtpField.value)
@@ -98,15 +101,16 @@ class LoginPage extends StatelessWidget {
                                               iconAlignment: IconAlignment.end,
                                               onPressed:
                                                   logic.isOtpSending.value
-                                                      ? null
-                                                      : () async {
-                                                          await logic.sendOtp(
-                                                            logic.emailController
-                                                                .text,
-                                                          );
-                                                          logic.showOtpField.value =
-                                                              true;
-                                                        },
+                                                  ? null
+                                                  : () async {
+                                                      await logic.sendOtp(
+                                                        logic
+                                                            .emailController
+                                                            .text,
+                                                      );
+                                                      logic.showOtpField.value =
+                                                          true;
+                                                    },
                                               label: Text(
                                                 logic.isOtpSending.value
                                                     ? "Sending..."
@@ -116,13 +120,14 @@ class LoginPage extends StatelessWidget {
                                                 Icons.arrow_right_alt_rounded,
                                               ),
                                               style: TextButton.styleFrom(
-                                                backgroundColor: Colors.grey[900],
+                                                backgroundColor:
+                                                    Colors.grey[900],
                                                 foregroundColor: Colors.white,
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 25,
-                                                  vertical: 10,
-                                                ),
+                                                      horizontal: 25,
+                                                      vertical: 10,
+                                                    ),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(10),
@@ -135,7 +140,8 @@ class LoginPage extends StatelessWidget {
                                             controller: logic.otpController,
                                             keyboardType: TextInputType.number,
                                             decoration: _buildInputDecoration(
-                                                "Enter OTP"),
+                                              hint: "Enter OTP",
+                                            ),
                                           ),
                                           const SizedBox(height: 15),
                                           SizedBox(
@@ -144,35 +150,37 @@ class LoginPage extends StatelessWidget {
                                               iconAlignment: IconAlignment.end,
                                               onPressed:
                                                   logic.isPasswordSending.value
-                                                      ? null
-                                                      : () async {
-                                                          if (logic.verifyOtp(
-                                                            logic.otpController
-                                                                .text,
-                                                          )) {
-                                                            await logic
-                                                                .sendNewPassword(
-                                                              logic.emailController
+                                                  ? null
+                                                  : () async {
+                                                      if (logic.verifyOtp(
+                                                        logic
+                                                            .otpController
+                                                            .text,
+                                                      )) {
+                                                        await logic
+                                                            .sendNewPassword(
+                                                              logic
+                                                                  .emailController
                                                                   .text,
                                                             );
-                                                            Get.snackbar(
-                                                              "Success",
-                                                              "New password sent to your email",
-                                                              snackPosition:
-                                                                  SnackPosition
-                                                                      .BOTTOM,
-                                                            );
-                                                            Get.back();
-                                                          } else {
-                                                            Get.snackbar(
-                                                              "Error",
-                                                              "Invalid OTP",
-                                                              snackPosition:
-                                                                  SnackPosition
-                                                                      .BOTTOM,
-                                                            );
-                                                          }
-                                                        },
+                                                        Get.snackbar(
+                                                          "Success",
+                                                          "New password sent to your email",
+                                                          snackPosition:
+                                                              SnackPosition
+                                                                  .BOTTOM,
+                                                        );
+                                                        Get.back();
+                                                      } else {
+                                                        Get.snackbar(
+                                                          "Error",
+                                                          "Invalid OTP",
+                                                          snackPosition:
+                                                              SnackPosition
+                                                                  .BOTTOM,
+                                                        );
+                                                      }
+                                                    },
                                               label: Text(
                                                 logic.isPasswordSending.value
                                                     ? "Verifying..."
@@ -182,13 +190,14 @@ class LoginPage extends StatelessWidget {
                                                 Icons.check_circle_outline,
                                               ),
                                               style: TextButton.styleFrom(
-                                                backgroundColor: Colors.grey[900],
+                                                backgroundColor:
+                                                    Colors.grey[900],
                                                 foregroundColor: Colors.white,
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 25,
-                                                  vertical: 10,
-                                                ),
+                                                      horizontal: 25,
+                                                      vertical: 10,
+                                                    ),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(10),
@@ -208,11 +217,10 @@ class LoginPage extends StatelessWidget {
                       );
                     },
                     style: ButtonStyle(
-                      padding: MaterialStateProperty.all(EdgeInsets.zero),
-                      minimumSize: MaterialStateProperty.all(Size.zero),
+                      padding: WidgetStateProperty.all(EdgeInsets.zero),
+                      minimumSize: WidgetStateProperty.all(Size.zero),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      overlayColor:
-                          MaterialStateProperty.all(Colors.white),
+                      overlayColor: WidgetStateProperty.all(Colors.white),
                     ),
                     child: const Text(
                       "Forgot Password ?",
@@ -229,7 +237,10 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _buildLoginCard(
-      BuildContext context, LoginController controller, BoxConstraints constraints) {
+    BuildContext context,
+    LoginController controller,
+    BoxConstraints constraints,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 20),
       padding: const EdgeInsets.all(20),
@@ -240,14 +251,28 @@ class LoginPage extends StatelessWidget {
         children: [
           TextFormField(
             controller: controller.emailController,
-            decoration: _buildInputDecoration("Email"),
+            decoration: _buildInputDecoration(hint: "Email"),
           ),
           const SizedBox(height: 12),
-          TextFormField(
-            controller: controller.passwordController,
-            decoration: _buildInputDecoration("Password"),
-            obscureText: true,
+
+          Obx(
+            () => TextFormField(
+              controller: controller.passwordController,
+              obscureText: !controller.isPasswordVisible.value,
+              decoration: _buildInputDecoration(
+                hint: "Password",
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.isPasswordVisible.value
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: controller.togglePasswordVisibility,
+                ),
+              ),
+            ),
           ),
+
           const SizedBox(height: 20),
           _buildLoginButton(controller),
         ],
@@ -306,11 +331,18 @@ class LoginPage extends StatelessWidget {
     });
   }
 
-  InputDecoration _buildInputDecoration(String hint) {
+  InputDecoration _buildInputDecoration({
+    required String hint,
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
       filled: true,
       fillColor: Colors.grey[200],
       hintText: hint,
+      suffixIcon: Padding(
+        padding: EdgeInsetsGeometry.only(right: 10),
+        child: suffixIcon,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,

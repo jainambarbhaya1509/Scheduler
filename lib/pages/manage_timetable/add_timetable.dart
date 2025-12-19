@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/helper/download/download_mobile.dart';
+import 'package:schedule/helper/download/download_web.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import '../../controller/schedule/timetable_controller.dart';
 
@@ -90,7 +92,12 @@ class AddTimeTable extends StatelessWidget {
   Widget _downloadTemplate() {
     return InkWell(
       onTap: () {
-        downloadExcelFile("timetable_template.xlsx");
+        if(kIsWeb){
+          downloadExcelFileWeb("timetable_template.xlsx");
+
+        }else{
+          downloadExcelFileApp("timetable_template.xlsx");
+        }
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
