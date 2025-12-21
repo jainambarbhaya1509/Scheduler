@@ -122,7 +122,8 @@ class ManageFacultyPage extends StatelessWidget {
 
                                     if (confirm == true) {
                                       _superAdminController.deleteUser(
-                                        faculty.email,
+                                        email: faculty.email,
+                                        userName: faculty.username,
                                       );
                                     }
                                   },

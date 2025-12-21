@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:schedule/imports.dart';
 import 'package:schedule/models/faculty_model.dart';
 
@@ -74,14 +75,32 @@ class SuperAdminController extends GetxController {
   }
 
   /// Delete faculty
-  Future<void> deleteUser(String email) async {
-    final snapshot = await _firestore
-        .collection("faculty")
-        .where("email", isEqualTo: email)
-        .get();
+  Future<void> deleteUser({
+    required String email,
+    required String userName,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection("faculty")
+          .where("email", isEqualTo: email)
+          .get();
 
-    for (final doc in snapshot.docs) {
-      await doc.reference.delete();
+      for (final doc in snapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      await sendEmailNotification(
+        facultyEmail: email,
+        userName: userName,
+        subject: "Faculty Account Deleted",
+        emailMessage:
+            "Your faculty account has been removed from the system. "
+            "If this is a mistake, please contact the administrator.",
+      );
+
+      ErrorHandler.handleSuccess("Deleted", "Faculty deleted successfully");
+    } catch (e) {
+      ErrorHandler.showError(e.toString());
     }
   }
 }
