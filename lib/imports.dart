@@ -2,7 +2,6 @@
 export 'dart:async';
 export 'dart:io' show File, Directory, Platform;
 export 'dart:math';
-export 'dart:js_interop';
 
 // ================= Flutter Pages =================
 export 'package:schedule/pages/home.dart';

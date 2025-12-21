@@ -1,4 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "dart.flutterSdkPath": "/Users/jainambarbhaya/Applications/development/flutter"
+    "dart.flutterSdkPath": "/Users/jainambarbhaya/Applications/development/flutter",
+    "dart.debugExternalPackageLibraries": false,
+    "dart.debugSdkLibraries": false,
 }

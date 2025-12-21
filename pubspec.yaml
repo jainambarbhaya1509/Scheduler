@@ -54,6 +54,8 @@ dependencies:
   url_launcher: ^6.3.2
   logger: ^2.6.2
   path: ^1.9.1
+  universal_html: ^2.3.0
+  flutter_slidable: ^4.0.3
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/controller/superadmin/superadmin_controller.dart';
 import 'package:schedule/helper/security/generate_password.dart';
+import 'package:schedule/pages/superadmin/manage_faculty_page.dart';
 
 class SuperAdminPage extends StatefulWidget {
   const SuperAdminPage({super.key});
@@ -83,34 +84,63 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
 
                   const SizedBox(height: 26),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: submitUser,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black87,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Add Faculty",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                  _button(
+                    "Add Faculty",
+                    Colors.black87,
+                    Colors.white,
+                    Colors.black87,
+                    submitUser,
+                  ),
+                  const SizedBox(height: 10),
+                  _button(
+                    "Manage Faculty",
+                    Colors.white,
+                    Colors.black87,
+                    Colors.black87,
+                    () {
+                      Get.to(
+                        () => ManageFacultyPage(),
+                        transition: Transition.rightToLeft,
+                      );
+                    },
                   ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _button(
+    String text,
+    Color bgColor,
+    Color textColor,
+    Color borderColor,
+    VoidCallback callback,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: callback,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: bgColor,
+          foregroundColor: textColor,
+          side: BorderSide(color: borderColor),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
         ),
       ),
     );

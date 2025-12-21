@@ -1,9 +1,16 @@
 import 'package:schedule/imports.dart';
+import 'package:schedule/models/faculty_model.dart';
 
 class SuperAdminController extends GetxController {
   final _firestore = FirestoreService().instance;
+  final RxList<FacultyModel> faculties = <FacultyModel>[].obs;
 
-  /// Add new user to faculty collection
+  @override
+  void onInit() {
+    super.onInit();
+    _bindFacultyStream();
+  }
+
   Future<void> addUser(Map<String, dynamic> data) async {
     try {
       // Check if user already exists
@@ -42,6 +49,39 @@ class SuperAdminController extends GetxController {
       );
     } catch (e) {
       ErrorHandler.showError(e);
+    }
+  }
+
+  void _bindFacultyStream() {
+    faculties.bindStream(
+      _firestore
+          .collection("faculty")
+          .where("isSuperAdmin", isEqualTo: false)
+          .snapshots()
+          .map(
+            (query) => query.docs.map((doc) {
+              final data = doc.data();
+              return FacultyModel(
+                email: data['email'] ?? '',
+                username: data['username'] ?? '',
+                department: data['department'] ?? '',
+                isHOD: data['isHOD'] ?? false,
+                isAdmin: data['isAdmin'] ?? false,
+              );
+            }).toList(),
+          ),
+    );
+  }
+
+  /// Delete faculty
+  Future<void> deleteUser(String email) async {
+    final snapshot = await _firestore
+        .collection("faculty")
+        .where("email", isEqualTo: email)
+        .get();
+
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
     }
   }
 }
