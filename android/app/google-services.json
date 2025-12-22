@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:288826539666:android:4f1ab658b21b066cd0304b",
+        "mobilesdk_app_id": "1:288826539666:android:7ce907702943f2c6d0304b",
         "android_client_info": {
-          "package_name": "com.example.schedule"
+          "package_name": "com.djsce.schedule"
         }
       },
       "oauth_client": [],
