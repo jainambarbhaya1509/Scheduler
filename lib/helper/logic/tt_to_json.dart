@@ -84,7 +84,10 @@ String excelToHtml(Excel excel, String sheetName, Sheet sheet) {
 /// Parse HTML produced from excelToHtml and extract empty slots.
 /// Returns a Map with keys: department, class, slots -> list of {day, empty_slots}
 Map<String, dynamic> extractEmptySlotsFromHtml(
-    String html, String department, String className) {
+  String html,
+  String department,
+  String className,
+) {
   final document = parse(html);
   final table = document.querySelector('table');
   final rows = table?.querySelectorAll('tr') ?? [];
@@ -174,15 +177,13 @@ Map<String, dynamic> extractEmptySlotsFromHtml(
     currentRowNumber++;
   }
 
-  final result = {
-    "department": department,
-    'class': className,
-    'slots': [],
-  };
+  final result = {"department": department, 'class': className, 'slots': []};
 
   for (var day in daySlotsFilled.keys) {
     final filled = daySlotsFilled[day]!;
-    final emptySlots = timeSlotsList.where((ts) => !filled.contains(ts)).toList();
+    final emptySlots = timeSlotsList
+        .where((ts) => !filled.contains(ts))
+        .toList();
 
     (result['slots'] as List).add({'day': day, 'empty_slots': emptySlots});
   }
@@ -191,13 +192,15 @@ Map<String, dynamic> extractEmptySlotsFromHtml(
 }
 
 /// Decode from a file path (mobile/desktop) and return JSON for all sheets.
-Future<List<Map<String, dynamic>>> excelToJsonFile(
+Future<({List<Map<String, dynamic>> results, List<String> classes})>
+excelToJsonFile(
   String department,
   String filePath, {
   bool saveHtml = false,
   bool saveJson = true,
 }) async {
   final bytes = await File(filePath).readAsBytes();
+
   return excelToJsonBytes(
     department,
     bytes,
@@ -209,7 +212,8 @@ Future<List<Map<String, dynamic>>> excelToJsonFile(
 
 /// Decode from bytes (web) and return JSON for all sheets.
 /// `fileName` is optional and used only for naming saved files (if possible).
-Future<List<Map<String, dynamic>>> excelToJsonBytes(
+Future<({List<Map<String, dynamic>> results, List<String> classes})>
+excelToJsonBytes(
   String department,
   Uint8List bytes, {
   bool saveHtml = false,
@@ -219,6 +223,9 @@ Future<List<Map<String, dynamic>>> excelToJsonBytes(
   final excel = Excel.decodeBytes(bytes);
 
   final results = <Map<String, dynamic>>[];
+  final classes = <String>[];
+
+  classes.addAll(excel.tables.keys.toList());
 
   for (final sheetKey in excel.tables.keys) {
     final sheet = excel.tables[sheetKey]!;
@@ -229,7 +236,6 @@ Future<List<Map<String, dynamic>>> excelToJsonBytes(
     results.add(jsonResult);
 
     if (saveHtml) {
-      // Attempt to write if running on non-web platforms; ignore failures on web.
       try {
         final outName = '${sheetKey}_table_output.html';
         File(outName).writeAsStringSync(html);
@@ -240,9 +246,11 @@ Future<List<Map<String, dynamic>>> excelToJsonBytes(
   if (saveJson) {
     try {
       final outName = 'empty_slots_all_sheets.json';
-      File(outName).writeAsStringSync(JsonEncoder.withIndent('  ').convert(results));
+      File(
+        outName,
+      ).writeAsStringSync(JsonEncoder.withIndent('  ').convert(results));
     } catch (_) {}
   }
 
-  return results;
+  return (results: results, classes: classes);
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:schedule/imports.dart';
 import 'package:schedule/models/faculty_model.dart';
 
