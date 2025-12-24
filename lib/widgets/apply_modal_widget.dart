@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 // import 'package:get/get.dart';
 // import 'package:schedule/controller/timings_controller.dart';
 // import 'package:schedule/models/class_avalability_model.dart';
@@ -160,15 +161,19 @@ import 'package:flutter/material.dart';
 // }
 
 class ApplyReasonDialog extends StatelessWidget {
-  final String title;
-  final int maxLength;
+  final String department;
+  final bool isClassroom;
+  final String roomId;
+  final String slotId;
   final void Function(String reason) onSubmit;
 
   ApplyReasonDialog({
     super.key,
     required this.onSubmit,
-    this.title = "Enter details to apply",
-    this.maxLength = 60,
+    required this.department,
+    required this.isClassroom,
+    required this.roomId,
+    required this.slotId,
   });
 
   final TextEditingController reasonController = TextEditingController();
@@ -182,47 +187,107 @@ class ApplyReasonDialog extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
+            Text(
+              slotId,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  department,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.circle, size: 4, color: Colors.black54),
+                const SizedBox(width: 6),
+                Text(
+                  isClassroom ? "Class $roomId" : "Lab $roomId",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
 
+            const SizedBox(height: 20),
+
+            /// Reason Input
             TextFormField(
               controller: reasonController,
-              maxLength: maxLength,
+              maxLength: 60,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey[200],
+                counterText: "",
                 hintText: "Enter reason/details",
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(5),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            const SizedBox(height: 15),
 
-            ElevatedButton(
-              onPressed: () {
-                final reason = reasonController.text.trim();
-                if (reason.isEmpty) return;
+            const SizedBox(height: 6),
 
-                onSubmit(reason); // <- reusable callback
+            Text(
+              "This request will be sent to the HOD for approval.",
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 20),
 
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                "Apply",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    final reason = reasonController.text.trim();
+                    if (reason.isEmpty) return;
+
+                    onSubmit(reason);
+
+                    Get.back();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    "Apply for Class",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

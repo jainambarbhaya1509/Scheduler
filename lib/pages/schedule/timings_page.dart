@@ -180,6 +180,10 @@ class SelectTimings extends StatelessWidget {
                 context: context,
                 builder: (BuildContext builder) {
                   return ApplyReasonDialog(
+                    roomId: classModel.className,
+                    isClassroom: classModel.isClassroom,
+                    department: deptAvailabilityModel.departmentName.toString(),
+                    slotId: timing.timing,
                     onSubmit: (reason) {
                       timingController.apply(
                         classModel: classModel,
@@ -228,7 +232,9 @@ class SelectTimings extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          appliedUser.status == "Accepted" ? "Booked" : "Pending",
+                          appliedUser.status == "Accepted"
+                              ? "Booked"
+                              : "Pending",
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,

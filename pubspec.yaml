@@ -56,6 +56,7 @@ dependencies:
   path: ^1.9.1
   universal_html: ^2.3.0
   flutter_slidable: ^4.0.3
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:
