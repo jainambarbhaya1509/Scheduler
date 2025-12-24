@@ -25,9 +25,11 @@ class ApplicationStatusPage extends StatelessWidget {
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+
             _buildTabBar(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+
             Expanded(child: _buildTabView(controller)),
           ],
         ),
@@ -38,29 +40,36 @@ class ApplicationStatusPage extends StatelessWidget {
   /// Extracted tab bar widget
   Widget _buildTabBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      // margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(10),
+        color: const Color.fromARGB(255, 245, 245, 245), // iOS system gray
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: const TabBar(
-        labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        padding: EdgeInsets.all(5),
-        dividerColor: Colors.transparent,
+      child: TabBar(
         indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        labelPadding: EdgeInsets.zero,
         indicator: BoxDecoration(
-          color: Color.fromARGB(255, 80, 80, 80),
-          borderRadius: BorderRadius.all(Radius.circular(4)),
-          shape: BoxShape.rectangle,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        tabs: [
+        labelColor: Colors.black,
+        unselectedLabelColor: Colors.black54,
+        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        tabs: const [
           Tab(text: "All"),
           Tab(text: "Accepted"),
           Tab(text: "Rejected"),
           Tab(text: "Pending"),
         ],
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey,
       ),
     );
   }

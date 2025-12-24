@@ -26,71 +26,75 @@ class StatusWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
-                    time,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+              Text(
+                requestedDate,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Icon(Icons.circle, size: 5, color: Colors.black54,),
+              const SizedBox(width: 5),
+              Text(
+                time,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const Spacer(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    status,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: status == "Accepted"
-                          ? Colors.green
-                          : status == "Rejected"
-                          ? Colors.red
-                          : const Color.fromARGB(255, 184, 166, 6),
-                    ),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: status == "Accepted"
+                      ? const Color(0xFF34C759).withOpacity(0.15)
+                      : status == "Rejected"
+                      ? const Color(0xFFFF3B30).withOpacity(0.15)
+                      : const Color(0xFFFFCC00).withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  status,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: status == "Accepted"
+                        ? const Color(0xFF34C759)
+                        : status == "Rejected"
+                        ? const Color(0xFFFF3B30)
+                        : const Color(0xFFFFCC00),
                   ),
-                  Text(
-                    requestedDate,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(34, 193, 193, 193),
-              borderRadius: BorderRadius.circular(10),
+          Text(
+            "Requested Reason:",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: const Color.fromARGB(150, 28, 28, 30),
             ),
+          ),
+          SizedBox(
+            width: double.infinity,
+
             child: Text(
               description,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: const Color.fromARGB(95, 28, 28, 28),
+                color: const Color.fromARGB(150, 28, 28, 30),
               ),
             ),
           ),

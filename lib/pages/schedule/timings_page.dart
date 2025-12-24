@@ -35,7 +35,6 @@ class SelectTimings extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _buildTabBar(),
-              const SizedBox(height: 10),
               Expanded(child: _buildTabView(context, controller)),
             ],
           ),
@@ -47,17 +46,33 @@ class SelectTimings extends StatelessWidget {
   /// Extracted tab bar widget
   Widget _buildTabBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        color: const Color.fromARGB(255, 245, 245, 245), // iOS system gray
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: const TabBar(
-        labelStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-        labelColor: Colors.black87,
-        unselectedLabelColor: Colors.black54,
+      child: TabBar(
+        indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
-        tabs: [
+        labelPadding: EdgeInsets.zero,
+        indicator: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        labelColor: Colors.black,
+        unselectedLabelColor: Colors.black54,
+        labelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600, // Apple-like
+        ),
+        tabs: const [
           Tab(text: "Classroom"),
           Tab(text: "Lab"),
         ],

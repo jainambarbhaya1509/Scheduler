@@ -17,15 +17,20 @@ class RequestsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Requests",
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Text(
+                "Manage Requests",
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Spacer(),
+              IconButton(onPressed: () {}, icon: Icon(Icons.manage_history)),
+            ],
           ),
-          const SizedBox(height: 20),
           _buildSearchBar(context, searchQuery),
-          const SizedBox(height: 20),
+          const SizedBox(height: 3),
           _buildRequestsList(context, controller, searchQuery),
         ],
       ),
@@ -88,10 +93,7 @@ class RequestsPage extends StatelessWidget {
         return ListView.builder(
           itemCount: filteredRequests.length,
           itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: RequestCard(request: controller.appliedRequests[index]),
-            );
+            return RequestCard(request: filteredRequests[index]);
           },
         );
       }),

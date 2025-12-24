@@ -51,10 +51,10 @@ class _RequestCardState extends State<RequestCard> {
     final reason = req["reason"] ?? "No reason provided";
     final requestedDate = req["requestedDate"] ?? '';
 
-    return InkWell(
+    return GestureDetector(
       onTap: () => setState(() => showActions = !showActions),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(15),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: const Color.fromARGB(255, 245, 245, 245),
@@ -63,37 +63,36 @@ class _RequestCardState extends State<RequestCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// FIRST ROW — ROOM + TIMESLOT + USER
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        room,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+                    Text(
+                      room.toString().contains('L')
+                          ? "Lab $room"
+                          : "Classroom $room",
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        time,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
+                    ),
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        color: Colors.black87,
+
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-
-                const SizedBox(width: 10),
-
+                Spacer(),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -101,18 +100,19 @@ class _RequestCardState extends State<RequestCard> {
                     Text(
                       user,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     Text(
                       requestedDate,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
                         color: Colors.black87,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -120,16 +120,17 @@ class _RequestCardState extends State<RequestCard> {
               ],
             ),
 
-            const SizedBox(height: 12),
-
-            /// REASON BOX
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(34, 193, 193, 193),
-                borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: 15),
+            Text(
+              "Reason for application:",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: const Color.fromARGB(150, 28, 28, 30),
               ),
+            ),
+            SizedBox(
+              width: double.infinity,
+
               child: Text(
                 reason,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -146,30 +147,38 @@ class _RequestCardState extends State<RequestCard> {
               isUpdating
                   ? const Center(child: CircularProgressIndicator())
                   : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        TextButton.icon(
-                          onPressed: () => updateStatus("Accepted"),
-                          icon: const Icon(Icons.check, color: Colors.green),
-                          label: const Text(
-                            "Accept",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => updateStatus("Rejected"),
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.redAccent,
+                            ),
+                            label: const Text("Reject"),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.redAccent,
+                              side: const BorderSide(color: Colors.redAccent),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: () => updateStatus("Rejected"),
-                          icon: const Icon(
-                            Icons.close,
-                            color: Colors.redAccent,
-                          ),
-                          label: const Text(
-                            "Reject",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.redAccent,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => updateStatus("Accepted"),
+                            icon: const Icon(Icons.check, color: Colors.green),
+                            label: const Text("Accept"),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.green,
+                              backgroundColor: Colors.transparent,
+                              side: const BorderSide(color: Colors.green),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
