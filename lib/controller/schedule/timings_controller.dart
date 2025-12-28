@@ -1,110 +1,111 @@
+import 'package:rxdart/rxdart.dart';
 import 'package:schedule/imports.dart';
 
 class TimingsController extends GetxController {
   final _firestore = FirestoreService().instance;
 
   final isLoading = false.obs;
+
   final classroomList = <ClassAvailabilityModel>[].obs;
   final labList = <ClassAvailabilityModel>[].obs;
+
   final hoursRequired = 0.0.obs;
   final initialTiming = "".obs;
 
   final _scheduleController = Get.put(ScheduleController(), permanent: true);
   final _sessionController = Get.put(SessionController());
 
-  /// Fetch timings for classrooms and labs
-  Future<void> fetchTimings(
-    DepartmentAvailabilityModel deptModel, {
-    double? reqHrs,
-    String? initialTime,
-  }) async {
+  StreamSubscription? _classroomSub;
+  StreamSubscription? _labSub;
+
+  void fetchTimings(DepartmentAvailabilityModel deptModel) {
+    final day = _scheduleController.selectedDay.value;
+    final deptName = deptModel.departmentName!;
+    final date = _scheduleController.selectedDate.value;
+
     isLoading.value = true;
-    classroomList.clear();
-    labList.clear();
 
-    try {
-      final day = _scheduleController.selectedDay.value;
-      final deptName = deptModel.departmentName!;
+    _classroomSub?.cancel();
+    _labSub?.cancel();
 
-      final results = await Future.wait([
-        _fetchSection(day, deptName, "Classrooms", true),
-        _fetchSection(day, deptName, "Labs", false),
-      ]);
+    _classroomSub = _sectionStream(day, deptName, "Classrooms", true, date)
+        .listen((data) {
+          classroomList.value = data;
+          isLoading.value = false;
+        });
 
-      classroomList.addAll(results[0]);
-      labList.addAll(results[1]);
-    } catch (e) {
-      logger.d("Error fetching timings: $e");
-    } finally {
+    _labSub = _sectionStream(day, deptName, "Labs", false, date).listen((data) {
+      labList.value = data;
       isLoading.value = false;
-    }
+    });
   }
 
-  /// Refactored section fetching with optimized filtering
-  Future<List<ClassAvailabilityModel>> _fetchSection(
+  Stream<List<ClassAvailabilityModel>> _sectionStream(
     String day,
     String deptName,
     String section,
     bool isClassroom,
-  ) async {
-    final allSlots = <ClassAvailabilityModel>[];
-    final date = _scheduleController.selectedDate.value;
+    String date,
+  ) {
+    return _firestore
+        .collection('slots')
+        .doc(day)
+        .collection('departments')
+        .doc(deptName)
+        .collection(section)
+        .snapshots()
+        .asyncExpand((roomsSnapshot) {
+          final roomStreams = roomsSnapshot.docs
+              .where((doc) => doc.id != "_meta")
+              .map((roomDoc) {
+                return roomDoc.reference.collection('slots').snapshots().map((
+                  slotsSnapshot,
+                ) {
+                  final timings = slotsSnapshot.docs.map((slotDoc) {
+                    final appliedUsers =
+                        FirestoreHelpers.filterApplicationsByStatus(
+                          slotDoc['applications'],
+                          date,
+                          'rejected',
+                          exclude: true,
+                        ).map((e) => UsersAppliedModel.fromMap(e)).toList();
 
-    try {
-      final snapshot = await _firestore
-          .collection('slots')
-          .doc(day)
-          .collection('departments')
-          .doc(deptName)
-          .collection(section)
-          .get();
+                    return ClassTiming(
+                      timing: "${slotDoc['start_time']}-${slotDoc['end_time']}",
+                      appliedUsers: appliedUsers,
+                    );
+                  }).toList();
 
-      for (var doc in snapshot.docs) {
-        if (doc.id == "_meta") continue;
+                  return ClassAvailabilityModel(
+                    id: roomDoc.id,
+                    className: roomDoc.id,
+                    isClassroom: isClassroom,
+                    timingsList: timings,
+                  );
+                });
+              })
+              .toList();
 
-        final slotsSnapshot = await doc.reference.collection('slots').get();
+          if (roomStreams.isEmpty) {
+            return Stream.value(<ClassAvailabilityModel>[]);
+          }
 
-        final timingList = slotsSnapshot.docs.map((slot) {
-          final appliedUsers = FirestoreHelpers.filterApplicationsByStatus(
-            slot['applications'] as Map<String, dynamic>?,
-            date,
-            'rejected',
-            exclude: true,
-          ).map((e) => UsersAppliedModel.fromMap(e)).toList();
+          return CombineLatestStream.list(roomStreams).map((rooms) {
+            var filtered = rooms;
 
-          return ClassTiming(
-            timing: "${slot['start_time'] ?? ''}-${slot['end_time'] ?? ''}",
-            appliedUsers: appliedUsers,
-          );
-        }).toList();
+            if (initialTiming.value.isNotEmpty) {
+              filtered = filterSlotsAfter(filtered, initialTiming.value);
+            }
 
-        allSlots.add(
-          ClassAvailabilityModel(
-            id: doc.id,
-            className: doc.id,
-            isClassroom: isClassroom,
-            timingsList: timingList,
-          ),
-        );
-      }
+            if (hoursRequired.value > 0) {
+              filtered = findConsecutiveSlots(filtered, hoursRequired.value);
+            }
 
-      // Apply filters if set
-      var finalList = allSlots;
-      if (initialTiming.value.isNotEmpty) {
-        finalList = filterSlotsAfter(allSlots, initialTiming.value);
-      }
-      if (hoursRequired.value != 0.0) {
-        finalList = findConsecutiveSlots(finalList, hoursRequired.value);
-      }
-
-      return finalList;
-    } catch (e) {
-      logger.d("Error fetching $section: $e");
-      return [];
-    }
+            return filtered;
+          });
+        });
   }
-
-  /// Apply booking request
+  
   Future<void> apply({
     required ClassAvailabilityModel classModel,
     required String timeslot,
@@ -114,15 +115,24 @@ class TimingsController extends GetxController {
     try {
       final day = _scheduleController.selectedDay.value;
       final dept = _scheduleController.selectedDept.value;
-      final section = classModel.isClassroom ? "Classrooms" : "Labs";
       final date = _scheduleController.selectedDate.value;
-
-      final batch = _firestore.batch();
-      final bookingId = _firestore.collection("requests").doc().id;
+      final section = classModel.isClassroom ? "Classrooms" : "Labs";
 
       final session = await _sessionController.getSession();
-      final userName = session["username"];
-      final userEmail = session["email"];
+
+      final bookingId = _firestore.collection("requests").doc().id;
+
+      final application = {
+        "bookingId": bookingId,
+        "username": session["username"],
+        "email": session["email"],
+        "reason": reason,
+        "requestedDate": date,
+        "createdAt": Timestamp.now(),
+        "status": "Pending",
+      };
+
+      final batch = _firestore.batch();
 
       // Store request
       final requestRef = _firestore
@@ -131,39 +141,21 @@ class TimingsController extends GetxController {
           .collection("requests_list")
           .doc(bookingId);
 
-      final requestData = {
-        "bookingId": bookingId,
-        "username": userName,
-        "email": userEmail,
+      batch.set(requestRef, {
+        ...application,
         "department": dept,
         "roomId": classModel.className,
-        "reason": reason,
         "timeSlot": timeslot,
         "consideredSlots": consideredSlots ?? [],
-        "status": "Pending",
         "day": day,
-        "requestedDate": date,
-        "createdAt": Timestamp.now(),
-      };
-      batch.set(requestRef, requestData);
+      });
 
-      // Create application object
-      final application = {
-        "bookingId": bookingId,
-        "username": userName,
-        "email": userEmail,
-        "reason": reason,
-        "requestedDate": date,
-        "createdAt": Timestamp.now(),
-        "status": "Pending",
-      };
-
-      // Update slots with application
-      final slotsToUpdate = consideredSlots?.isNotEmpty ?? false
+      // Update slots
+      final slots = consideredSlots?.isNotEmpty == true
           ? consideredSlots!
           : [timeslot];
 
-      for (final slot in slotsToUpdate) {
+      for (final slot in slots) {
         final slotRef = _firestore
             .collection("slots")
             .doc(day)
@@ -181,24 +173,33 @@ class TimingsController extends GetxController {
 
       await batch.commit();
 
-      // email notification logic to be implemented here for HOD
-      final hodSnapshot = await _firestore
+      // 🔔 Notify HOD
+      final hods = await _firestore
           .collection('faculty')
           .where('department', isEqualTo: dept)
           .where('isHOD', isEqualTo: true)
           .get();
 
-      for (final doc in hodSnapshot.docs) {
-        final hodEmail = doc['email'];
-        final subject = "New Booking Request from $userName";
-        final emailMessage = "Dear HOD,\n\n$userName has submitted a booking request for ${classModel.className} on $date. \nTime Slot: $timeslot \n\nReason: $reason\n\nBest regards,\nScheduling System";
-
-        sendEmailNotification(facultyEmail: hodEmail, userName: userName, subject: subject, emailMessage: emailMessage);
+      for (final hod in hods.docs) {
+        sendEmailNotification(
+          facultyEmail: hod['email'],
+          userName: session['username'],
+          subject: "New Booking Request from ${session['username']}",
+          emailMessage:
+              "Booking request for ${classModel.className}\nDate: $date\nSlot: $timeslot\nReason: $reason",
+        );
       }
 
-      Get.snackbar("Success", "Application submitted and faculty notified");
+      Get.snackbar("Success", "Request submitted");
     } catch (e) {
-      Get.snackbar("Error", "Failed to submit: $e");
+      Get.snackbar("Error", e.toString());
     }
+  }
+
+  @override
+  void onClose() {
+    _classroomSub?.cancel();
+    _labSub?.cancel();
+    super.onClose();
   }
 }
