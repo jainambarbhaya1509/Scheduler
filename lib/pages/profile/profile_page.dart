@@ -52,68 +52,50 @@ class _ProfilePageState extends State<ProfilePage> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return Scaffold(
-          body: SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: IntrinsicHeight(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Profile Details",
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 30),
-
-                            _buildInfoTile("Name", username),
-                            _buildInfoTile("Email", email),
-                            _buildInfoTile("Department", department),
-
-                            _buildInfoTile(
-                              "Role",
-                              isHOD
-                                  ? "Head of Department / Faculty"
-                                  : isAdmin && !isSuperAdmin && !isHOD
-                                  ? "Time Table Coordinator / Faculty"
-                                  : isSuperAdmin
-                                  ? "Super Admin"
-                                  : "Faculty",
-                            ),
-
-                            const SizedBox(height: 30),
-
-                            Text(
-                              "Change Password",
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 20),
-
-                            _buildChangePassword(),
-
-                            const Spacer(),
-
-                            _buildLogoutButton(),
-
-                            const SizedBox(height: 20),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Profile Details",
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
-          ),
+            const SizedBox(height: 30),
+
+            _buildInfoTile("Name", username),
+            _buildInfoTile("Email", email),
+            _buildInfoTile("Department", department),
+
+            _buildInfoTile(
+              "Role",
+              isHOD
+                  ? "Head of Department / Faculty"
+                  : isAdmin && !isSuperAdmin && !isHOD
+                  ? "Time Table Coordinator / Faculty"
+                  : isSuperAdmin
+                  ? "Super Admin"
+                  : "Faculty",
+            ),
+
+            const SizedBox(height: 30),
+
+            Text(
+              "Change Password",
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+
+            _buildChangePassword(),
+
+            const Spacer(),
+
+            _buildLogoutButton(),
+
+            const SizedBox(height: 20),
+          ],
         );
       },
     );
@@ -140,17 +122,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildChangePassword() {
     return Column(
       children: [
-        // _buildInputContainer(
-        //   child: TextFormField(
-        //     controller: loginController.oldPasswordController,
-        //     decoration: const InputDecoration(
-        //       border: InputBorder.none,
-        //       hintText: "Enter Old Password",
-        //       hintStyle: TextStyle(color: Colors.grey),
-        //     ),
-        //   ),
-        // ),
-        // const SizedBox(height: 15),
         _buildInputContainer(
           child: TextFormField(
             controller: loginController.newPasswordController,

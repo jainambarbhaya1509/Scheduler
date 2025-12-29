@@ -1,6 +1,5 @@
 import 'package:schedule/imports.dart';
 
-
 class RequestsController extends GetxController {
   final _firestore = FirestoreService().instance;
 
@@ -49,8 +48,42 @@ class RequestsController extends GetxController {
     rejectedRequests.clear();
     pendingRequests.clear();
 
+    final now = DateTime.now();
+
     for (var doc in snapshot.docs) {
       final data = doc.data();
+
+      final requestedDateStr = data['requestedDate'];
+      final timeSlotStr = data['timeSlot'];
+
+      // 🔒 Safety checks
+      if (requestedDateStr == null || timeSlotStr == null) {
+        continue;
+      }
+
+      // Parse date: dd-MM-yyyy
+      final dateParts = requestedDateStr.split('-');
+      if (dateParts.length != 3) continue;
+
+      final day = int.parse(dateParts[0]);
+      final month = int.parse(dateParts[1]);
+      final year = int.parse(dateParts[2]);
+
+      // Extract END time: "08:30-11:30"
+      final endTime = timeSlotStr.split('-')[1];
+      final timeParts = endTime.split(':');
+
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+
+      final expiryDateTime = DateTime(year, month, day, hour, minute);
+
+      // ❌ Skip expired requests
+      if (now.isAfter(expiryDateTime)) {
+        continue;
+      }
+
+      // ✅ Still valid → process normally
       allRequests.add(data);
 
       switch ((data['status'] as String?)?.toLowerCase() ?? 'pending') {
@@ -76,9 +109,43 @@ class RequestsController extends GetxController {
         .collection('requests_list')
         .snapshots()
         .listen((snapshot) {
-          appliedRequests.assignAll(
-            snapshot.docs.map((doc) => doc.data()).toList(),
-          );
+          final now = DateTime.now();
+
+          final filtered = snapshot.docs
+              .where((doc) {
+                final data = doc.data();
+
+                final requestedDateStr = data['requestedDate'];
+                final timeSlotStr = data['timeSlot'];
+
+                if (requestedDateStr == null || timeSlotStr == null) {
+                  return false;
+                }
+
+                // Parse date: dd-MM-yyyy
+                final dateParts = requestedDateStr.split('-');
+                if (dateParts.length != 3) return false;
+
+                final day = int.parse(dateParts[0]);
+                final month = int.parse(dateParts[1]);
+                final year = int.parse(dateParts[2]);
+
+                // Extract END time from slot: "08:30-11:30"
+                final endTime = timeSlotStr.split('-')[1];
+                final timeParts = endTime.split(':');
+
+                final hour = int.parse(timeParts[0]);
+                final minute = int.parse(timeParts[1]);
+
+                final expiryDateTime = DateTime(year, month, day, hour, minute);
+
+                // KEEP only if expiry is in the future
+                return now.isBefore(expiryDateTime);
+              })
+              .map((doc) => doc.data())
+              .toList();
+
+          appliedRequests.assignAll(filtered);
         });
   }
 
@@ -104,7 +171,8 @@ class RequestsController extends GetxController {
       final snap = await ref.get();
       final requestData = snap.data();
 
-      final effectiveSlots = consideredSlots ??
+      final effectiveSlots =
+          consideredSlots ??
           List<String>.from(requestData?["consideredSlots"] ?? []);
 
       await ref.update({"status": newStatus});
@@ -119,19 +187,20 @@ class RequestsController extends GetxController {
         isClassroom: isClassroom,
         consideredSlots: effectiveSlots,
       );
-      
+
       ErrorHandler.handleSuccess("Success", "Application updated");
 
       // Send notification based on status
-      if (newStatus.toLowerCase() == 'accepted' || newStatus.toLowerCase() == 'rejected') {
+      if (newStatus.toLowerCase() == 'accepted' ||
+          newStatus.toLowerCase() == 'rejected') {
         final userEmail = requestData?['email'];
         final userName = requestData?['username'];
-        final subject = newStatus.toLowerCase() == 'accepted' 
-        ? 'Room Request Accepted' 
-        : 'Room Request Rejected';
+        final subject = newStatus.toLowerCase() == 'accepted'
+            ? 'Room Request Accepted'
+            : 'Room Request Rejected';
         final emailMessage = newStatus.toLowerCase() == 'accepted'
-        ? 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been accepted.\n\nBest regards,\nSchedule Team'
-        : 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been rejected.\n\nBest regards,\nSchedule Team';
+            ? 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been accepted.\n\nBest regards,\nSchedule Team'
+            : 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been rejected.\n\nBest regards,\nSchedule Team';
 
         sendEmailNotification(
           facultyEmail: userEmail,
@@ -220,4 +289,3 @@ class RequestsController extends GetxController {
     super.onClose();
   }
 }
-    

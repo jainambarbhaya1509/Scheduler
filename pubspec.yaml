@@ -57,6 +57,7 @@ dependencies:
   universal_html: ^2.3.0
   flutter_slidable: ^4.0.3
   rxdart: ^0.28.0
+  showcaseview: ^5.0.1
 
 dev_dependencies:
   flutter_test:
