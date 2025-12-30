@@ -32,38 +32,12 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-          padding: EdgeInsets.all(10),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(context),
-          const SizedBox(height: 20),
-          _buildSlotSelector(context),
-          const SizedBox(height: 20),
-          _buildAvailableClasses(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Schedule Class",
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        // const Spacer(),
-        // IconButton(
-        //   onPressed: () {
-        //     Get.to(() => NotificationPage(), transition: Transition.cupertino);
-        //   },
-        //   icon: const Icon(Icons.notifications_active_rounded),
-        // ),
+        _buildSlotSelector(context),
+        const SizedBox(height: 20),
+        _buildAvailableClasses(),
       ],
     );
   }

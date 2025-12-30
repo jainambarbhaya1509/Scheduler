@@ -16,29 +16,6 @@ class AddTimeTable extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Manage Time Table",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-
-            IconButton(
-              icon: const Icon(Icons.calendar_today_sharp),
-              onPressed: () {
-                Get.to(
-                  () => ViewReservations(),
-                  transition: Transition.cupertino,
-                );
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
         _downloadTemplate(),
         const SizedBox(height: 16),
 

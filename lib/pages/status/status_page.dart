@@ -10,29 +10,16 @@ class ApplicationStatusPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final RequestsController controller = Get.put(RequestsController());
 
-    return Container(
-      padding: EdgeInsets.all(10),
-
-      child: DefaultTabController(
-        length: 4,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Your Requests",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            _buildTabBar(),
-            const SizedBox(height: 10),
-
-            Expanded(child: _buildTabView(controller)),
-          ],
-        ),
+    return DefaultTabController(
+      length: 4,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTabBar(),
+          const SizedBox(height: 10),
+          Expanded(child: _buildTabView(controller)),
+        ],
       ),
     );
   }

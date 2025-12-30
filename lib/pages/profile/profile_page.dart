@@ -55,14 +55,6 @@ class _ProfilePageState extends State<ProfilePage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Profile Details",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 30),
-
             _buildInfoTile("Name", username),
             _buildInfoTile("Email", email),
             _buildInfoTile("Department", department),

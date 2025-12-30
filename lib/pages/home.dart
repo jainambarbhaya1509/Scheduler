@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:schedule/pages/manage_timetable/add_timetable.dart';
+import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import 'package:schedule/pages/profile/profile_page.dart';
 import 'package:schedule/pages/requests/requests_page.dart';
 import 'package:schedule/pages/schedule/schedule_page.dart';
@@ -27,6 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   late final List<Widget> pages;
   late final List<BottomNavigationBarItem> navItems;
+  late final List<String> navLabels;
 
   @override
   void initState() {
@@ -34,12 +37,14 @@ class _HomePageState extends State<HomePage> {
 
     pages = [];
     navItems = [];
+    navLabels = [];
 
     // ---------------------------------------------------
     // SUPERADMIN ONLY
     // ---------------------------------------------------
     if (widget.isSuperAdmin && !widget.isAdmin && !widget.isHOD) {
       pages.add(SuperAdminPage());
+      navLabels.add("User Management");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.group),
@@ -53,6 +58,7 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (widget.isAdmin && !widget.isSuperAdmin && widget.isHOD) {
       pages.add(const SchedulePage());
+      navLabels.add("Schedule Class");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.home_rounded),
@@ -61,6 +67,7 @@ class _HomePageState extends State<HomePage> {
       );
 
       pages.add(const ApplicationStatusPage());
+      navLabels.add("Application Status");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.call_missed_outgoing),
@@ -68,6 +75,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
       pages.add(const RequestsPage());
+      navLabels.add("Manage Requests");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.approval_rounded),
@@ -75,6 +83,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
       pages.add(AddTimeTable());
+      navLabels.add("Manage Time Table");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.settings),
@@ -88,6 +97,7 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (widget.isAdmin && !widget.isSuperAdmin && !widget.isHOD) {
       pages.add(const SchedulePage());
+      navLabels.add("Schedule Class");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.home_rounded),
@@ -96,6 +106,7 @@ class _HomePageState extends State<HomePage> {
       );
 
       pages.add(const ApplicationStatusPage());
+      navLabels.add("Application Status");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.call_missed_outgoing),
@@ -103,6 +114,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
       pages.add(AddTimeTable());
+      navLabels.add("Manage Time Table");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.settings),
@@ -116,6 +128,7 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (widget.isHOD && !widget.isAdmin && !widget.isSuperAdmin) {
       pages.add(const SchedulePage());
+      navLabels.add("Schedule Class");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.home_rounded),
@@ -124,6 +137,7 @@ class _HomePageState extends State<HomePage> {
       );
 
       pages.add(const ApplicationStatusPage());
+      navLabels.add("Application Status");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.call_missed_outgoing),
@@ -132,6 +146,7 @@ class _HomePageState extends State<HomePage> {
       );
 
       pages.add(const RequestsPage());
+      navLabels.add("Manage Requests");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.approval_rounded),
@@ -145,6 +160,7 @@ class _HomePageState extends State<HomePage> {
     // ---------------------------------------------------
     if (!widget.isAdmin && !widget.isSuperAdmin && !widget.isHOD) {
       pages.add(const SchedulePage());
+      navLabels.add("Schedule Class");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.home_rounded),
@@ -153,6 +169,7 @@ class _HomePageState extends State<HomePage> {
       );
 
       pages.add(const ApplicationStatusPage());
+      navLabels.add("Application Status");
       navItems.add(
         const BottomNavigationBarItem(
           icon: Icon(Icons.call_missed_outgoing),
@@ -165,6 +182,7 @@ class _HomePageState extends State<HomePage> {
     // PROFILE — ALWAYS LAST
     // ---------------------------------------------------
     pages.add(ProfilePage(loggedEmail: widget.loggedEmail));
+    navLabels.add("Profile");
     navItems.add(
       const BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
     );
@@ -175,8 +193,43 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        padding: const EdgeInsets.only(top: 50, left: 12, right: 12),
-        child: pages[index],
+        padding: const EdgeInsets.only(top: 60, left: 20, right: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  navLabels[index],
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                if (index == 2) ...[
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.manage_history),
+                  ),
+                ],
+                if (index == 3) ...[
+                  IconButton(
+                    icon: const Icon(Icons.calendar_today_sharp),
+                    onPressed: () {
+                      Get.to(
+                        () => ViewReservations(),
+                        transition: Transition.cupertino,
+                      );
+                    },
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(child: pages[index]),
+          ],
+        ),
       ),
       bottomNavigationBar: ClipRRect(
         borderRadius: BorderRadius.circular(40),
