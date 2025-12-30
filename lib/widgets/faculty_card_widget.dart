@@ -17,7 +17,6 @@ class FacultyCardWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 245, 245, 245),
         borderRadius: BorderRadius.circular(10),
@@ -27,27 +26,42 @@ class FacultyCardWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                position,
-                softWrap: true,
-                style: const TextStyle(
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
+              /// LEFT TEXT
+              Expanded(
+                child: Text(
+                  position,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.black45,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              Spacer(),
-              Text(
-                department,
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
+
+              const SizedBox(width: 10),
+
+              /// RIGHT TEXT
+              Flexible(
+                child: Text(
+                  department,
+                  maxLines: 1,
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.black45,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 6),
           Text(
             username,
-            style: TextStyle(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.black87,
               fontWeight: FontWeight.w500,

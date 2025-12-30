@@ -1,4 +1,5 @@
 import 'package:schedule/imports.dart';
+import 'package:schedule/pages/splash_page.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -27,6 +28,7 @@ class LoginController extends GetxController {
 
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
+
 
       if (email.isEmpty || password.isEmpty) {
         ErrorHandler.handleError("Error", "Please fill all fields");
@@ -60,6 +62,9 @@ class LoginController extends GetxController {
         FirestoreHelpers.safeGet<bool>(user, "isSuperAdmin") ?? false,
         FirestoreHelpers.safeGet<bool>(user, "isAdmin") ?? false,
       );
+
+      passwordController.clear();
+      emailController.clear();
 
       ErrorHandler.handleSuccess("Success", "Welcome ${user['username']}");
       return user;
@@ -124,7 +129,7 @@ class LoginController extends GetxController {
   /// Logout
   Future<void> logout() async {
     await _sessionController.clearSession();
-    Get.offAllNamed("/login");
+    Get.offAll(SplashPage());
   }
 
   @override

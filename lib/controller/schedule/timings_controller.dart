@@ -1,6 +1,5 @@
 import 'package:rxdart/rxdart.dart';
 import 'package:schedule/helper/date_time/is_same_day.dart';
-import 'package:schedule/helper/date_time/time_to_min.dart';
 import 'package:schedule/imports.dart';
 
 class TimingsController extends GetxController {

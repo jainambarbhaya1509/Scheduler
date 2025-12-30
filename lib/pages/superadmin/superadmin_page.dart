@@ -47,18 +47,10 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Faculty Management",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
             Form(
               key: _formKey,
               child: Column(
@@ -125,6 +117,7 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
       child: ElevatedButton(
         onPressed: callback,
         style: ElevatedButton.styleFrom(
+          elevation: 0,
           backgroundColor: bgColor,
           foregroundColor: textColor,
           side: BorderSide(color: borderColor),

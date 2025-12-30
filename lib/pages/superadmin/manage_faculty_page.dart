@@ -38,7 +38,9 @@ class ManageFacultyPage extends StatelessWidget {
                           children: [Text("No faculties added")],
                         ),
                       )
-                    : ListView.builder(
+                    : ListView.separated(
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
                         itemCount: _superAdminController.faculties.length,
                         itemBuilder: (context, index) {
                           final faculty =
@@ -46,13 +48,12 @@ class ManageFacultyPage extends StatelessWidget {
 
                           return Slidable(
                             key: ValueKey(faculty.email),
-
-                            // 👉 Slide action (drag OR click on web)
                             endActionPane: ActionPane(
                               motion: const DrawerMotion(),
                               extentRatio: 0.25,
                               children: [
                                 SlidableAction(
+                                  borderRadius: BorderRadius.circular(10),
                                   onPressed: (_) async {
                                     final confirm = await Get.dialog<bool>(
                                       AlertDialog(
@@ -109,7 +110,7 @@ class ManageFacultyPage extends StatelessWidget {
                                               ).colorScheme.onError,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(10),
+                                                    BorderRadius.circular(16),
                                               ),
                                             ),
                                             onPressed: () =>
@@ -151,6 +152,7 @@ class ManageFacultyPage extends StatelessWidget {
                       ),
               ),
             ),
+            const SizedBox(height: 15),
           ],
         ),
       ),

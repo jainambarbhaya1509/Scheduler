@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schedule/helper/download/download_mobile.dart';
 import 'package:schedule/helper/download/download_web.dart';
-import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import '../../controller/schedule/timetable_controller.dart';
 
 class AddTimeTable extends StatelessWidget {
