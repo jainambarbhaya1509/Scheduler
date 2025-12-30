@@ -133,11 +133,12 @@ class _SchedulePageState extends State<SchedulePage> {
                 return;
               }
 
-              // Passed validation → update text field
               setState(() {
                 _timeController.text =
                     "${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}";
               });
+              _timingsController.initialTiming.value = _timeController.text
+                  .toString();
             }
           },
         ),
@@ -151,12 +152,14 @@ class _SchedulePageState extends State<SchedulePage> {
         child: TextFormField(
           controller: _nHoursController,
           keyboardType: TextInputType.number,
-          // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: const InputDecoration(
             border: InputBorder.none,
             hintText: "Enter Hours",
             hintStyle: TextStyle(color: Colors.grey),
           ),
+          onChanged: (value) {
+            _timingsController.hoursRequired.value = safeParseDouble(value);
+          },
         ),
       ),
     );
@@ -187,11 +190,6 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ),
         onPressed: () {
-          _timingsController.hoursRequired.value = safeParseDouble(
-            _nHoursController.text,
-          );
-          _timingsController.initialTiming.value = _timeController.text
-              .toString();
           _scheduleController.fetchAvailabilityForDay(
             _scheduleController.selectedDay.value,
           );
