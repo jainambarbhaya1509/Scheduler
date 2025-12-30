@@ -1,4 +1,6 @@
 import 'package:rxdart/rxdart.dart';
+import 'package:schedule/helper/date_time/is_same_day.dart';
+import 'package:schedule/helper/date_time/time_to_min.dart';
 import 'package:schedule/imports.dart';
 
 class TimingsController extends GetxController {
@@ -38,6 +40,40 @@ class TimingsController extends GetxController {
       labList.value = data;
       isLoading.value = false;
     });
+  }
+
+  List<ClassAvailabilityModel> filterPastSlotsForToday(
+    List<ClassAvailabilityModel> rooms,
+    String selectedDate,
+  ) {
+    // 🔥 Only filter for TODAY
+    if (!isToday(selectedDate)) return rooms;
+
+    final now = TimeOfDay.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+
+    return rooms
+        .map((room) {
+          final validTimings = room.timingsList.where((timing) {
+            final startPart = timing.timing.split('-').last.trim();
+
+            final parts = startPart.split(':');
+            final startMinutes = int.parse(parts[0]) * 60 + int.parse(parts[1]);
+
+            return startMinutes > currentMinutes;
+          }).toList();
+
+          if (validTimings.isEmpty) return null;
+
+          return ClassAvailabilityModel(
+            id: room.id,
+            className: room.className,
+            isClassroom: room.isClassroom,
+            timingsList: validTimings,
+          );
+        })
+        .whereType<ClassAvailabilityModel>()
+        .toList();
   }
 
   Stream<List<ClassAvailabilityModel>> _sectionStream(
@@ -93,6 +129,9 @@ class TimingsController extends GetxController {
           return CombineLatestStream.list(roomStreams).map((rooms) {
             var filtered = rooms;
 
+            // 🔥 Remove past slots for today
+            filtered = filterPastSlotsForToday(filtered, date);
+
             if (initialTiming.value.isNotEmpty) {
               filtered = filterSlotsAfter(filtered, initialTiming.value);
             }
@@ -105,7 +144,7 @@ class TimingsController extends GetxController {
           });
         });
   }
-  
+
   Future<void> apply({
     required ClassAvailabilityModel classModel,
     required String timeslot,
