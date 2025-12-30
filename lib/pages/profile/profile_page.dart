@@ -49,7 +49,12 @@ class _ProfilePageState extends State<ProfilePage> {
       future: _loadSessionFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.black12,
+                color: Colors.black,
+              ),
+            );
         }
 
         return Column(

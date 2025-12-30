@@ -4,6 +4,7 @@ import 'package:schedule/controller/schedule/schedule_controller.dart';
 import 'package:schedule/controller/schedule/timings_controller.dart';
 import 'package:schedule/helper/date_time/date_to_day.dart';
 import 'package:schedule/helper/convert_datatype/parse_double.dart';
+import 'package:schedule/imports.dart';
 import 'package:schedule/models/dept_availability_model.dart';
 import 'package:schedule/pages/schedule/timings_page.dart';
 
@@ -112,34 +113,48 @@ class _SchedulePageState extends State<SchedulePage> {
             hintStyle: TextStyle(color: Colors.grey),
           ),
           onTap: () async {
+            final now = TimeOfDay.now();
+
             final selectedTime = await showTimePicker(
               context: context,
-              initialTime: TimeOfDay.now(),
+              initialTime: now,
             );
 
-            if (selectedTime != null) {
-              final int totalMinutes =
-                  selectedTime.hour * 60 + selectedTime.minute;
+            if (selectedTime == null) return;
 
-              const int minMinutes = 8 * 60; // 8:00 AM
-              const int maxMinutes = 18 * 60; // 6:00 PM
+            final int selectedMinutes =
+                selectedTime.hour * 60 + selectedTime.minute;
 
-              // Check if within allowed range
-              if (totalMinutes < minMinutes || totalMinutes > maxMinutes) {
-                Get.snackbar(
-                  "Invalid Time",
-                  "Please select a time between 8:00 AM and 6:00 PM",
-                );
-                return;
-              }
+            const int minMinutes = 8 * 60; // 8:00 AM
+            const int maxMinutes = 18 * 60; // 6:00 PM
 
-              setState(() {
-                _timeController.text =
-                    "${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}";
-              });
-              _timingsController.initialTiming.value = _timeController.text
-                  .toString();
+            final int currentMinutes = now.hour * 60 + now.minute;
+
+            // 1️⃣ Check office hours
+            if (selectedMinutes < minMinutes || selectedMinutes > maxMinutes) {
+              Get.snackbar(
+                "Invalid Time",
+                "Please select a time between 8:00 AM and 6:00 PM",
+              );
+              return;
             }
+
+            // 2️⃣ Check not earlier than current time
+            if (selectedMinutes < currentMinutes) {
+              Get.snackbar(
+                "Invalid Time",
+                "Selected time cannot be earlier than the current time.",
+              );
+              return;
+            }
+
+            setState(() {
+              _timeController.text =
+                  "${selectedTime.hour.toString().padLeft(2, '0')}:"
+                  "${selectedTime.minute.toString().padLeft(2, '0')}";
+            });
+
+            _timingsController.initialTiming.value = _timeController.text;
           },
         ),
       ),
@@ -151,7 +166,12 @@ class _SchedulePageState extends State<SchedulePage> {
       child: _buildInputContainer(
         child: TextFormField(
           controller: _nHoursController,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+              RegExp(r'^(10(\.0{0,2})?|[1-9](\.\d{0,2})?)$'),
+            ),
+          ],
           decoration: const InputDecoration(
             border: InputBorder.none,
             hintText: "Enter Hours",
@@ -206,7 +226,12 @@ class _SchedulePageState extends State<SchedulePage> {
     return Expanded(
       child: Obx(() {
         if (_scheduleController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.black12,
+              color: Colors.black,
+            ),
+          );
         }
 
         final list = _scheduleController.departmentAvailabilityList;

@@ -145,7 +145,12 @@ class _RequestCardState extends State<RequestCard> {
             /// ACCEPT / REJECT BUTTONS
             if (showActions)
               isUpdating
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.black12,
+                        color: Colors.black,
+                      ),
+                    )
                   : Row(
                       children: [
                         Expanded(

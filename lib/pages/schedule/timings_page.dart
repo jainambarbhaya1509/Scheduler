@@ -84,7 +84,12 @@ class SelectTimings extends StatelessWidget {
   Widget _buildTabView(BuildContext context, TimingsController controller) {
     return Obx(() {
       if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.black12,
+                color: Colors.black,
+              ),
+            );
       }
 
       return TabBarView(

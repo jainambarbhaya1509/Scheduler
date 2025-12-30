@@ -16,7 +16,12 @@ class SplashPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Colors.black12,
+                color: Colors.black,
+              ),
+            ),
           );
         }
 
