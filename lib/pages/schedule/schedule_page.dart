@@ -136,15 +136,34 @@ class _SchedulePageState extends State<SchedulePage> {
                 "Invalid Time",
                 "Please select a time between 8:00 AM and 6:00 PM",
               );
+              _timeController.clear();
+
               return;
             }
 
-            // 2️⃣ Check not earlier than current time
-            if (selectedMinutes < currentMinutes) {
+            final parts = _dateController.text.split('-');
+            final selectedDate = DateTime(
+              int.parse(parts[2]),
+              int.parse(parts[1]),
+              int.parse(parts[0]),
+            );
+
+            // Today's date without time
+            final nowDateTime = DateTime.now();
+            final today = DateTime(
+              nowDateTime.year,
+              nowDateTime.month,
+              nowDateTime.day,
+            );
+
+            // 2️⃣ Check not earlier than current time ONLY if date is today
+            if (selectedDate.isAtSameMomentAs(today) &&
+                selectedMinutes < currentMinutes) {
               Get.snackbar(
                 "Invalid Time",
                 "Selected time cannot be earlier than the current time.",
               );
+              _timeController.clear();
               return;
             }
 
