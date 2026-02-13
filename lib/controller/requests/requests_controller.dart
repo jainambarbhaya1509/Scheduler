@@ -210,7 +210,6 @@ class RequestsController extends GetxController {
             ? "Hi $userName, your booking for $roomId on $requestedDate ($timeSlot) was ACCEPTED."
             : "Hi $userName, your booking for $roomId on $requestedDate ($timeSlot) was REJECTED.";
 
-        /// 🔥 ALWAYS SAVE IN-APP NOTIFICATION FIRST (independent)
         await _notifController.addNotificationForUser(
           email: userEmail,
           title: title,
@@ -218,7 +217,6 @@ class RequestsController extends GetxController {
           bookingId: bookingId,
         );
 
-        /// 🔥 THEN TRY PUSH NOTIFICATION (optional)
         try {
           final snapshot = await _firestore
               .collection("faculty")

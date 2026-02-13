@@ -30,7 +30,7 @@ class FCMService {
   }) async {
     final jsonString =
         await rootBundle.loadString('assets/keys/scheduler-1a878-b2f2f5598019.json');
-    final projectId = json.decode(jsonString)['project_id']; // ⭐ FIX HERE
+    final projectId = json.decode(jsonString)['project_id'];
 
     final accessToken = await _getAccessToken();
 

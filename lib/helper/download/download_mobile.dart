@@ -29,7 +29,7 @@ Future<void> downloadExcelFileApp(String fileName) async {
   late String filePath;
 
   if (Platform.isAndroid) {
-    final downloadsDir = Directory("/storage/emulated/0/Download");
+    final downloadsDir = Directory("/sdcard/Download");
     if (!downloadsDir.existsSync()) {
       downloadsDir.createSync(recursive: true);
     }
