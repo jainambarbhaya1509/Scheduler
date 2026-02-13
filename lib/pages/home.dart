@@ -4,6 +4,7 @@ import 'package:schedule/pages/manage_timetable/add_timetable.dart';
 import 'package:schedule/pages/manage_timetable/view_reservations.dart';
 import 'package:schedule/pages/profile/profile_page.dart';
 import 'package:schedule/pages/requests/requests_page.dart';
+import 'package:schedule/pages/schedule/notification_page.dart';
 import 'package:schedule/pages/schedule/schedule_page.dart';
 import 'package:schedule/pages/status/status_page.dart';
 import 'package:schedule/pages/superadmin/superadmin_page.dart';
@@ -207,6 +208,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const Spacer(),
+                if (index == 0) ...[
+                  IconButton(
+                    onPressed: () => Get.to(() => NotificationPage()),
+                    icon: Icon(Icons.notifications),
+                  ),
+                ],
                 if (index == 2) ...[
                   IconButton(
                     onPressed: () {},

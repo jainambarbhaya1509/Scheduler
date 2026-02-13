@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class NotificationTile extends StatelessWidget {
   final String message;
   final String time;
+  final bool isRead;
 
   const NotificationTile({
     super.key,
     required this.message,
     required this.time,
+    required this.isRead,
   });
 
   @override
@@ -22,14 +24,23 @@ class NotificationTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Message expands so row never overflows
+          /// 🔵 Small unread dot
+          if (!isRead)
+            Container(
+              margin: const EdgeInsets.only(top: 6, right: 8),
+              height: 8,
+              width: 8,
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+            ),
+
+          /// Message
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.w500),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
 

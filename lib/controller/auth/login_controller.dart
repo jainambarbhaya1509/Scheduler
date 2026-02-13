@@ -1,5 +1,6 @@
 import 'package:schedule/imports.dart';
 import 'package:schedule/pages/splash_page.dart';
+import 'package:schedule/services/fcm_service.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -28,7 +29,6 @@ class LoginController extends GetxController {
 
       final email = emailController.text.trim();
       final password = passwordController.text.trim();
-
 
       if (email.isEmpty || password.isEmpty) {
         ErrorHandler.handleError("Error", "Please fill all fields");
@@ -65,6 +65,9 @@ class LoginController extends GetxController {
 
       passwordController.clear();
       emailController.clear();
+
+      await FCMTokenService.saveTokenToFaculty(user["email"]);
+      FCMTokenService.saveTokenToFaculty(user["email"]);
 
       ErrorHandler.handleSuccess("Success", "Welcome ${user['username']}");
       return user;

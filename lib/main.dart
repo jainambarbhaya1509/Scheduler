@@ -4,11 +4,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:schedule/controller/session/session_controller.dart';
 
 import 'package:schedule/pages/splash_page.dart';
+import 'package:schedule/services/notification_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.initialize();
+  String? token = await NotificationService.getToken();
+  print("FCM TOKEN: $token");
+
   Get.put(SessionController());
 
   runApp(MyApp());

@@ -1,6 +1,8 @@
 import 'package:rxdart/rxdart.dart';
+import 'package:schedule/controller/notif/notification_controller.dart';
 import 'package:schedule/helper/date_time/is_same_day.dart';
 import 'package:schedule/imports.dart';
+import 'package:schedule/services/push_notif_sender.dart';
 
 class TimingsController extends GetxController {
   final _firestore = FirestoreService().instance;
@@ -15,6 +17,7 @@ class TimingsController extends GetxController {
 
   final _scheduleController = Get.put(ScheduleController(), permanent: true);
   final _sessionController = Get.put(SessionController());
+  final NotificationController _notifController = NotificationController();
 
   StreamSubscription? _classroomSub;
   StreamSubscription? _labSub;
@@ -217,14 +220,29 @@ class TimingsController extends GetxController {
           .where('department', isEqualTo: dept)
           .where('isHOD', isEqualTo: true)
           .get();
-
       for (final hod in hods.docs) {
-        sendEmailNotification(
-          facultyEmail: hod['email'],
-          userName: session['username'],
-          subject: "New Booking Request from ${session['username']}",
-          emailMessage:
-              "Booking request for ${classModel.className}\nDate: $date\nSlot: $timeslot\nReason: $reason",
+        final data = hod.data();
+
+        final token = data['fcmToken'];
+
+        // 🚫 Skip faculty without token
+        if (token == null || token.toString().isEmpty) {
+          print("⚠️ HOD ${data['email']} has no FCM token yet");
+          continue;
+        }
+
+        await FCMService.sendNotification(
+          deviceToken: token,
+          title: "New Booking Request",
+          body:
+              "Booking request from ${session['username']}\nClass: ${classModel.className}\nDate: $date\nSlot: $timeslot",
+        );
+        await _notifController.addNotificationForUser(
+          email: data['email'], // ✅ userUid actually stores email
+          title: "New Booking Request",
+          body:
+              "Booking request from ${session['username']}\nClass: ${classModel.className}\nDate: $date\nSlot: $timeslot",
+          bookingId: bookingId,
         );
       }
 

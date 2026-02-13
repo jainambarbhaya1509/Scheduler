@@ -1,4 +1,6 @@
+import 'package:schedule/controller/notif/notification_controller.dart';
 import 'package:schedule/imports.dart';
+import 'package:schedule/services/push_notif_sender.dart';
 
 class RequestsController extends GetxController {
   final _firestore = FirestoreService().instance;
@@ -13,6 +15,8 @@ class RequestsController extends GetxController {
   StreamSubscription? _adminRequestsSubscription;
 
   final _sessionController = Get.put(SessionController());
+
+  final NotificationController _notifController = NotificationController();
 
   @override
   void onInit() {
@@ -195,19 +199,49 @@ class RequestsController extends GetxController {
           newStatus.toLowerCase() == 'rejected') {
         final userEmail = requestData?['email'];
         final userName = requestData?['username'];
-        final subject = newStatus.toLowerCase() == 'accepted'
-            ? 'Room Request Accepted'
-            : 'Room Request Rejected';
-        final emailMessage = newStatus.toLowerCase() == 'accepted'
-            ? 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been accepted.\n\nBest regards,\nSchedule Team'
-            : 'Dear $userName,\n\nYour room request on $roomId for $timeSlot on $requestedDate has been rejected.\n\nBest regards,\nSchedule Team';
 
-        sendEmailNotification(
-          facultyEmail: userEmail,
-          userName: userName,
-          subject: subject,
-          emailMessage: emailMessage,
+        if (userEmail == null) return;
+
+        final title = newStatus.toLowerCase() == 'accepted'
+            ? "Room Request Accepted 🎉"
+            : "Room Request Rejected ❌";
+
+        final body = newStatus.toLowerCase() == 'accepted'
+            ? "Hi $userName, your booking for $roomId on $requestedDate ($timeSlot) was ACCEPTED."
+            : "Hi $userName, your booking for $roomId on $requestedDate ($timeSlot) was REJECTED.";
+
+        /// 🔥 ALWAYS SAVE IN-APP NOTIFICATION FIRST (independent)
+        await _notifController.addNotificationForUser(
+          email: userEmail,
+          title: title,
+          body: body,
+          bookingId: bookingId,
         );
+
+        /// 🔥 THEN TRY PUSH NOTIFICATION (optional)
+        try {
+          final snapshot = await _firestore
+              .collection("faculty")
+              .where("email", isEqualTo: userEmail)
+              .limit(1)
+              .get();
+
+          if (snapshot.docs.isNotEmpty) {
+            final deviceToken = snapshot.docs.first.data()['fcmToken'];
+
+            if (deviceToken != null && deviceToken.toString().isNotEmpty) {
+              await FCMService.sendNotification(
+                deviceToken: deviceToken,
+                title: title,
+                body: body,
+              );
+            } else {
+              logger.d("No FCM token — push skipped but in-app saved");
+            }
+          }
+        } catch (e) {
+          logger.d("Push notification failed but in-app saved: $e");
+        }
       }
     } catch (e) {
       ErrorHandler.showError(e);

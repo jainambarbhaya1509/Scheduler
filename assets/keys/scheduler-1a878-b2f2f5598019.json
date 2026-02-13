@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "scheduler-1a878",
+  "private_key_id": "b2f2f559801941415798a285fa5fb294a0f6a017",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCrhJlJ1JUupYES\ntz14rIcqC9Ad1Wb3P8XuHcIByBLXaSsDJul1+rkkc5A8H2J8hEyqZMm7vXJsWcus\n9cgmX1mf0qTqwUENNih0abxHpa3q3mJsrX/4VzLhzXiw1B/xdeIQ8wOs8ScsDZO4\nJ9LudCw/JXFlO5u3LSZYUgYjZCBQv3Y3d56mEJCMUty+Fsh5baZH6fah9QN99pzb\nhgiANy7h5o6HwCcJtEtklBUXafj/ZU8IOuIG51QRV8nDrQ8ZBCAvKjB+3hBPDPDe\nNMxvzPqEoBCSFn1FF3zeFbsMsBRLQNpFUTHHm6mtmnOxBSMZ8lYgdQHlsOmF+gtM\nmBgJo4HlAgMBAAECggEAUtuf4dbcqsgxboUvIRjXwywpwf/R2ifoynt9ubaZw45+\nxOsLZX9V6ZIaX7EZtuWC094UxqlimY1Xo5qoskDl3xu3p+DsOCGtsW9TEZmsRwZf\nrfizFZmqbwMABwyy0ccNCvsbD3UAY3u7nP9AGwnsRiUkfq8pLniVSZ12capxIhBR\n4SNKXD9nYa7s/HQHozNeDD8UpR9cOyk8LgGAlg7WfkpBZd0AqsxKWrUkIyUaEHzs\n1gAeO8CIDuj4wbLSRXQ8chH0ndszSs9J29ftYcE1j9pbtNVv5NP+/RKWj04375iX\nbMiWqu3Yn/0c2peSE2uyHUNBO8N6of1aalxCeu01EQKBgQDVi5oTxNf4OwBgO3Uo\nTGEmqNR/kwq6yra6B/K5CaoF9CwwiYg3I68urZeHPo4U1ZhNl4MqJP9cjbajO2wQ\nbS//k3TkPJ2cYT48dH7mZvTMBWm5iYmMHVUx8RPOEgWfk6LAPkcmPc/gYTJjVDN8\nAYCxIVjFtV/tqv2Gci5fVBRAvwKBgQDNngNKpiW1lHLwFEQ/s3oiJsGfhL44kppb\nR8XHI15B0vlHMJcrL6BaNUrmVkcRfwjUpy04i+oSGuy9he21zHm2JYmUc4uDX3l5\nS7aqN7CAYejZIEgTlT48KyB+UPPRRSYt6GCZ4vac6HugAMw+9QNnqktOqja71eBP\n4GhCXtECWwKBgQDJ9Ij3AUavAD3OxOx7/CA1C55MOKgBGA3PygyHathdYRsZnDgy\nzZCzuICB62s70PWFDDGD/hFzWqLLpTsCHgEy2CXIZHs6lcziJ9qL0/rXqJbgXW60\nEFmuLazpSqn+zQUygrOPOw4JymJ5Bfza3iDzY/IsqOfcQcYbDIlGpqGwyQKBgCOx\nx56A41D3WVCmJAbu8EfXdIttrtwBTzyDZCki0a0Zo96g580+clbWo48C8UlvRSgt\ncWM8nsDP3cM06cRCn+pn789Ok6yVuW++HhLEoiZXWOXAfeKwaOJnFjf3c6wjlfIo\nQgTU6rzoevWWzd4sCJBJdtNMJz5KbatQKKlE7oG7AoGAa3Tf67G0JSg5M2cWCnUn\n3JMAtA6yPV0sLduSo+dITLMR6jRjG8UQ9lzBCRS3C2tklUURnecOmH81vsbeDiaH\n+Pmh2ntL5RX5DLz9eNTvxbbJuZfU79t0hFr4gfokwNoQEdjB7R6bc+raYR4Z8fH5\nPCjR1iH0XFg/gZA1/I33lHw=\n-----END PRIVATE KEY-----\n",
+  "client_email": "notif-sender@scheduler-1a878.iam.gserviceaccount.com",
+  "client_id": "105999139226605627684",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/notif-sender%40scheduler-1a878.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -193,7 +193,7 @@ UI (Pages) → Controllers (GetX) → Services (Firestore) → Firebase
 ## 👥 Key Features by Role
 
 ### Super Admin
-- Manage all users and roles
+- Manage all faculty and roles
 - Manage faculty and departments
 - Approve/reject timetables
 - Generate reports
@@ -208,7 +208,7 @@ UI (Pages) → Controllers (GetX) → Services (Firestore) → Firebase
 - View department reports
 
 ### Admin
-- Manage users within scope
+- Manage faculty within scope
 - Create/edit timetables
 - Process requests
 - View schedules and status
@@ -287,7 +287,7 @@ requests/
 
 #### Users/Faculty Collection
 ```
-users/ or faculty/
+faculty/ or faculty/
 ├── {email}
 │   ├── username: string
 │   ├── email: string
