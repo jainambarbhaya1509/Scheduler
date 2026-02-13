@@ -50,49 +50,65 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(
-              child: CircularProgressIndicator(
-                backgroundColor: Colors.black12,
-                color: Colors.black,
-              ),
-            );
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.black12,
+              color: Colors.black,
+            ),
+          );
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoTile("Name", username),
-            _buildInfoTile("Email", email),
-            _buildInfoTile("Department", department),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoTile("Name", username),
+                        _buildInfoTile("Email", email),
+                        _buildInfoTile("Department", department),
 
-            _buildInfoTile(
-              "Role",
-              isHOD
-                  ? "Head of Department / Faculty"
-                  : isAdmin && !isSuperAdmin && !isHOD
-                  ? "Time Table Coordinator / Faculty"
-                  : isSuperAdmin
-                  ? "Super Admin"
-                  : "Faculty",
-            ),
+                        _buildInfoTile(
+                          "Role",
+                          isHOD
+                              ? "Head of Department / Faculty"
+                              : isAdmin && !isSuperAdmin && !isHOD
+                              ? "Time Table Coordinator / Faculty"
+                              : isSuperAdmin
+                              ? "Super Admin"
+                              : "Faculty",
+                        ),
 
-            const SizedBox(height: 30),
+                        const SizedBox(height: 30),
 
-            Text(
-              "Change Password",
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
+                        Text(
+                          "Change Password",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
 
-            _buildChangePassword(),
+                        _buildChangePassword(),
 
-            const Spacer(),
+                        const Spacer(),
 
-            _buildLogoutButton(),
+                        _buildLogoutButton(),
 
-            const SizedBox(height: 20),
-          ],
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
