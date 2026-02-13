@@ -1,5 +1,5 @@
 import 'package:schedule/imports.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ViewReservations extends StatefulWidget {
   const ViewReservations({super.key});
@@ -29,6 +29,8 @@ class _ViewReservationsState extends State<ViewReservations> {
   Map<String, Map<String, SlotInfo>> _data = {};
   List<RequestModel> _requests = [];
 
+  DateTime? _selectedDate;
+
   @override
   void initState() {
     super.initState();
@@ -37,7 +39,31 @@ class _ViewReservationsState extends State<ViewReservations> {
 
   Future<void> _initAll() async {
     await _detectSlotsRoot();
+    await _loadSavedDepartment();
     await _fetchDepartments();
+  }
+
+  Future<void> _loadSavedDepartment() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedDept = prefs.getString('selected_department');
+      if (savedDept != null && savedDept.isNotEmpty) {
+        setState(() {
+          _selectedDepartment = savedDept;
+        });
+      }
+    } catch (e) {
+      logger.d('Error loading saved department: $e');
+    }
+  }
+
+  Future<void> _saveDepartment(String dept) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selected_department', dept);
+    } catch (e) {
+      logger.d('Error saving department: $e');
+    }
   }
 
   Future<void> _detectSlotsRoot() async {
@@ -250,8 +276,8 @@ class _ViewReservationsState extends State<ViewReservations> {
     for (final o in order) {
       if (lower.contains(o)) {
         present.add(days.firstWhere((d) => d.toLowerCase() == o));
-    }
       }
+    }
     for (final d in days) {
       if (!present.contains(d)) present.add(d);
     }
@@ -452,213 +478,384 @@ class _ViewReservationsState extends State<ViewReservations> {
     return 'Available';
   }
 
-  // Top controls with white background, black text, dropdowns with no underline
-  Widget _buildTopControls() {
-    const labelStyle = TextStyle(
-      color: Colors.black,
-      fontWeight: FontWeight.bold,
-    );
-    const normalText = TextStyle(color: Colors.black);
+  String _getDayName(DateTime date) {
+    final days = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday',
+    ];
+    return days[date.weekday - 1];
+  }
 
-    return Card(
-      color: Colors.white,
-      elevation: 0,
-      margin: const EdgeInsets.all(12),
+  List<String> _getFilteredDays() {
+    if (_selectedDate == null) {
+      return _dayList;
+    }
+    final selectedDayName = _getDayName(_selectedDate!).toLowerCase();
+    return _dayList
+        .where((day) => day.toLowerCase() == selectedDayName)
+        .toList();
+  }
+
+  bool _areAllFieldsFilled() {
+    return _selectedDepartment != null &&
+        _selectedClass != null &&
+        _selectedDate != null;
+  }
+
+  String _getValidationError() {
+    if (_selectedDepartment == null) {
+      return 'Please select a Department';
+    }
+    if (_selectedClass == null) {
+      return 'Please select a Class/Lab';
+    }
+    if (_selectedDate == null) {
+      return 'Please select a Date';
+    }
+    return '';
+  }
+
+  // Modern, clean UI for filter controls - White background with black text
+  Widget _buildTopControls() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // If you still want the small title, keep this; otherwise remove it.
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
-              child: Text(
-                'Filter / Select',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
+            // Department display (non-editable)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.business, color: Colors.black87, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _selectedDepartment ?? 'Department',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Section selector
+            _buildFilterField(
+              label: 'Section',
+              icon: Icons.school,
+              child: Theme(
+                data: Theme.of(
+                  context,
+                ).copyWith(dividerColor: Colors.transparent),
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: _section,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Classrooms',
+                      child: Text(
+                        'Classrooms',
+                        style: TextStyle(color: Colors.black87, fontSize: 13),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Labs',
+                      child: Text(
+                        'Labs',
+                        style: TextStyle(color: Colors.black87, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                  onChanged: (v) async {
+                    if (v == null) return;
+                    setState(() {
+                      _section = v;
+                      _selectedClass = null;
+                      _classList = [];
+                      _data = {};
+                      _dayList = [];
+                      _slotTimesSorted = [];
+                    });
+                    await _fetchClassesForSection();
+                  },
+                  underline: const SizedBox.shrink(),
+                  dropdownColor: Colors.white,
+                  iconEnabledColor: Colors.black87,
                 ),
               ),
             ),
 
-            Row(
-              children: [
-                const SizedBox(width: 8),
-                const Text('Department:', style: labelStyle),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _loadingDepartments
-                      ? const SizedBox(
-                          height: 24,
-                          child: LinearProgressIndicator(
-                            backgroundColor: Colors.black12,
-                            color: Colors.black,
-                          ),
-                        )
-                      : Theme(
-                          data: Theme.of(
-                            context,
-                          ).copyWith(dividerColor: Colors.transparent),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: _selectedDepartment,
-                            hint: const Text(
-                              'Select Department',
-                              style: normalText,
+            const SizedBox(height: 12),
+
+            // Class selector
+            _buildFilterField(
+              label: 'Class/Lab',
+              icon: Icons.class_,
+              child: Theme(
+                data: Theme.of(
+                  context,
+                ).copyWith(dividerColor: Colors.transparent),
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: _selectedClass,
+                  hint: const Text(
+                    'Select Class/Lab',
+                    style: TextStyle(color: Colors.black54, fontSize: 13),
+                  ),
+                  items: _classList
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(
+                            c,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 13,
                             ),
-                            items: _departments
-                                .map(
-                                  (d) => DropdownMenuItem(
-                                    value: d,
-                                    child: Text(d, style: normalText),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) async {
-                              if (v == null) return;
-                              setState(() {
-                                _selectedDepartment = v;
-                                _selectedClass = null;
-                                _classList = [];
-                                _data = {};
-                                _dayList = [];
-                                _slotTimesSorted = [];
-                              });
-                              await _fetchClassesForSection();
-                            },
-                            underline: const SizedBox.shrink(),
-                            dropdownColor: Colors.white,
-                            iconEnabledColor: Colors.black,
                           ),
                         ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    setState(() {
+                      _selectedClass = v;
+                      _data = {};
+                      _dayList = [];
+                      _slotTimesSorted = [];
+                      _selectedDate = null;
+                    });
+                    if (v != null) _loadSlotsAndRequests();
+                  },
+                  underline: const SizedBox.shrink(),
+                  dropdownColor: Colors.white,
+                  iconEnabledColor: Colors.black87,
                 ),
-              ],
+              ),
             ),
 
             const SizedBox(height: 12),
 
+            // Date selector
             Row(
               children: [
-                const SizedBox(width: 8),
-                const Text('Section:', style: labelStyle),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Theme(
-                    data: Theme.of(
-                      context,
-                    ).copyWith(dividerColor: Colors.transparent),
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: _section,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Classrooms',
-                          child: Text('Classrooms', style: normalText),
+                  child: _buildFilterField(
+                    label: 'Date',
+                    icon: Icons.calendar_today,
+                    isDateField: true,
+                    onDateTap: () async {
+                      if (_selectedDepartment == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a Department first'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        return;
+                      }
+                      if (_selectedClass == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please select a Class/Lab first'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        return;
+                      }
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate ?? DateTime.now(),
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 365),
                         ),
-                        DropdownMenuItem(
-                          value: 'Labs',
-                          child: Text('Labs', style: normalText),
-                        ),
-                      ],
-                      onChanged: (v) async {
-                        if (v == null) return;
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked != null) {
                         setState(() {
-                          _section = v;
-                          _selectedClass = null;
-                          _classList = [];
-                          _data = {};
-                          _dayList = [];
-                          _slotTimesSorted = [];
+                          _selectedDate = picked;
                         });
-                        await _fetchClassesForSection();
-                      },
-                      underline: const SizedBox.shrink(),
-                      dropdownColor: Colors.white,
-                      iconEnabledColor: Colors.black,
+                      }
+                    },
+                    dateText: _selectedDate != null
+                        ? '${_selectedDate!.day}-${_selectedDate!.month}-${_selectedDate!.year}'
+                        : 'Select Date',
+                  ),
+                ),
+                if (_selectedDate != null) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDate = null;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.black87,
+                        size: 18,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
 
             const SizedBox(height: 12),
 
-            Row(
-              children: [
-                const SizedBox(width: 8),
-                const Text('Class/Lab:', style: labelStyle),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _loadingClasses
-                      ? const SizedBox(
-                          height: 24,
-                          child: LinearProgressIndicator(
-                            backgroundColor: Colors.black12,
-                            color: Colors.black,
-                          ),
-                        )
-                      : Theme(
-                          data: Theme.of(
-                            context,
-                          ).copyWith(dividerColor: Colors.transparent),
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: _selectedClass,
-                            hint: const Text(
-                              'Select Class/Lab',
-                              style: normalText,
-                            ),
-                            items: _classList
-                                .map(
-                                  (c) => DropdownMenuItem(
-                                    value: c,
-                                    child: Text(c, style: normalText),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) {
-                              setState(() {
-                                _selectedClass = v;
-                                _data = {};
-                                _dayList = [];
-                                _slotTimesSorted = [];
-                              });
-                              if (v != null) _loadSlotsAndRequests();
-                            },
-                            underline: const SizedBox.shrink(),
-                            dropdownColor: Colors.white,
-                            iconEnabledColor: Colors.black,
-                          ),
+            // Validation error
+            if (!_areAllFieldsFilled())
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.red.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_rounded,
+                      color: Colors.red.shade700,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _getValidationError(),
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
                         ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
 
-            const SizedBox(height: 16),
+            if (!_areAllFieldsFilled()) const SizedBox(height: 12),
 
-            Row(
-              children: [
-                const Spacer(),
-                ElevatedButton.icon(
-                  onPressed:
-                      (_selectedDepartment == null ||
-                          _selectedClass == null ||
-                          _loadingSlots)
-                      ? null
-                      : _loadSlotsAndRequests,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                  ),
+            // Refresh button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: (_loadingSlots || !_areAllFieldsFilled())
+                    ? null
+                    : _loadSlotsAndRequests,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text(
+                  'Load Slots',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                 ),
-              ],
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledForegroundColor: Colors.grey.shade600,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFilterField({
+    required String label,
+    required IconData icon,
+    Widget? child,
+    bool isDateField = false,
+    VoidCallback? onDateTap,
+    String? dateText,
+  }) {
+    if (isDateField && onDateTap != null) {
+      return GestureDetector(
+        onTap: onDateTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.black87, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  dateText ?? 'Select Date',
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.black87, size: 18),
+          const SizedBox(width: 10),
+          Expanded(child: child ?? const SizedBox()),
+        ],
       ),
     );
   }
@@ -717,13 +914,10 @@ class _ViewReservationsState extends State<ViewReservations> {
   }
 
   Widget _buildGrid() {
-    if (_selectedClass == null) {
-      return const Center(
-        child: Text(
-          'Select department, section and class/lab to view slots.',
-          style: TextStyle(color: Colors.black),
-        ),
-      );
+    if (_selectedClass == null ||
+        _selectedDepartment == null ||
+        _selectedDate == null) {
+      return const SizedBox.shrink();
     }
     if (_loadingSlots) {
       return const Center(
@@ -742,9 +936,21 @@ class _ViewReservationsState extends State<ViewReservations> {
       );
     }
 
+    final filteredDays = _getFilteredDays();
+    if (filteredDays.isEmpty) {
+      return Center(
+        child: Text(
+          _selectedDate != null
+              ? 'No slots found for ${_getDayName(_selectedDate!)} (${_selectedDate!.day}-${_selectedDate!.month}-${_selectedDate!.year}).'
+              : 'No slots found for the selected class/lab.',
+          style: const TextStyle(color: Colors.black),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Column(
-        children: _dayList.map((day) {
+        children: filteredDays.map((day) {
           final dayMap = _data[day] ?? {};
           final slotIds = _slotTimesSorted;
           if (slotIds.isEmpty) {
@@ -845,19 +1051,18 @@ class _ViewReservationsState extends State<ViewReservations> {
     return Scaffold(
       backgroundColor: Colors.white, // white app background
       // AppBar intentionally removed so no title is shown
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 28,
-          ), // small top padding so content is not glued to status bar
-          _buildTopControls(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: _buildGrid(),
-            ),
-          ),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 28,
+            ), // small top padding so content is not glued to status bar
+            _buildTopControls(),
+            const SizedBox(height: 4),
+            _buildGrid(),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
