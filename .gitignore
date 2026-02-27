@@ -51,3 +51,8 @@ app.*.map.json
 .env.*
 lib/helper/email/web_email/.env
 lib/helper/email/app_email/.env
+
+android/app/google-services.json
+android/app/upload-keystore.jks
+android/key.properties
+android/local.properties

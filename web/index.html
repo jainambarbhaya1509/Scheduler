@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,35 +28,23 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <title>schedule</title>
   <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
   <script src="flutter_bootstrap.js" async></script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered');
+        });
+    }
+  </script>
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAQbNA1MCP7It3ykJghJtD95sQtAhuuC48",
-    authDomain: "scheduler-1a878.firebaseapp.com",
-    projectId: "scheduler-1a878",
-    storageBucket: "scheduler-1a878.firebasestorage.app",
-    messagingSenderId: "288826539666",
-    appId: "1:288826539666:web:70ac13ca0b5f1b3fd0304b",
-    measurementId: "G-PSW1VFBRG1"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
+
 </html>
