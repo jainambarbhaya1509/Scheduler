@@ -56,3 +56,5 @@ android/app/google-services.json
 android/app/upload-keystore.jks
 android/key.properties
 android/local.properties
+
+assets/keys/
